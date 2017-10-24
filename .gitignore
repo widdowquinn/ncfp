@@ -7,8 +7,12 @@
 # Exclude virtualenvs
 venv*
 
-# Ignore dist files
+# Exclude dist files
 *.egg-info
 
-# Ignore pycache
+# Exclude Python files
+*.pyc
 *__pycache__*
+
+# Exclude test files
+skipped.fas
