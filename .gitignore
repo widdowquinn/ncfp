@@ -1,0 +1,11 @@
+# Exclude OSX files
+.DS_Store
+
+# Exclude Emacs files
+*~
+
+# Exclude virtualenvs
+venv*
+
+# Ignore dist files
+*.egg-info
