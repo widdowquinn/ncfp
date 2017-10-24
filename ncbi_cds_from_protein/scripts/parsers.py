@@ -68,6 +68,9 @@ def parse_cmdline():
     parser.add_argument('-s', '--stockholm', dest='stockholm',
                         action='store_true', default=False,
                         help='parse Stockholm format sequence regions')
+    parser.add_argument('-d', '--cachedir', dest='cachedir',
+                        action='store', default='.ncfp_cache',
+                        help='directory for cached data')
     parser.add_argument('-c', '--cachestem', dest='cachestem',
                         action='store',
                         default=time.strftime("%Y-%m-%d-%H-%m-%S"),

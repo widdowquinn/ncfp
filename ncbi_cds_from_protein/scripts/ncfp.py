@@ -128,8 +128,23 @@ def run_main(namespace=None):
     logger.info('Processed arguments: %s', args)
     logger.info('command-line: %s', args.cmdline)
 
-    # Process input/output streams
+    # Get input sequences
+    logger.info("Parsing sequence input...")
     seqrecords = process_input_sequences(args, logger)
+
+    # Set up cache filenames
+    logger.info("Setting up data caches...")
+    elink_cachename = os.path.join(args.cachedir,
+                                   'elink_{}'.format(args.cachestem))
+    gb_cachename = os.path.join(args.cachedir,
+                                'gb_{}'.format(args.cachestem))
+    gbfull_cachename = os.path.join(args.cachedir,
+                                    'gbfull_{}'.format(args.cachestem))
+    acc_cachename = os.path.join(args.cachedir,
+                                 'acc_{}'.format(args.cachestem))
+
+    # Process input sequences to key by NCBI search accession
+    logger.info("Processing input sequences")
 
     # Report success
     logger.info('Completed. Time taken: %.3f',
