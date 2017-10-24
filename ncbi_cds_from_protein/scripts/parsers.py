@@ -88,6 +88,9 @@ def parse_cmdline():
     parser.add_argument('--keepcache', dest='keepcache',
                         action='store_true', default=False,
                         help='keep download cache (for testing)')
+    parser.add_argument('--skippedfile', dest='skippedfname',
+                        action='store', default='skipped.fas',
+                        help='path to file with skipped sequences')
     parser.add_argument('-l', '--logfile', dest='logfile',
                         action='store', default=None,
                         help='path to logfile')

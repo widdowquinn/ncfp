@@ -49,6 +49,7 @@ from Bio import SeqIO
 from .parsers import parse_cmdline
 from .. import __version__
 from ..ncfp_tools import last_exception, NCFPException
+from ..sequences import add_seqrecord_query
 
 
 # Process input sequences
@@ -128,7 +129,7 @@ def run_main(namespace=None):
     logger.info('Processed arguments: %s', args)
     logger.info('command-line: %s', args.cmdline)
 
-    # Get input sequences
+    # Get input sequences and add query string
     logger.info("Parsing sequence input...")
     seqrecords = process_input_sequences(args, logger)
 
@@ -144,7 +145,27 @@ def run_main(namespace=None):
                                  'acc_{}'.format(args.cachestem))
 
     # Process input sequences to key by NCBI search accession
-    logger.info("Processing input sequences")
+    if args.uniprot:
+        fmt = 'uniprot'
+    else:
+        fmt = 'ncbi'
+    logger.info("Processing input sequences as %s format", fmt)
+    qrecords = []
+    qskipped = []
+    for record in seqrecords:
+        qrecord = add_seqrecord_query(record, fmt)
+        if qrecord.query is None:
+            qskipped.append(qrecord)
+        else:
+            qrecords.append(qrecord)
+    if len(qskipped):
+        logger.warning("Skipped %d sequences as no query term found",
+                       len(qskipped))
+        SeqIO.write(qskipped, args.skippedfname, 'fasta')
+        logger.warning("Skipped sequences written to %s",
+                       args.skippedfname)
+    logger.info("%d sequences taken forward with query",
+                len(qrecords))
 
     # Report success
     logger.info('Completed. Time taken: %.3f',

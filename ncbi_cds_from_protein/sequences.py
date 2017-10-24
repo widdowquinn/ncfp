@@ -39,10 +39,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from Bio import SeqIO
+import re
 
 
-# Read FASTA sequences from an input stream
-def read_fasta_stream(instream):
-    """Returns SeqRecords parsed from the input stream."""
-    return SeqIO.parse(instream, "fasta")
+# regexes for parsing out query strings
+re_uniprot = re.compile('(?<=GN=)[^\s]+')
+
+
+# Add a .query_string attribute to a Biopython SeqRecord object,
+def add_seqrecord_query(record, fmt="ncbi"):
+    """Adds a .query attribute to a SeqRecord
+
+    The query string depends on the passed format/origin of the
+    sequence.
+
+    ncbi: Parse the accession as the query string
+    uniprot: Parse the GN field as the query string
+    """
+    # Identify query string
+    if fmt == 'uniprot':
+        match = re.search(re_uniprot, record.description)
+        if match is None:
+            qstring = None
+        else:
+            qstring = match.group(0)
+    else:
+        qstring = record.id
+
+    # Add query string to record
+    record.query = qstring
+
+    return record
