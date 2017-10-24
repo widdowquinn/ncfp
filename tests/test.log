@@ -1,0 +1,3 @@
+INFO: Processed arguments: Namespace(cmdline='/Users/lpritc/Documents/Development/ncbi_cds_from_protein/venv-ncfp/bin/ncbi_cds_from_protein -l tests/test.log -v', logfile='tests/test.log', verbose=True)
+INFO: command-line: /Users/lpritc/Documents/Development/ncbi_cds_from_protein/venv-ncfp/bin/ncbi_cds_from_protein -l tests/test.log -v
+INFO: Completed. Time taken: 0.000

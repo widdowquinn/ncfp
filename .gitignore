@@ -9,3 +9,6 @@ venv*
 
 # Ignore dist files
 *.egg-info
+
+# Ignore pycache
+*__pycache__*
