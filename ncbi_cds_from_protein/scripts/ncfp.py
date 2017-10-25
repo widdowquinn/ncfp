@@ -53,7 +53,7 @@ from .. import __version__
 from ..ncfp_tools import (last_exception, NCFPException)
 from ..sequences import add_seqrecord_query
 from ..caches import load_elink_cache
-from ..entrez import (elink_fetch_with_retries, set_entrez_email)
+from ..entrez import (set_entrez_email, )
 
 
 # Paths cache files for script
@@ -95,7 +95,6 @@ def build_logger(args):
     Instantiates a logger for the script, and adds basic info.
     """
     logger = logging.getLogger('ncfp: {}'.format(time.asctime))
-    time0 = time.time()
     logger.setLevel(logging.DEBUG)
     err_handler = logging.StreamHandler(sys.stderr)
     err_formatter = logging.Formatter('%(levelname)s: %(message)s')
@@ -145,6 +144,7 @@ def run_main(namespace=None):
         return 0
 
     # Set up logging
+    time0 = time.time()
     logger = build_logger(args)
 
     # Get input sequences and add query string
@@ -163,7 +163,15 @@ def run_main(namespace=None):
                                      'acc_{}'.format(args.cachestem)))
     logger.info(caches)
 
-    # Process input sequences to key by NCBI search accession
+    # Rather than subclass the Biopython SeqRecord class, we add
+    # the ncfp attribute. This will be a dictionary that holds key:values
+    # for:
+    # header_id - the accession pulled from the FASTA header
+    # nt_query  - query term for NCBI nucleotide database
+    # aa_query  - query term for NCBI protein database
+    # These accessions are taken from the FASTA header and, if we can't
+    # parse that appropriately, we can't search - so we skip those
+    # sequences
     if args.uniprot:
         fmt = 'uniprot'
     else:
@@ -173,15 +181,15 @@ def run_main(namespace=None):
     qskipped = []
     for record in seqrecords:
         qrecord = add_seqrecord_query(record, fmt)
-        if qrecord.query is None:
+        if qrecord.ncfp['header_id'] is None:
             qskipped.append(qrecord)
         else:
             qrecords.append(qrecord)
     if len(qskipped):
-        logger.warning("Skipped %d sequences as no query term found",
+        logger.warning("Skipped %d sequences (no header ID)",
                        len(qskipped))
         SeqIO.write(qskipped, args.skippedfname, 'fasta')
-        logger.warning("Skipped sequences written to %s",
+        logger.warning("Skipped sequences were written to %s",
                        args.skippedfname)
     logger.info("%d sequences taken forward with query",
                 len(qrecords))

@@ -53,20 +53,16 @@ class NCFPELinkException(Exception):
         Exception.__init__(self, msg)
 
 
+def fetch_nt_ids(records, retries):
+    """Returns records with NCBI nucleotide ID as attribute.
 
-def elink_fetch_with_retries(record, dbfrom, linkname, retries):
-    """Returns ELink search result.
+    records - collection of SeqRecords
+    retries - number of Entrez retries
 
-    Allows the maximum number of retries specified.
+    Passed records must have the record.ncfp attribute
     """
-    tries = 0
-    while tries < retries:
-        try:
-            link = Entrez.elink(dbfrom=dbfrom,
-                                linkname=linkname,
-                                id=record.query)
-            matches = Entrez.read(link)
-            return matches
-        except:
-            tries += 1
-    raise NCFPELinkException("Could not complete ELink query")
+    
+
+def set_entrez_email(email):
+    """Sets Entrez email address."""
+    Entrez.email = email

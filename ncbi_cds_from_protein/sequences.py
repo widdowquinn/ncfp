@@ -48,13 +48,18 @@ re_uniprot = re.compile('(?<=GN=)[^\s]+')
 
 # Add a .query_string attribute to a Biopython SeqRecord object,
 def add_seqrecord_query(record, fmt="ncbi"):
-    """Adds a .query attribute to a SeqRecord
+    """Adds .ncfp attribute to a SeqRecord
 
-    The query string depends on the passed format/origin of the
-    sequence.
+    The .ncfp attribute is a dictionary that holds key:values
 
-    ncbi: Parse the accession as the query string
-    uniprot: Parse the GN field as the query string
+    header_id - the accession pulled from the FASTA header
+    nt_query  - query term for NCBI nucleotide database
+    aa_query  - query term for NCBI protein database
+
+    The header ID is dependent on the input sequence source.
+    NCBI proteins have the accession as their identifier. UniProt
+    proteins have the originating gene sequence accession as
+    a 'GN=' gene name field in the description.
     """
     # Identify query string
     if fmt == 'uniprot':
@@ -67,6 +72,6 @@ def add_seqrecord_query(record, fmt="ncbi"):
         qstring = record.id
 
     # Add query string to record
-    record.query = qstring
+    record.ncfp = {'header_id': qstring}
 
     return record
