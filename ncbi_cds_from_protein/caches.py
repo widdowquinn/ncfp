@@ -59,11 +59,12 @@ def initialise_caches(cachedir, cachestem):
     cachepaths = Cachepaths(os.path.join(cachedir,
                                          'elink_{}'.format(cachestem)),
                             os.path.join(cachedir,
+                                         'acc_{}'.format(cachestem)),
+                            os.path.join(cachedir,
                                          'gb_{}'.format(cachestem)),
                             os.path.join(cachedir,
                                          'gbfull_{}'.format(cachestem)),
-                            os.path.join(cachedir,
-                                         'acc_{}'.format(cachestem)))
+                            )
     for path in cachepaths:
         check_and_create_cache(path)
     return cachepaths

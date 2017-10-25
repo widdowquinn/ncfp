@@ -44,6 +44,7 @@ from io import StringIO
 from Bio import Entrez
 from tqdm import tqdm
 
+from .ncfp_tools import last_exception
 
 # EXCEPTIONS
 # ==========
@@ -79,24 +80,31 @@ class NCFPMaxretryException(Exception):
         Exception.__init__(self, msg)
 
 
-def fetch_nt_headers(records, retries):
+def fetch_gb_headers(records, cache, retries):
     """Returns NCBI GenBank headers for passed records
 
     records - collection of SeqRecords
     retries - number of Entrez retries
     """
-    successrecords = []
-    failrecords = []
-    for record in records:
-        print(record, retries)
+    # Collate all unique nucleotide accessions
+    accessions = set()
+    for record in tqdm(records, desc="Collating accessions"):
+        for acc in record.ncfp['nt_acc']:
+            accessions.add(acc)
+
+    # Check accessions against those in the cache. We only
+    # retrieve accessions not in the cache
+    fetchlist = accessions.difference(set(cache.keys()))
+            
+    # Get GenBank header for each unique accession
+    for accession in tqdm(fetchlist, desc="Fetch GenBank headers"):
         try:
-            retval = efetch_with_retries(record.ncfp['nt_query'],
-                                         'nucleotide', 'acc', 'text',
+            retval = efetch_with_retries(accession,
+                                         'nucleotide', 'gb', 'text',
                                          retries).read().strip()
-            print(retval)
         except NCFPMaxretryException:
-            failrecords.append(record)
-    return records, failrecords
+            continue
+    return cache
 
 
 # Query NCBI singly with each record, to recover nucleotide accessions
@@ -121,14 +129,18 @@ def search_nt_ids(records, cache, retries):
             try:
                 result = esearch_with_retries(record.ncfp['nt_query'],
                                               'nucleotide', retries)
-                if result['Count'] == 0:
-                    failrecords.append(record)
-                else:
-                    record.ncfp['nt_accessions'] = result['IdList']
-                    cache[record.ncfp['nt_query']] = result['IdList']
             except NCFPESearchException:
                 failrecords.append(record)
-    return records, cache, failrecords
+            if int(result['Count']) == 0:
+                failrecords.append(record)
+            else:
+                successrecords.append(record)
+                record.ncfp['nt_acc'] = result['IdList']
+                cache[record.ncfp['nt_query']] = result['IdList']
+        else:
+            record.ncfp['nt_acc'] = cache[record.ncfp['nt_query']]
+            successrecords.append(record)
+    return successrecords, cache, failrecords
 
 
 # Run an ESearch on a single ID
@@ -168,15 +180,15 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
     tries = 0
     while tries < maxretries:
         try:
-            print(query_id)
-            data = Entrez.efetch(db=db, rettype=rettype,
+            data = Entrez.efetch(db=dbname, rettype=rettype,
                                  retmode=retmode,
                                  id=query_id).read()
             if rettype in ['gb', 'gbwithparts'] and retmode == 'text':
                 assert data.startswith('LOCUS')
             # Return data string as stream
-            return StringIO.StringIO(data)
+            return StringIO(data)
         except:
+            print(last_exception())
             tries += 1
     raise NCFPMaxretryException("Query ID %s EFetch failed" % query_id)
 

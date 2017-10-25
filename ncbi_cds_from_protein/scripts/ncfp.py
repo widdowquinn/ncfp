@@ -54,7 +54,7 @@ from .. import __version__
 from ..ncfp_tools import (last_exception, NCFPException)
 from ..sequences import add_seqrecord_query
 from ..caches import (initialise_caches, load_cache, write_cache)
-from ..entrez import (set_entrez_email, search_nt_ids)
+from ..entrez import (set_entrez_email, search_nt_ids, fetch_gb_headers)
 
 
 # Process input sequences
@@ -206,17 +206,26 @@ def run_main(namespace=None):
     logger.info("Writing accession cache with %d entries to %s",
                 len(acc_cache), cachepaths.acc)
     write_cache(acc_cache, cachepaths.acc)
-    logger.info("nucleotide accessions retrieved for %d records (%d failed)",
+    logger.info("NCBI nucleotide accessions retrieved for %d records (%d failed)",
                 len(qrecords), len(accfail))
-    
+
     # At this point, all records should have a .ncfp['nt_acc']
     # attribute, and be queryable against the NCBI nuccore db.
     # First, we retrieve GenBank headers, for inspection and
     # identification of the most useful nucleotide record.
+    logger.info("Downloading GenBank headers for each record")
+    gb_cache = load_cache(cachepaths.gb)
+    logger.info("GenBank header cache %s contains %d entries",
+                cachepaths.gb, len(gb_cache))
+    gb_cache = fetch_gb_headers(qrecords, gb_cache, args.retries)
+    logger.info("Writing GenBank header cache with %d entries to %s",
+                len(gb_cache), cachepaths.gb)
+    write_cache(gb_cache, cachepaths.gb)
 
     # Next we recover the complete GenBank records for useful
     # sequences
-    
+    pass
+
     # Report success
     logger.info('Completed. Time taken: %.3f',
                 (time.time() - time0))
