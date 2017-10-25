@@ -39,16 +39,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+from io import StringIO
+
 from Bio import Entrez
 
 
 # EXCEPTIONS
 # ==========
-# General exception for scripts
 class NCFPELinkException(Exception):
     """Exception for ELink qeries."""
 
     def __init__(self, msg="Error in ncfp ELink query"):
+        """Instantiate class."""
+        Exception.__init__(self, msg)
+
+
+class NCFPEFetchException(Exception):
+    """Exception for EFetch queries."""
+
+    def __init__(self, msg="Error in ncfp EFetch query"):
+        """Instantiate class."""
+        Exception.__init__(self, msg)
+
+
+class NCFPMaxretryException(Exception):
+    """Exception raised when maximum retries are reached"""
+
+    def __init__(self, msg="Maximum retries exceeded"):
         """Instantiate class."""
         Exception.__init__(self, msg)
 
@@ -59,9 +76,52 @@ def fetch_nt_ids(records, retries):
     records - collection of SeqRecords
     retries - number of Entrez retries
 
-    Passed records must have the record.ncfp attribute
+    Passed records must have the record.ncfp attribute. This will
+    be extended with the ['nt_accession'] key, whose value is the
+    NCBI accession for that sequence.
     """
-    
+    successrecords = []
+    failrecords = []
+    for record in records:
+        print(record, retries)
+        try:
+            retval = efetch_with_retries(record.ncfp['nt_query'],
+                                         'nucleotide', 'acc', 'text',
+                                         retries).read().strip()
+            print(retval)
+        except NCFPMaxretryException:
+            failrecords.append(record)
+    return records, failrecords
+
+
+# Run an EFetch on a single ID with passed parameters
+def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
+    """Entrez EFetch for a single query ID.
+
+    query_id      - query term for search
+    dbname        - NCBI target database name
+    rettype       - requested return type
+    retmode       - format of data to be returned
+    maxretries    - maximum number of attempts to make
+
+    Returns a handle to a completely buffered string, after a read()
+    operation, sanity check, and retokenising.
+    """
+    tries = 0
+    while tries < maxretries:
+        try:
+            print(query_id)
+            data = Entrez.efetch(db=db, rettype=rettype,
+                                 retmode=retmode,
+                                 id=query_id).read()
+            if rettype in ['gb', 'gbwithparts'] and retmode == 'text':
+                assert data.startswith('LOCUS')
+            # Return data string as stream
+            return StringIO.StringIO(data)
+        except:
+            tries += 1
+    raise NCFPMaxretryException("Query ID %s EFetch failed" % query_id)
+
 
 def set_entrez_email(email):
     """Sets Entrez email address."""
