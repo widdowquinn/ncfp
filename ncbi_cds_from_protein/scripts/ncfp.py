@@ -53,7 +53,7 @@ from .. import __version__
 from ..ncfp_tools import (last_exception, NCFPException)
 from ..sequences import add_seqrecord_query
 from ..caches import load_elink_cache
-from ..entrez import (set_entrez_email, )
+from ..entrez import (set_entrez_email, fetch_nt_ids)
 
 
 # Paths cache files for script
@@ -197,21 +197,20 @@ def run_main(namespace=None):
     # Set email address at Entrez
     set_entrez_email(args.email)
 
+    # NCBI protein accessions can't be queried directly against the
+    # nucleotide database, so we must perform an ELink search to
+    # connect protein entries to nuccore entries, and populate the
+    # .ncfp['nt_query'] attribute
+
+    # UniProt sequence accessions should have a matching NCBI
+    # nucleotide entry.
     
-#    # Get Entrez EUtils protein_nuccore links for sequences
-#    # Check local cache first
-#    if not os.path.isfile(elink_cachename):
-#        logger.info("No ELink cache... not checking")
-#    else:
-#        cachedata = load_elink_cache(elink_cachename)
-#        logger.info("Checking ELink cache at %s", elink_cachename)
-#        logger.info("Loaded data for %d queries", len(cachedata))
-#    # Get EUtils links
-#    for record in qrecords:
-#        logger.info("Downloading protein_nuccore record for %s", record.id)
-#        matches = elink_fetch_with_retries(record, "protein",
-#                                           "protein_nuccore",
-#                                           args.retries)
+    # At this point, all records should have a .ncfp['nt_query']
+    # attribute, and be queryable against the NCBI nuccore db
+    qrecords, ntfail = fetch_nt_ids(qrecords, args.retries)
+    logger.info("Records retrieved for %d records (%d failed)",
+                len(qrecords), len(ntfail))
+    
     
     # Report success
     logger.info('Completed. Time taken: %.3f',
