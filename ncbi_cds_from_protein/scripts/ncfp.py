@@ -44,12 +44,20 @@ import os
 import sys
 import time
 
+from collections import namedtuple
+
 from Bio import SeqIO
 
 from .parsers import parse_cmdline
 from .. import __version__
-from ..ncfp_tools import last_exception, NCFPException
+from ..ncfp_tools import (last_exception, NCFPException)
 from ..sequences import add_seqrecord_query
+from ..caches import load_elink_cache
+from ..entrez import (elink_fetch_with_retries, set_entrez_email)
+
+
+# Paths cache files for script
+Cachepaths = namedtuple("Cachepaths", "elink acc gb gbfull")
 
 
 # Process input sequences
@@ -81,22 +89,11 @@ def process_input_sequences(args, logger):
     return records
 
 
-# Main script function
-def run_main(namespace=None):
-    """Run main process for ncfp script."""
-    # Parse command-line if no namespace provided
-    if namespace is None:
-        args = parse_cmdline()
-    else:
-        args = namespace
+def build_logger(args):
+    """Return a logger for this script.
 
-    # Catch execution with no arguments
-    if len(sys.argv) == 1:
-        sys.stderr.write("ncbi_cds_from_protein " +
-                         "version: {0}\n".format(__version__))
-        return 0
-
-    # Set up logging
+    Instantiates a logger for the script, and adds basic info.
+    """
     logger = logging.getLogger('ncfp: {}'.format(time.asctime))
     time0 = time.time()
     logger.setLevel(logging.DEBUG)
@@ -129,20 +126,42 @@ def run_main(namespace=None):
     logger.info('Processed arguments: %s', args)
     logger.info('command-line: %s', args.cmdline)
 
+    return logger
+
+
+# Main script function
+def run_main(namespace=None):
+    """Run main process for ncfp script."""
+    # Parse command-line if no namespace provided
+    if namespace is None:
+        args = parse_cmdline()
+    else:
+        args = namespace
+
+    # Catch execution with no arguments
+    if len(sys.argv) == 1:
+        sys.stderr.write("ncbi_cds_from_protein " +
+                         "version: {0}\n".format(__version__))
+        return 0
+
+    # Set up logging
+    logger = build_logger(args)
+
     # Get input sequences and add query string
     logger.info("Parsing sequence input...")
     seqrecords = process_input_sequences(args, logger)
 
     # Set up cache filenames
     logger.info("Setting up data caches...")
-    elink_cachename = os.path.join(args.cachedir,
-                                   'elink_{}'.format(args.cachestem))
-    gb_cachename = os.path.join(args.cachedir,
-                                'gb_{}'.format(args.cachestem))
-    gbfull_cachename = os.path.join(args.cachedir,
-                                    'gbfull_{}'.format(args.cachestem))
-    acc_cachename = os.path.join(args.cachedir,
-                                 'acc_{}'.format(args.cachestem))
+    caches = Cachepaths(os.path.join(args.cachedir,
+                                     'elink_{}'.format(args.cachestem)),
+                        os.path.join(args.cachedir,
+                                     'gb_{}'.format(args.cachestem)),
+                        os.path.join(args.cachedir,
+                                     'gbfull_{}'.format(args.cachestem)),
+                        os.path.join(args.cachedir,
+                                     'acc_{}'.format(args.cachestem)))
+    logger.info(caches)
 
     # Process input sequences to key by NCBI search accession
     if args.uniprot:
@@ -167,6 +186,25 @@ def run_main(namespace=None):
     logger.info("%d sequences taken forward with query",
                 len(qrecords))
 
+    # Set email address at Entrez
+    set_entrez_email(args.email)
+
+    
+#    # Get Entrez EUtils protein_nuccore links for sequences
+#    # Check local cache first
+#    if not os.path.isfile(elink_cachename):
+#        logger.info("No ELink cache... not checking")
+#    else:
+#        cachedata = load_elink_cache(elink_cachename)
+#        logger.info("Checking ELink cache at %s", elink_cachename)
+#        logger.info("Loaded data for %d queries", len(cachedata))
+#    # Get EUtils links
+#    for record in qrecords:
+#        logger.info("Downloading protein_nuccore record for %s", record.id)
+#        matches = elink_fetch_with_retries(record, "protein",
+#                                           "protein_nuccore",
+#                                           args.retries)
+    
     # Report success
     logger.info('Completed. Time taken: %.3f',
                 (time.time() - time0))

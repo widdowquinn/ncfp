@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Functions for handling data caches
+"""Functions to interact with Entrez
 
 (c) The James Hutton Institute 2017
 Author: Leighton Pritchard
@@ -39,24 +39,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+from Bio import Entrez
 
-# Load ELink cache contents
-def load_elink_cache(fname):
-    """Load contents of elink cache.
 
-    Returns a dictionary where keys are NCBI query terms,
-    and values are the list of matching NCBI accessions.
+# EXCEPTIONS
+# ==========
+# General exception for scripts
+class NCFPELinkException(Exception):
+    """Exception for ELink qeries."""
+
+    def __init__(self, msg="Error in ncfp ELink query"):
+        """Instantiate class."""
+        Exception.__init__(self, msg)
+
+
+
+def elink_fetch_with_retries(record, dbfrom, linkname, retries):
+    """Returns ELink search result.
+
+    Allows the maximum number of retries specified.
     """
-    with open(fname, 'r') as cfh:
-        data = [line.strip().split() for line in cfh if
-                len(line.strip())]
-
-    cachedata = dict()
-    for line in data:
-        if len(line) > 1:
-            val = line[1:]
-        else:
-            val = None
-        cachedata[line[0]] = val
-
-    return cachedata
+    tries = 0
+    while tries < retries:
+        try:
+            link = Entrez.elink(dbfrom=dbfrom,
+                                linkname=linkname,
+                                id=record.query)
+            matches = Entrez.read(link)
+            return matches
+        except:
+            tries += 1
+    raise NCFPELinkException("Could not complete ELink query")
