@@ -39,24 +39,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import os
 
-# Load ELink cache contents
-def load_elink_cache(fname):
-    """Load contents of elink cache.
+from collections import namedtuple
 
-    Returns a dictionary where keys are NCBI query terms,
-    and values are the list of matching NCBI accessions.
+
+# Paths cache files for script
+Cachepaths = namedtuple("Cachepaths", "elink acc gb gbfull")
+
+
+# Initialise caches
+def initialise_caches(cachedir, cachestem):
+    """Initialise caches for downloading.
+
+    cachedir     - path to cache directory
+    cachestem    - suffix for caches to identify a run
     """
-    with open(fname, 'r') as cfh:
-        data = [line.strip().split() for line in cfh if
-                len(line.strip())]
+    cachepaths = Cachepaths(os.path.join(cachedir,
+                                         'elink_{}'.format(cachestem)),
+                            os.path.join(cachedir,
+                                         'gb_{}'.format(cachestem)),
+                            os.path.join(cachedir,
+                                         'gbfull_{}'.format(cachestem)),
+                            os.path.join(cachedir,
+                                         'acc_{}'.format(cachestem)))
+    for path in cachepaths:
+        check_and_create_cache(path)
+    return cachepaths
 
-    cachedata = dict()
-    for line in data:
-        if len(line) > 1:
-            val = line[1:]
-        else:
-            val = None
-        cachedata[line[0]] = val
 
-    return cachedata
+# Create cache if it doesn't exist
+def check_and_create_cache(path):
+    """If no file at passed path, creates one."""
+    if os.path.isfile(path):
+        return
+    os.makedirs(os.path.split(path)[0], exist_ok=True)
+    with open(path, 'w') as cfh:
+        cfh.write("#ncfp cache: %s" % path)

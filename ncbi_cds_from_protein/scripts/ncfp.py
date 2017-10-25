@@ -43,6 +43,7 @@ import logging
 import os
 import sys
 import time
+import tqdm
 
 from collections import namedtuple
 
@@ -52,12 +53,8 @@ from .parsers import parse_cmdline
 from .. import __version__
 from ..ncfp_tools import (last_exception, NCFPException)
 from ..sequences import add_seqrecord_query
-from ..caches import load_elink_cache
-from ..entrez import (set_entrez_email, fetch_nt_ids)
-
-
-# Paths cache files for script
-Cachepaths = namedtuple("Cachepaths", "elink acc gb gbfull")
+from ..caches import initialise_caches
+from ..entrez import (set_entrez_email, fetch_nt_ids, search_nt_ids)
 
 
 # Process input sequences
@@ -153,15 +150,11 @@ def run_main(namespace=None):
 
     # Set up cache filenames
     logger.info("Setting up data caches...")
-    caches = Cachepaths(os.path.join(args.cachedir,
-                                     'elink_{}'.format(args.cachestem)),
-                        os.path.join(args.cachedir,
-                                     'gb_{}'.format(args.cachestem)),
-                        os.path.join(args.cachedir,
-                                     'gbfull_{}'.format(args.cachestem)),
-                        os.path.join(args.cachedir,
-                                     'acc_{}'.format(args.cachestem)))
-    logger.info(caches)
+    cachepaths = initialise_caches(args.cachedir, args.cachestem)
+    logger.info(cachepaths)
+
+    # Initialise caches
+    
 
     # Rather than subclass the Biopython SeqRecord class, we add
     # the ncfp attribute. This will be a dictionary that holds key:values
@@ -203,13 +196,19 @@ def run_main(namespace=None):
     # .ncfp['nt_query'] attribute
 
     # UniProt sequence accessions should have a matching NCBI
-    # nucleotide entry.
+    # nucleotide entry, that we need to identify with an ESearch
+    # and put in the .ncfp['nt_query'] slot
+    logger.info("Identifying nucleotide accessions...")
+    qrecords, accfail = search_nt_ids(qrecords, args.retries)
+    logger.info("nucleotide accessions retrieved for %d records (%d failed)",
+                len(qrecords), len(accfail))
     
-    # At this point, all records should have a .ncfp['nt_query']
+    # At this point, all records should have a .ncfp['nt_acc']
     # attribute, and be queryable against the NCBI nuccore db
-    qrecords, ntfail = fetch_nt_ids(qrecords, args.retries)
+    logger.info("Retrieving nucleotide records...")
+    qrecords, gbfail = fetch_nt_ids(qrecords, args.retries)
     logger.info("Records retrieved for %d records (%d failed)",
-                len(qrecords), len(ntfail))
+                len(qrecords), len(gbfail))
     
     
     # Report success

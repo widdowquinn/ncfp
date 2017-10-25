@@ -42,6 +42,7 @@ THE SOFTWARE.
 from io import StringIO
 
 from Bio import Entrez
+from tqdm import tqdm
 
 
 # EXCEPTIONS
@@ -62,6 +63,14 @@ class NCFPEFetchException(Exception):
         Exception.__init__(self, msg)
 
 
+class NCFPESearchException(Exception):
+    """Exception for ESearch queries."""
+
+    def __init__(self, msg="Error in ncfp ESearch query"):
+        """Instantiate class."""
+        Exception.__init__(self, msg)
+
+
 class NCFPMaxretryException(Exception):
     """Exception raised when maximum retries are reached"""
 
@@ -71,14 +80,10 @@ class NCFPMaxretryException(Exception):
 
 
 def fetch_nt_ids(records, retries):
-    """Returns records with NCBI nucleotide ID as attribute.
+    """Returns NCBI records for a given NCBI nucleotide ID.
 
     records - collection of SeqRecords
     retries - number of Entrez retries
-
-    Passed records must have the record.ncfp attribute. This will
-    be extended with the ['nt_accession'] key, whose value is the
-    NCBI accession for that sequence.
     """
     successrecords = []
     failrecords = []
@@ -94,7 +99,53 @@ def fetch_nt_ids(records, retries):
     return records, failrecords
 
 
-# Run an EFetch on a single ID with passed parameters
+def search_nt_ids(records, retries):
+    """Returns records with NCBI nucleotide ID as an attribute.
+
+    records - collection of SeqRecords
+    retries - number of Entrez retries
+
+    Passed records must have the record.ncfp attribute. This will
+    be extended with the ['nt_accession'] key, whose value is the
+    NCBI accession for that sequence.
+    """
+    successrecords = []
+    failrecords = []
+    for record in tqdm(records, desc="Search NT IDs"):
+        try:
+            result = esearch_with_retries(record.ncfp['nt_query'],
+                                          'nucleotide', retries)
+            if result['Count'] == 0:
+                failrecords.append(record)
+            else:
+                record.ncfp['nt_accessions'] = result['IdList']
+        except NCFPESearchException:
+            failrecords.append(record)
+    return records, failrecords
+
+
+# Run an ESearch on a single ID
+def esearch_with_retries(query_id, dbname, maxretries):
+    """Entrez ESearch for single query ID.
+
+    query_id    - query term for search
+    dbname      - NCBI target database name
+    maxretries  - maximum number of attempts to make
+
+    Returns the parsed record resulting from the ESearch,
+    after trying the ESearch up to a maximum number of times.
+    """
+    tries = 0
+    while tries < maxretries:
+        try:
+            handle = Entrez.esearch(db=dbname, term=query_id)
+            return Entrez.read(handle)
+        except:
+            tries += 1
+    raise NCFPMaxretryException("Query ID %s ESearch failed" % query_id)
+
+
+# Run an EFetch on a single ID
 def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
     """Entrez EFetch for a single query ID.
 
