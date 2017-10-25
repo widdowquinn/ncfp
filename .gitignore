@@ -16,3 +16,4 @@ venv*
 
 # Exclude test files
 skipped.fas
+.ncfp_cache
