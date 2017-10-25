@@ -41,7 +41,7 @@ THE SOFTWARE.
 
 from io import StringIO
 
-from Bio import Entrez
+from Bio import Entrez, SeqIO
 from tqdm import tqdm
 
 from .ncfp_tools import last_exception
@@ -80,11 +80,13 @@ class NCFPMaxretryException(Exception):
         Exception.__init__(self, msg)
 
 
-def fetch_gb_headers(records, cache, retries):
+def fetch_gb_headers(records, cache, batchsize, retries):
     """Returns NCBI GenBank headers for passed records
 
-    records - collection of SeqRecords
-    retries - number of Entrez retries
+    records    - collection of SeqRecords
+    cache      - gb_cache for GenBank headers
+    batchsize  - the batch size for EPost history
+    retries    - number of Entrez retries
     """
     # Collate all unique nucleotide accessions
     accessions = set()
@@ -94,16 +96,25 @@ def fetch_gb_headers(records, cache, retries):
 
     # Check accessions against those in the cache. We only
     # retrieve accessions not in the cache
-    fetchlist = accessions.difference(set(cache.keys()))
-            
-    # Get GenBank header for each unique accession
-    for accession in tqdm(fetchlist, desc="Fetch GenBank headers"):
-        try:
-            retval = efetch_with_retries(accession,
-                                         'nucleotide', 'gb', 'text',
-                                         retries).read().strip()
-        except NCFPMaxretryException:
-            continue
+    fetchlist = list(accessions.difference(set(cache.keys())))
+
+    # Batch fetchlist for separate EPost submissions
+    histories = []
+    for batch in [fetchlist[i:i+batchsize] for i in
+                  range(0, len(fetchlist), batchsize)]:
+        histories.append(epost_history_with_retries(batch,
+                                                    'nucleotide',
+                                                    retries))
+
+    # Fetch headers with each history
+    for history in tqdm(histories, desc="Fetching GenBank headers"):
+        gbheader = efetch_history_with_retries(history, 'nucleotide',
+                                               'gb', 'text', retries)
+        # Parse the gbheader data and get the record ID, length
+        # and annotations
+        print(accessions)
+        for record in SeqIO.parse(gbheader, 'gb'):
+            print(record.id, len(record), record.annotations['accessions'])
     return cache
 
 
@@ -161,7 +172,8 @@ def esearch_with_retries(query_id, dbname, maxretries):
             return Entrez.read(handle)
         except:
             tries += 1
-    raise NCFPMaxretryException("Query ID %s ESearch failed" % query_id)
+    raise NCFPMaxretryException("Query ID %s ESearch failed\n%s" %
+                                (query_id, last_exception()))
 
 
 # Run an EFetch on a single ID
@@ -188,9 +200,49 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
             # Return data string as stream
             return StringIO(data)
         except:
-            print(last_exception())
             tries += 1
-    raise NCFPMaxretryException("Query ID %s EFetch failed" % query_id)
+    raise NCFPMaxretryException("Query ID %s EFetch failed\n" %
+                                (query_id, last_exception()))
+
+
+def epost_history_with_retries(batch, dbname, maxretries):
+    """Returns EPost history key for query batch
+
+    batch      - collection of query terms
+    dbname     - NCBI target database
+    maxretries - maximum number of query attempts
+    """
+    tries = 0
+    while tries < maxretries:
+        try:
+            result = Entrez.epost(id=','.join(batch), db=dbname)
+            return Entrez.read(result)
+        except:
+            tries += 1
+    raise NCFPMaxretryException("EPost history failed\n%s" % last_exception())
+
+
+def efetch_history_with_retries(history, dbname, rettype, retmode, maxretries):
+    """Return batched EFetch as tokenised string
+
+    history         - NCBI EPost history key
+    dbname          - NCBI target database
+    rettype         - data return type
+    retmode         - data return mode
+    maxretries      - maximum retrieval attempts
+    """
+    tries = 0
+    while tries < maxretries:
+        try:
+            data = Entrez.efetch(db=dbname, rettype=rettype, retmode=retmode,
+                                 webenv=history['WebEnv'],
+                                 query_key=history['QueryKey']).read()
+            if rettype in ['gb', 'gbwithparts'] and retmode == 'text':
+                assert data.startswith('LOCUS')
+            return StringIO(data)
+        except:
+            tries += 1
+    raise NCFPMaxretryException("EFetch history failed\n%s" % last_exception())
 
 
 def set_entrez_email(email):

@@ -211,13 +211,17 @@ def run_main(namespace=None):
 
     # At this point, all records should have a .ncfp['nt_acc']
     # attribute, and be queryable against the NCBI nuccore db.
-    # First, we retrieve GenBank headers, for inspection and
+    # First, we associate each of the records with the accession for
+    # its corresponding GenBank file.
+    
+    # Then, we retrieve GenBank headers, for inspection and
     # identification of the most useful nucleotide record.
     logger.info("Downloading GenBank headers for each record")
     gb_cache = load_cache(cachepaths.gb)
     logger.info("GenBank header cache %s contains %d entries",
                 cachepaths.gb, len(gb_cache))
-    gb_cache = fetch_gb_headers(qrecords, gb_cache, args.retries)
+    gb_cache = fetch_gb_headers(qrecords, gb_cache,
+                                args.batchsize, args.retries)
     logger.info("Writing GenBank header cache with %d entries to %s",
                 len(gb_cache), cachepaths.gb)
     write_cache(gb_cache, cachepaths.gb)
