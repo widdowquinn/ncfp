@@ -39,6 +39,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import json
 import os
 
 from collections import namedtuple
@@ -75,4 +76,24 @@ def check_and_create_cache(path):
         return
     os.makedirs(os.path.split(path)[0], exist_ok=True)
     with open(path, 'w') as cfh:
-        cfh.write("#ncfp cache: %s" % path)
+        json.dump({}, cfh)
+
+
+# Load cache
+def load_cache(path):
+    """Load cache from path
+
+    The caches store key:value data as JSON.
+    """
+    with open(path, 'r') as cfh:
+        return json.load(cfh)
+
+
+# Write cache
+def write_cache(cache, path):
+    """Write cache to path.
+
+    The caches store key:value data as JSON.
+    """
+    with open(path, 'w') as cfh:
+        json.dump(cache, cfh)

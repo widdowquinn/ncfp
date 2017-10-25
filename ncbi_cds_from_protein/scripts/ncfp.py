@@ -53,8 +53,8 @@ from .parsers import parse_cmdline
 from .. import __version__
 from ..ncfp_tools import (last_exception, NCFPException)
 from ..sequences import add_seqrecord_query
-from ..caches import initialise_caches
-from ..entrez import (set_entrez_email, fetch_nt_ids, search_nt_ids)
+from ..caches import (initialise_caches, load_cache, write_cache)
+from ..entrez import (set_entrez_email, search_nt_ids)
 
 
 # Process input sequences
@@ -199,17 +199,23 @@ def run_main(namespace=None):
     # nucleotide entry, that we need to identify with an ESearch
     # and put in the .ncfp['nt_query'] slot
     logger.info("Identifying nucleotide accessions...")
-    qrecords, accfail = search_nt_ids(qrecords, args.retries)
+    acc_cache = load_cache(cachepaths.acc)
+    logger.info("Accession cache %s contains %d entries",
+                cachepaths.acc, len(acc_cache))
+    qrecords, acc_cache, accfail = search_nt_ids(qrecords, acc_cache, args.retries)
+    logger.info("Writing accession cache with %d entries to %s",
+                len(acc_cache), cachepaths.acc)
+    write_cache(acc_cache, cachepaths.acc)
     logger.info("nucleotide accessions retrieved for %d records (%d failed)",
                 len(qrecords), len(accfail))
     
     # At this point, all records should have a .ncfp['nt_acc']
-    # attribute, and be queryable against the NCBI nuccore db
-    logger.info("Retrieving nucleotide records...")
-    qrecords, gbfail = fetch_nt_ids(qrecords, args.retries)
-    logger.info("Records retrieved for %d records (%d failed)",
-                len(qrecords), len(gbfail))
-    
+    # attribute, and be queryable against the NCBI nuccore db.
+    # First, we retrieve GenBank headers, for inspection and
+    # identification of the most useful nucleotide record.
+
+    # Next we recover the complete GenBank records for useful
+    # sequences
     
     # Report success
     logger.info('Completed. Time taken: %.3f',

@@ -79,8 +79,8 @@ class NCFPMaxretryException(Exception):
         Exception.__init__(self, msg)
 
 
-def fetch_nt_ids(records, retries):
-    """Returns NCBI records for a given NCBI nucleotide ID.
+def fetch_nt_headers(records, retries):
+    """Returns NCBI GenBank headers for passed records
 
     records - collection of SeqRecords
     retries - number of Entrez retries
@@ -99,29 +99,36 @@ def fetch_nt_ids(records, retries):
     return records, failrecords
 
 
-def search_nt_ids(records, retries):
+# Query NCBI singly with each record, to recover nucleotide accessions
+def search_nt_ids(records, cache, retries):
     """Returns records with NCBI nucleotide ID as an attribute.
 
     records - collection of SeqRecords
+    cache   - accession cache (dictionary)
     retries - number of Entrez retries
 
     Passed records must have the record.ncfp attribute. This will
     be extended with the ['nt_accession'] key, whose value is the
     NCBI accession for that sequence.
+
+    If the record's ID is in the cache, the ESearch is not
+    performed - the cache is presumed to be up to date.
     """
     successrecords = []
     failrecords = []
     for record in tqdm(records, desc="Search NT IDs"):
-        try:
-            result = esearch_with_retries(record.ncfp['nt_query'],
-                                          'nucleotide', retries)
-            if result['Count'] == 0:
+        if record.ncfp['nt_query'] not in cache:
+            try:
+                result = esearch_with_retries(record.ncfp['nt_query'],
+                                              'nucleotide', retries)
+                if result['Count'] == 0:
+                    failrecords.append(record)
+                else:
+                    record.ncfp['nt_accessions'] = result['IdList']
+                    cache[record.ncfp['nt_query']] = result['IdList']
+            except NCFPESearchException:
                 failrecords.append(record)
-            else:
-                record.ncfp['nt_accessions'] = result['IdList']
-        except NCFPESearchException:
-            failrecords.append(record)
-    return records, failrecords
+    return records, cache, failrecords
 
 
 # Run an ESearch on a single ID
