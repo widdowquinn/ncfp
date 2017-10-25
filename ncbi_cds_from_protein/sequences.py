@@ -72,6 +72,13 @@ def add_seqrecord_query(record, fmt="ncbi"):
         qstring = record.id
 
     # Add query string to record
-    record.ncfp = {'header_id': qstring}
+    if fmt == 'uniprot':
+        record.ncfp = {'header_id': qstring,
+                       'nt_query': None,
+                       'aa_query': None}
+    else:
+        record.ncfp = {'header_id': qstring,
+                       'nt_query': None,
+                       'aa_query': qstring}
 
     return record
