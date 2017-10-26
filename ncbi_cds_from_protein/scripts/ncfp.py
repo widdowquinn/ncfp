@@ -198,7 +198,16 @@ def run_main(namespace=None):
 
     # Next we recover the shortest complete GenBank record for each input
     # sequence
-    pass
+    logger.info("Fetching shortest complete GenBank records...")
+    addedrows, countfail = fetch_shortest_genbank(cachepath,
+                                                  args.retries, args.batchsize)
+    logger.info("Fetched GenBank records for %d UIDs", len(addedrows))
+    if countfail:
+        logger.warning("Unable to get complete GenBank files for %d UIDs",
+                       countfail)
+    if len(addedrows) == 0 and countfail == 0:
+        logger.warning(
+            "No complete GenBank downloads were required! (in cache?)")
 
     # Report success
     logger.info('Completed. Time taken: %.3f',
