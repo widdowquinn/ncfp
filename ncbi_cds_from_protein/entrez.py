@@ -44,10 +44,15 @@ from io import StringIO
 from Bio import Entrez
 from tqdm import tqdm
 
+from .caches import (has_nt_query, get_nt_query,
+                     has_ncbi_uid, add_ncbi_uids,
+                     get_nt_noacc_uids, update_nt_uid_acc)
 from .ncfp_tools import last_exception
 
 # EXCEPTIONS
 # ==========
+
+
 class NCFPELinkException(Exception):
     """Exception for ELink qeries."""
 
@@ -95,7 +100,7 @@ def fetch_gb_headers(records, cache, retries):
     # Check accessions against those in the cache. We only
     # retrieve accessions not in the cache
     fetchlist = accessions.difference(set(cache.keys()))
-            
+
     # Get GenBank header for each unique accession
     for accession in tqdm(fetchlist, desc="Fetch GenBank headers"):
         try:
@@ -108,39 +113,52 @@ def fetch_gb_headers(records, cache, retries):
 
 
 # Query NCBI singly with each record, to recover nucleotide accessions
-def search_nt_ids(records, cache, retries):
-    """Returns records with NCBI nucleotide ID as an attribute.
+def search_nt_ids(records, cachepath, retries):
+    """Queries NCBI nucleotide database and populates cache
 
     records - collection of SeqRecords
-    cache   - accession cache (dictionary)
+    cache   - path to cache
     retries - number of Entrez retries
-
-    Passed records must have the record.ncfp attribute. This will
-    be extended with the ['nt_accession'] key, whose value is the
-    NCBI accession for that sequence.
 
     If the record's ID is in the cache, the ESearch is not
     performed - the cache is presumed to be up to date.
     """
-    successrecords = []
-    failrecords = []
+    addedrows = []  # Holds list of added rows in nt_uid_acc
+    noresult = 0    # Count of records with no result
     for record in tqdm(records, desc="Search NT IDs"):
-        if record.ncfp['nt_query'] not in cache:
-            try:
-                result = esearch_with_retries(record.ncfp['nt_query'],
-                                              'nucleotide', retries)
-            except NCFPESearchException:
-                failrecords.append(record)
-            if int(result['Count']) == 0:
-                failrecords.append(record)
+        if (not has_ncbi_uid(cachepath, record.id) and
+                has_nt_query(cachepath, record.id)):
+            result = esearch_with_retries(get_nt_query(cachepath,
+                                                       record.id),
+                                          'nucleotide', retries)
+            if len(result['IdList']):
+                addedrows.extend(add_ncbi_uids(cachepath, record.id,
+                                               result['IdList']))
             else:
-                successrecords.append(record)
-                record.ncfp['nt_acc'] = result['IdList']
-                cache[record.ncfp['nt_query']] = result['IdList']
+                noresult += 1
+    return addedrows, noresult
+
+
+def update_gb_accessions(cachepath, retries):
+    """Updates the cache table with GenBank accession for each UID.
+
+    cachepath     - path to cache database
+    retries       - number of Entres retries
+
+    For each UID in nt_uid_acc where there is no GenBank accession,
+    obtain the GenBank accession and update the row.
+    """
+    updatedrows = []
+    noupdate = 0
+    for uid in tqdm(get_nt_noacc_uids(cachepath),
+                    desc="Fetch UID accessions"):
+        result = efetch_with_retries(uid, 'nucleotide', 'acc',
+                                     'text', retries).read()
+        if result is None:
+            noupdate += 1
         else:
-            record.ncfp['nt_acc'] = cache[record.ncfp['nt_query']]
-            successrecords.append(record)
-    return successrecords, cache, failrecords
+            updatedrows.extend(update_nt_uid_acc(cachepath, uid, result))
+    return updatedrows, noupdate
 
 
 # Run an ESearch on a single ID

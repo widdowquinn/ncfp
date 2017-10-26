@@ -41,60 +41,215 @@ THE SOFTWARE.
 
 import json
 import os
+import sqlite3
 
 from collections import namedtuple
 
 
-# Paths cache files for script
-Cachepaths = namedtuple("Cachepaths", "elink acc gb gbfull")
+# SQL QUERIES
+# ===========
+# The SQL below mediates cache database creation, update, and querying. It's
+# up here to make reading the code easier.
+#
+# The intention is that the cache holds relevant information about sequences
+# so that we can pick up in case of download failures (a real problem for us).
+#
+# The main table is seqdata, which holds input sequence accessions, and 1:1
+# data for that accession.
+#
+# accession     - the input sequence accession, pulled from the FASTA sequence
+#                 (.id attribute)
+# aa_query      - a query term used for searching against the protein db or
+#                 protein_nuccore link db. For NCBI sequences this is the
+#                 accession.
+# nt_query      - a query term used for searching against the nucleotide db.
+#                 For Uniprot sequences this is provided in the GN= field
+#                 (gene name), but for NCBI sequences we need to run a
+#                 preliminary search to populate it.
+#
+# The elink table holds a cache for results of searching query_term against
+# protein_nuccore to identify corresponding nucleotide UIDs. This is only
+# needed when input sequences are NCBI (UniProt GNs can be used to query
+# for nucleotide sequences directly.
+#
+# The nt_uid_acc table has a *:* relationship with seqdata. Each input
+# sequence may correspond to more than one nucleotide database entry at NCBI.
+# We need to identify the corresponding UID and accession for each one. Both
+# UID and accession are required, as we will be downloading GenBank entries
+# in batch form, and these contain the accession but not the UID in their
+# headers.
+# The *:* relationship is mediated by the seq_nt table, which references
+# the seqdata accession (unique to input sequence) and the nt_uid_acc
+# accession (unique to NCBI nucleotide sequence).
 
 
-# Initialise caches
-def initialise_caches(cachedir, cachestem):
-    """Initialise caches for downloading.
+# Create tables
+SQL_CREATEDB = """
+    DROP TABLE IF EXISTS seqdata;
+    CREATE TABLE seqdata (accession TEXT PRIMARY KEY NOT NULL,
+                          aa_query TEXT,
+                          nt_query TEXT
+                         );
+    DROP TABLE IF EXISTS elink;
+    DROP TABLE IF EXISTS seq_nt;
+    CREATE TABLE seq_nt (seq_nt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                         accession TEXT NOT NULL,
+                         uid TEXT NOT NULL,
+                         FOREIGN KEY(accession) REFERENCES seqdata(accession),
+                         FOREIGN KEY(uid) REFERENCES nt_uid_acc(uid)
+                        );
+    DROP TABLE IF EXISTS nt_uid_acc;
+    CREATE TABLE nt_uid_acc (uid TEXT PRIMARY KEY NOT NULL,
+                             accession TEXT
+                            );
+"""
 
-    cachedir     - path to cache directory
-    cachestem    - suffix for caches to identify a run
+# Add a new sequence to seqdata
+SQL_ADDSEQ = """
+    INSERT INTO seqdata (accession, aa_query, nt_query)
+           VALUES (?, ?, ?);
+"""
+
+# Get queries for a seqdata row
+SQL_GET_SEQDATA_QUERIES = """
+    SELECT nt_query, aa_query FROM seqdata
+           WHERE accession=?;
+"""
+
+# Get nt query for a seqdata row
+SQL_GET_SEQDATA_NTQUERY = """
+    SELECT nt_query FROM seqdata
+           WHERE accession=?;
+"""
+
+# Get known nt UIDs for a sequence accession
+SQL_GET_NT_UIDS = """
+    SELECT uid FROM seq_nt
+           WHERE accession=?;
+"""
+
+# Add nt UID for a sequence accession
+SQL_ADD_NT_UID = """
+    INSERT INTO nt_uid_acc (uid, accession)
+           VALUES (?, ?);
+"""
+
+# Add linker between seqdata and nt_uid_acc
+SQL_ADD_SEQDATA_NT_LINK = """
+    INSERT INTO seq_nt (accession, uid)
+           VALUES (?, ?);
+"""
+
+# Get all nt UIDs with no GenBank accession
+SQL_GET_NOACC_UIDS = """
+    SELECT uid FROM nt_uid_acc
+           WHERE accession IS NULL;
+"""
+
+# Update nt_uid_acc row with accession
+SQL_UPDATE_UID_ACC = """
+    INSERT OR REPLACE INTO nt_uid_acc (uid, accession)
+           VALUES (?, ?);
+"""
+
+
+# Initialise SQLite cache
+def initialise_dbcache(path):
+    """Initialise SQLite cache.
+
+    path     - path to SQLite3 database cache
     """
-    cachepaths = Cachepaths(os.path.join(cachedir,
-                                         'elink_{}'.format(cachestem)),
-                            os.path.join(cachedir,
-                                         'acc_{}'.format(cachestem)),
-                            os.path.join(cachedir,
-                                         'gb_{}'.format(cachestem)),
-                            os.path.join(cachedir,
-                                         'gbfull_{}'.format(cachestem)),
-                            )
-    for path in cachepaths:
-        check_and_create_cache(path)
-    return cachepaths
+    conn = sqlite3.connect(path)
+    with conn:
+        cur = conn.cursor()
+        cur.executescript(SQL_CREATEDB)
 
 
-# Create cache if it doesn't exist
-def check_and_create_cache(path):
-    """If no file at passed path, creates one."""
-    if os.path.isfile(path):
-        return
-    os.makedirs(os.path.split(path)[0], exist_ok=True)
-    with open(path, 'w') as cfh:
-        json.dump({}, cfh)
+def add_input_sequence(cachepath, accession, aa_query, nt_query):
+    """Populate a row of the seqdata table in cache.
 
-
-# Load cache
-def load_cache(path):
-    """Load cache from path
-
-    The caches store key:value data as JSON.
+    accession    - unique ID for input sequence
+    aa_query     - query term for searching protein or
+                   protein_nuccore
+    nt_query     - query term for searching nucleotide
     """
-    with open(path, 'r') as cfh:
-        return json.load(cfh)
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_ADDSEQ, (accession, aa_query, nt_query))
+    return cur.lastrowid
 
 
-# Write cache
-def write_cache(cache, path):
-    """Write cache to path.
+def has_query(cachepath, accession):
+    """Returns True if a seqdata row has any query."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_SEQDATA_QUERIES, (accession, ))
+    if cur.fetchone() == (None, None):
+        return False
+    return True
 
-    The caches store key:value data as JSON.
-    """
-    with open(path, 'w') as cfh:
-        json.dump(cache, cfh)
+
+def has_nt_query(cachepath, accession):
+    """Returns True if a seqdata row has an nt query."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession, ))
+    if cur.fetchone() is None:
+        return False
+    return True
+
+
+def get_nt_query(cachepath, accession):
+    """Returns nt query for a seqdata row."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession, ))
+    return cur.fetchone()
+
+
+def has_ncbi_uid(cachepath, accession):
+    """Returns True if seq accession has at least one nt UID."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_NT_UIDS, (accession, ))
+    if cur.fetchone() is None:
+        return False
+    return True
+
+
+def add_ncbi_uids(cachepath, accession, uids):
+    """Add collection of nt UIDs to cache for a record."""
+    conn = sqlite3.connect(cachepath)
+    results = []
+    with conn:
+        cur = conn.cursor()
+        for uid in uids:
+            cur.execute(SQL_ADD_NT_UID, (uid, None))
+            results.append(cur.fetchone())
+            cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
+    return results
+
+
+def get_nt_noacc_uids(cachepath):
+    """Return list of nt UIDs having no GenBank accession."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_NOACC_UIDS)
+    return [uid[0] for uid in cur.fetchall()]
+
+
+def update_nt_uid_acc(cachepath, uid, accession):
+    """Update nt UID GenBank accession."""
+    conn = sqlite3.connect(cachepath)
+    results = []
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_UPDATE_UID_ACC, (uid, accession))
+        results.append(cur.fetchone())
+    return results
