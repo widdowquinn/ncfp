@@ -40,6 +40,7 @@ THE SOFTWARE.
 """
 
 import re
+import sqlite3
 
 from tqdm import tqdm
 

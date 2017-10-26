@@ -41,12 +41,14 @@ THE SOFTWARE.
 
 from io import StringIO
 
-from Bio import Entrez
+from Bio import (Entrez, SeqIO)
 from tqdm import tqdm
 
 from .caches import (has_nt_query, get_nt_query,
                      has_ncbi_uid, add_ncbi_uids,
-                     get_nt_noacc_uids, update_nt_uid_acc)
+                     get_nt_noacc_uids, update_nt_uid_acc,
+                     get_nt_uids, add_gb_headers,
+                     get_nogbhead_nt_uids)
 from .ncfp_tools import last_exception
 
 # EXCEPTIONS
@@ -57,6 +59,14 @@ class NCFPELinkException(Exception):
     """Exception for ELink qeries."""
 
     def __init__(self, msg="Error in ncfp ELink query"):
+        """Instantiate class."""
+        Exception.__init__(self, msg)
+
+
+class NCFPEPostException(Exception):
+    """Exception for EPost qeries."""
+
+    def __init__(self, msg="Error in ncfp EPost query"):
         """Instantiate class."""
         Exception.__init__(self, msg)
 
@@ -85,31 +95,45 @@ class NCFPMaxretryException(Exception):
         Exception.__init__(self, msg)
 
 
-def fetch_gb_headers(records, cache, retries):
-    """Returns NCBI GenBank headers for passed records
+def fetch_gb_headers(cachepath, retries, batchsize):
+    """Update cache with NCBI GenBank headers for passed records
 
-    records - collection of SeqRecords
-    retries - number of Entrez retries
+    cachepath - path to cache
+    retries   - number of Entrez retries
+    batchsize - number of uids per EPost query
+
+    Gets list of UIDs with no existing cached GenBank headers, and
+    batch EFetches the GenBank headers.
     """
-    # Collate all unique nucleotide accessions
-    accessions = set()
-    for record in tqdm(records, desc="Collating accessions"):
-        for acc in record.ncfp['nt_acc']:
-            accessions.add(acc)
-
-    # Check accessions against those in the cache. We only
-    # retrieve accessions not in the cache
-    fetchlist = accessions.difference(set(cache.keys()))
-
-    # Get GenBank header for each unique accession
-    for accession in tqdm(fetchlist, desc="Fetch GenBank headers"):
+    addedrows = []
+    failcount = 0
+    # Create batches and get EPost keys for each batch
+    epost_histories = []
+    nogbhead_uids = get_nogbhead_nt_uids(cachepath)
+    for batch in [nogbhead_uids[idx:idx + batchsize] for idx in
+                  range(0, len(nogbhead_uids), batchsize)]:
+        epost_histories.append(epost_history_with_retries(batch,
+                                                          'nucleotide',
+                                                          retries))
+    for history in tqdm(epost_histories,
+                        desc="Fetching GenBank headers"):
+        print(history)
         try:
-            retval = efetch_with_retries(accession,
-                                         'nucleotide', 'gb', 'text',
-                                         retries).read().strip()
+            records = SeqIO.parse(efetch_history_with_retries(history,
+                                                              'nucleotide',
+                                                              'gb', 'text',
+                                                              retries), 'gb')
+            print(records)
+            for record in records:
+                taxonomy = ' '.join(record.annotations['taxonomy'])
+                addedrows.append(add_gb_headers(cachepath,
+                                                record.id, len(record),
+                                                record.annotations['organism'],
+                                                taxonomy,
+                                                record.annotations['date']))
         except NCFPMaxretryException:
-            continue
-    return cache
+            failcount += 1
+    return addedrows, failcount
 
 
 # Query NCBI singly with each record, to recover nucleotide accessions
@@ -139,6 +163,7 @@ def search_nt_ids(records, cachepath, retries):
     return addedrows, noresult
 
 
+# Update existing cache nt_uid_acc table with accessions from NCBI
 def update_gb_accessions(cachepath, retries):
     """Updates the cache table with GenBank accession for each UID.
 
@@ -153,7 +178,7 @@ def update_gb_accessions(cachepath, retries):
     for uid in tqdm(get_nt_noacc_uids(cachepath),
                     desc="Fetch UID accessions"):
         result = efetch_with_retries(uid, 'nucleotide', 'acc',
-                                     'text', retries).read()
+                                     'text', retries).read().strip()
         if result is None:
             noupdate += 1
         else:
@@ -209,6 +234,52 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
             print(last_exception())
             tries += 1
     raise NCFPMaxretryException("Query ID %s EFetch failed" % query_id)
+
+
+# Batch EPost to get history for a set of query IDs
+def epost_history_with_retries(qids, dbname, maxretries):
+    """Entrez EPost for a batch of queryids.
+
+    qids            - Collection of query IDs
+    dbname          - target NCBI database
+    maxretries      - maximum download attempts
+
+    Returns the generated history, as parsed by Entrez.read()
+    """
+    tries = 0
+    while tries < maxretries:
+        try:
+            history = Entrez.read(Entrez.epost(dbname,
+                                               id=','.join(qids)))
+            return history
+        except:
+            tries += 1
+    raise NCFPMaxretryException("Batch EPost failed.")
+
+
+def efetch_history_with_retries(history, dbname, rettype, retmode, maxretries):
+    """Run Entrez EFetch on a passed EPost history
+
+    history          - EPost history
+    dbname           - target NCBI database
+    rettype          - return datatype
+    retmode          - return data mode
+    maxretries       - maximum download attempts
+
+    Returns the result data as a tokenised string.
+    """
+    tries = 0
+    while tries < maxretries:
+        try:
+            data = Entrez.efetch(db=dbname, rettype=rettype, retmode=retmode,
+                                 webenv=history['WebEnv'],
+                                 query_key=history['QueryKey']).read()
+            if rettype in ['gb', 'gbwithparts'] and retmode == 'text':
+                assert data.startswith('LOCUS')
+            return StringIO(data)
+        except:
+            tries += 1
+    raise NCFPMaxretryException("Failed to recover batch EFetch")
 
 
 def set_entrez_email(email):

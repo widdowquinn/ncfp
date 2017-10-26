@@ -39,11 +39,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import json
-import os
 import sqlite3
-
-from collections import namedtuple
 
 
 # SQL QUERIES
@@ -102,12 +98,26 @@ SQL_CREATEDB = """
     CREATE TABLE nt_uid_acc (uid TEXT PRIMARY KEY NOT NULL,
                              accession TEXT
                             );
+    DROP TABLE IF EXISTS gb_headers;
+    CREATE TABLE gb_headers (accession TEXT PRIMARY KEY NOT NULL,
+                             length INTEGER NOT NULL,
+                             organism TEXT NOT NULL,
+                             taxonomy TEXT NOT NULL,
+                             date TEXT NOT NULL,
+                             FOREIGN KEY (accession) REFERENCES nt_uid_acc(accession)
+                            );
 """
 
 # Add a new sequence to seqdata
 SQL_ADDSEQ = """
     INSERT INTO seqdata (accession, aa_query, nt_query)
            VALUES (?, ?, ?);
+"""
+
+SQL_ADD_GBHEADER = """
+    INSERT INTO gb_headers (accession, length, organism,
+                            taxonomy, date)
+           VALUES (?, ?, ?, ?, ?);
 """
 
 # Get queries for a seqdata row
@@ -140,16 +150,29 @@ SQL_ADD_SEQDATA_NT_LINK = """
            VALUES (?, ?);
 """
 
+# Get all nt UIDs
+SQL_GET_UIDS = """
+    SELECT uid FROM nt_uid_acc;
+"""
+
 # Get all nt UIDs with no GenBank accession
 SQL_GET_NOACC_UIDS = """
     SELECT uid FROM nt_uid_acc
            WHERE accession IS NULL;
 """
 
+
+# Get all nt UIDs with no associated GenBank header
+SQL_GET_NOGBHEAD_UIDS = """
+    SELECT uid FROM nt_uid_acc
+           WHERE accession NOT IN
+                 (SELECT accession FROM gb_headers);
+"""
+
 # Update nt_uid_acc row with accession
 SQL_UPDATE_UID_ACC = """
-    INSERT OR REPLACE INTO nt_uid_acc (uid, accession)
-           VALUES (?, ?);
+    UPDATE nt_uid_acc
+           SET accession=? WHERE uid=?;
 """
 
 
@@ -235,6 +258,24 @@ def add_ncbi_uids(cachepath, accession, uids):
     return results
 
 
+def get_nt_uids(cachepath):
+    """Return list of nt UIDs."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_UIDS)
+    return [uid[0] for uid in cur.fetchall()]
+
+
+def get_nogbhead_nt_uids(cachepath):
+    """Return list of nt UIDs with no cached GenBank header."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_NOGBHEAD_UIDS)
+    return [uid[0] for uid in cur.fetchall()]
+
+
 def get_nt_noacc_uids(cachepath):
     """Return list of nt UIDs having no GenBank accession."""
     conn = sqlite3.connect(cachepath)
@@ -250,6 +291,16 @@ def update_nt_uid_acc(cachepath, uid, accession):
     results = []
     with conn:
         cur = conn.cursor()
-        cur.execute(SQL_UPDATE_UID_ACC, (uid, accession))
+        cur.execute(SQL_UPDATE_UID_ACC, (accession, uid))
         results.append(cur.fetchone())
     return results
+
+
+def add_gb_headers(cachepath, accession, length, org, taxon, date):
+    """Add a new GenBank header to the cache."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_ADD_GBHEADER, (accession, length, org,
+                                       taxon, date))
+    return cur.fetchone()

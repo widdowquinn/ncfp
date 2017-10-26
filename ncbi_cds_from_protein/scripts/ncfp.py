@@ -52,7 +52,8 @@ from ..ncfp_tools import (last_exception, NCFPException)
 from ..sequences import (process_sequences, )
 from ..caches import (initialise_dbcache, )
 from ..entrez import (set_entrez_email, search_nt_ids,
-                      update_gb_accessions)
+                      update_gb_accessions,
+                      fetch_gb_headers)
 
 
 # Process input sequences
@@ -170,6 +171,14 @@ def run_main(namespace=None):
     updatedrows, countfail = update_gb_accessions(cachepath, args.retries)
     logger.info("Updated GenBank accessions for %d UIDs", len(updatedrows))
     logger.info("Unable to update GenBank accessions for %d UIDs",
+                countfail)
+
+    # Next we recover GenBank headers and extract useful information
+    logger.info("Fetching GenBank headers...")
+    addedrows, countfail = fetch_gb_headers(cachepath,
+                                            args.retries, args.batchsize)
+    logger.info("Fetched GenBank headers for %d UIDs", len(addedrows))
+    logger.info("Unable to update GenBank headers for %d UIDs",
                 countfail)
 
     # Next we recover the complete GenBank records for useful
