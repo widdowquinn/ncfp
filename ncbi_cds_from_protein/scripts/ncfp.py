@@ -146,6 +146,8 @@ def run_main(namespace=None):
                        args.skippedfname)
     logger.info("%d sequences taken forward with query",
                 len(qrecords))
+    if len(qrecords) == 0:
+        logger.warning("No new input sequences were found! (in cache?)")
 
     # NCBI protein accessions can't be queried directly against the
     # nucleotide database, so we must perform an ELink search to
@@ -160,8 +162,12 @@ def run_main(namespace=None):
     logger.info("Identifying nucleotide accessions...")
     addedrows, countfail = search_nt_ids(qrecords, cachepath, args.retries)
     logger.info("Added %d new UIDs to cache", len(addedrows))
-    logger.info("NCBI nucleotide accession search failed for %d records",
-                countfail)
+    if countfail:
+        logger.warning("NCBI nucleotide accession search failed for " +
+                       "%d records", countfail)
+    if len(addedrows) == 0 and countfail == 0:
+        logger.warning(
+            "No nucleotide accession downloads were required! (in cache?)")
 
     # At this point, we want to retrieve all records that are
     # queryable against the NCBI nt database.
@@ -170,19 +176,28 @@ def run_main(namespace=None):
     logger.info("Collecting GenBank accessions...")
     updatedrows, countfail = update_gb_accessions(cachepath, args.retries)
     logger.info("Updated GenBank accessions for %d UIDs", len(updatedrows))
-    logger.info("Unable to update GenBank accessions for %d UIDs",
-                countfail)
+    if countfail:
+        logger.warning("Unable to update GenBank accessions for %d UIDs",
+                       countfail)
+    if len(updatedrows) == 0 and countfail == 0:
+        logger.warning(
+            "No GenBank accession downloads were required! (in cache?)")
 
-    # Next we recover GenBank headers and extract useful information
+    # Next we recover GenBank headers and extract useful information -
+    # sequence length, taxonomy, and so on.
     logger.info("Fetching GenBank headers...")
     addedrows, countfail = fetch_gb_headers(cachepath,
                                             args.retries, args.batchsize)
     logger.info("Fetched GenBank headers for %d UIDs", len(addedrows))
-    logger.info("Unable to update GenBank headers for %d UIDs",
-                countfail)
+    if countfail:
+        logger.warning("Unable to update GenBank headers for %d UIDs",
+                       countfail)
+    if len(addedrows) == 0 and countfail == 0:
+        logger.warning(
+            "No GenBank header downloads were required! (in cache?)")
 
-    # Next we recover the complete GenBank records for useful
-    # sequences
+    # Next we recover the shortest complete GenBank record for each input
+    # sequence
     pass
 
     # Report success
