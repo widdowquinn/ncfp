@@ -140,6 +140,29 @@ def extract_cds_features(seqrecords, cachepath, args, logger):
     return nt_sequences
 
 
+# Write paired aa and nt sequences to output directory
+def write_sequences(aa_nt_seqs, args, logger):
+    """Write aa and nt sequences to output directory
+
+    aa_nt_seqs      - List of paired (aa, nt) SeqRecord tuples
+    args            - script arguments
+    logger          - script logger
+    """
+    # Write input sequences that were matched
+    aafilename = os.path.join(args.outdirname,
+                              '_'.join([args.filestem, 'aa.fasta']))
+    logger.info("\tWriting matched input sequences to %s", aafilename)
+    SeqIO.write([aaseq for (aaseq, ntseq) in aa_nt_seqs],
+                aafilename, 'fasta')
+
+    # Write coding sequences
+    ntfilename = os.path.join(args.outdirname,
+                              '_'.join([args.filestem, 'nt.fasta']))
+    logger.info("\tWriting matched output sequences to %s", ntfilename)
+    SeqIO.write([ntseq for (aaseq, ntseq) in aa_nt_seqs],
+                ntfilename, 'fasta')
+
+
 # Main script function
 def run_main(namespace=None):
     """Run main process for ncfp script."""
@@ -205,9 +228,10 @@ def run_main(namespace=None):
     if len(qskipped):
         logger.warning("Skipped %d sequences (no query term found)",
                        len(qskipped))
-        SeqIO.write(qskipped, args.skippedfname, 'fasta')
+        skippedpath = os.path.join(args.outdirname, args.skippedfname)
+        SeqIO.write(qskipped, skippedpath, 'fasta')
         logger.warning("Skipped sequences were written to %s",
-                       args.skippedfname)
+                       skippedpath)
     logger.info("%d sequences taken forward with query",
                 len(qrecords))
     if len(qrecords) == 0:
@@ -278,26 +302,16 @@ def run_main(namespace=None):
     logger.info("Extracting CDS for each input sequence...")
     nt_sequences = extract_cds_features(seqrecords, cachepath,
                                         args, logger)
-
-    # Write matching nucleotide and protein sequences to file
     logger.info("Matched %d/%d records", len(nt_sequences),
                 len(seqrecords))
     for (record, cds) in nt_sequences:
         logger.info("\t%-40s to CDS: %s", record.id, cds.id)
 
-    # Write input sequences that were matched
-    aafilename = os.path.join(args.outdirname,
-                              '_'.join([args.filestem, 'aa.fasta']))
-    logger.info("Writing matched input sequences to %s", aafilename)
-    SeqIO.write([aaseq for (aaseq, ntseq) in nt_sequences],
-                aafilename, 'fasta')
-
-    # Write coding sequences
-    ntfilename = os.path.join(args.outdirname,
-                              '_'.join([args.filestem, 'nt.fasta']))
-    logger.info("Writing matched output sequences to %s", ntfilename)
-    SeqIO.write([ntseq for (aaseq, ntseq) in nt_sequences],
-                ntfilename, 'fasta')
+    # Write matched pairs to output directory, in files ending
+    # '_aa.fasta' and '_nt.fasta'. The pairs will be in the same order,
+    # so can be used for backtranslation
+    logger.info("Writing paired sequence files to %s", args.outdirname)
+    write_sequences(nt_sequences, args, logger)
 
     # Report success
     logger.info('Completed. Time taken: %.3f',
