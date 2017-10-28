@@ -53,7 +53,8 @@ from ..sequences import (process_sequences, )
 from ..caches import (initialise_dbcache, )
 from ..entrez import (set_entrez_email, search_nt_ids,
                       update_gb_accessions,
-                      fetch_gb_headers)
+                      fetch_gb_headers,
+                      fetch_shortest_genbank)
 
 
 # Process input sequences

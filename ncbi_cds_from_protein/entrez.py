@@ -47,8 +47,11 @@ from tqdm import tqdm
 from .caches import (has_nt_query, get_nt_query,
                      has_ncbi_uid, add_ncbi_uids,
                      get_nt_noacc_uids, update_nt_uid_acc,
-                     get_nt_uids, add_gb_headers,
-                     get_nogbhead_nt_uids)
+                     get_nt_uids,
+                     add_gbheaders, add_gbfull,
+                     get_nogbhead_nt_uids,
+                     get_nogbfull_nt_acc,
+                     find_shortest_genbank)
 from .ncfp_tools import last_exception
 
 # EXCEPTIONS
@@ -117,24 +120,65 @@ def fetch_gb_headers(cachepath, retries, batchsize):
                                                           retries))
     for history in tqdm(epost_histories,
                         desc="Fetching GenBank headers"):
-        print(history)
         try:
             records = SeqIO.parse(efetch_history_with_retries(history,
                                                               'nucleotide',
                                                               'gb', 'text',
                                                               retries), 'gb')
-            print(records)
             for record in records:
                 taxonomy = ' '.join(record.annotations['taxonomy'])
-                addedrows.append(add_gb_headers(cachepath,
-                                                record.id, len(record),
-                                                record.annotations['organism'],
-                                                taxonomy,
-                                                record.annotations['date']))
+                addedrows.append(add_gbheaders(cachepath,
+                                               record.id, len(record),
+                                               record.annotations['organism'],
+                                               taxonomy,
+                                               record.annotations['date']))
         except NCFPMaxretryException:
             failcount += 1
-    return addedrows, failcount
 
+    return addedrows, (failcount * batchsize)
+
+
+def fetch_shortest_genbank(cachepath, retries, batchsize):
+    """Update cache with shortest full GenBank record for each input.
+
+    cachepath     - path to cache database
+    retries       - number of times to retry Entrez fetch
+    batchsize     - number of GenBank records to fetch each time
+
+    Checks the sequence length for each GenBank record associated with
+    an input sequence, and records the shortest one. This list is used
+    to batch fetch full GenBank records from Entrez. Every input
+    sequence ends up with a corresponding nucleotide sequence.
+    """
+    addedrows = []
+    failcount = 0
+
+    # Get set of shortest GenBank accessions that cover input sequences
+    # Identify those that need to be downloaded as full records
+    shortids = find_shortest_genbank(cachepath)
+    nogbfull_acc = get_nogbfull_nt_acc(cachepath)
+    fetchaccs = list(shortids.intersection(nogbfull_acc))
+
+    # Create batches and get EPost keys
+    epost_histories = []
+    for batch in [fetchaccs[idx:idx + batchsize] for idx in
+                  range(0, len(fetchaccs), batchsize)]:
+        epost_histories.append(epost_history_with_retries(batch,
+                                                          'nucleotide',
+                                                          retries))
+    for history in tqdm(epost_histories,
+                        desc="Fetching full GenBank records"):
+        try:
+            records = SeqIO.parse(efetch_history_with_retries(history,
+                                                              'nucleotide',
+                                                              'gbwithparts', 'text',
+                                                              retries), 'gb')
+            for record in records:
+                addedrows.append(add_gbfull(cachepath, record.id, record.format('gb')))
+        except NCFPMaxretryException:
+            failcount += 1
+
+    return addedrows, (failcount * batchsize)
 
 # Query NCBI singly with each record, to recover nucleotide accessions
 def search_nt_ids(records, cachepath, retries):

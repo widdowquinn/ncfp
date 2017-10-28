@@ -76,7 +76,7 @@ def parse_cmdline():
                         default=time.strftime("%Y-%m-%d-%H-%m-%S"),
                         help='suffix for cache filestems')
     parser.add_argument('-b', '--batchsize', dest='batchsize',
-                        action='store', default=500, type=int,
+                        action='store', default=100, type=int,
                         help='batch size for EPost submissions')
     parser.add_argument('-r', '--retries', dest='retries',
                         action='store', default=10, type=int,

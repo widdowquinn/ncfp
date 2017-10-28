@@ -41,6 +41,7 @@ THE SOFTWARE.
 
 import sqlite3
 
+from collections import defaultdict
 
 # SQL QUERIES
 # ===========
@@ -106,6 +107,11 @@ SQL_CREATEDB = """
                              date TEXT NOT NULL,
                              FOREIGN KEY (accession) REFERENCES nt_uid_acc(accession)
                             );
+    DROP TABLE IF EXISTS gb_full;
+    CREATE TABLE gb_full (accession TEXT PRIMARY KEY NOT NULL,
+                          record TEXT NOT NULL,
+                          FOREIGN KEY (accession) REFERENCES nt_uid_acc(accession)
+                         );
 """
 
 # Add a new sequence to seqdata
@@ -118,6 +124,20 @@ SQL_ADD_GBHEADER = """
     INSERT INTO gb_headers (accession, length, organism,
                             taxonomy, date)
            VALUES (?, ?, ?, ?, ?);
+"""
+
+SQL_ADD_GBFULL = """
+    INSERT INTO gb_full (accession, record)
+    VALUES (?, ?);
+"""
+
+SQL_GET_GBHEADER_LENGTHS = """
+    SELECT prot_id, nt_id, length FROM
+           (SELECT seq_nt.accession AS prot_id,
+                   nt_uid_acc.accession AS nt_id FROM
+                         seq_nt JOIN nt_uid_acc ON seq_nt.uid=nt_uid_acc.uid)
+           JOIN
+           gb_headers ON nt_id=gb_headers.accession;
 """
 
 # Get queries for a seqdata row
@@ -167,6 +187,20 @@ SQL_GET_NOGBHEAD_UIDS = """
     SELECT uid FROM nt_uid_acc
            WHERE accession NOT IN
                  (SELECT accession FROM gb_headers);
+"""
+
+# Get all nt UIDs with no associated full GenBank record
+SQL_GET_NOGBFULL_UIDS = """
+    SELECT uid FROM nt_uid_acc
+           WHERE accession NOT IN
+                 (SELECT accession FROM gb_full);
+"""
+
+# Get all nt accessions with no associated full GenBank record
+SQL_GET_NOGBFULL_ACC = """
+    SELECT accession FROM nt_uid_acc
+           WHERE accession NOT IN
+                 (SELECT accession FROM gb_full);
 """
 
 # Update nt_uid_acc row with accession
@@ -296,7 +330,7 @@ def update_nt_uid_acc(cachepath, uid, accession):
     return results
 
 
-def add_gb_headers(cachepath, accession, length, org, taxon, date):
+def add_gbheaders(cachepath, accession, length, org, taxon, date):
     """Add a new GenBank header to the cache."""
     conn = sqlite3.connect(cachepath)
     with conn:
@@ -304,3 +338,54 @@ def add_gb_headers(cachepath, accession, length, org, taxon, date):
         cur.execute(SQL_ADD_GBHEADER, (accession, length, org,
                                        taxon, date))
     return cur.fetchone()
+
+
+def get_gbheader_lengths(cachepath):
+    """Returns GenBank accessions and lengths for each sequence."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_GBHEADER_LENGTHS)
+
+    result = defaultdict(list)
+    for (seqid, gbid, gblen) in cur.fetchall():
+        result[seqid].append((gblen, gbid))
+
+    return result
+
+
+def find_shortest_genbank(cachepath):
+    """Return shortest GenBank entries covering all sequences."""
+    shortids = set()
+    gblens = get_gbheader_lengths(cachepath)
+    for seqid in gblens.keys():
+        shortid = sorted(gblens[seqid])[0][1]
+        shortids.add(shortid)
+    return shortids
+
+
+def add_gbfull(cachepath, accession, record):
+    """Add a new full GenBank record to the cache."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_ADD_GBFULL, (accession, record))
+    return cur.fetchone()
+
+
+def get_nogbfull_nt_uids(cachepath):
+    """Return list of nt UIDs with no cached full GenBank record."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_NOGBFULL_UIDS)
+    return [uid[0] for uid in cur.fetchall()]
+
+
+def get_nogbfull_nt_acc(cachepath):
+    """Return list of nt accessions with no cached full GenBank record."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_NOGBFULL_ACC)
+    return [uid[0] for uid in cur.fetchall()]
