@@ -40,45 +40,48 @@ THE SOFTWARE.
 """
 
 import re
+import sqlite3
+
+from tqdm import tqdm
+
+from .caches import (add_input_sequence, has_query)
+
+# regexes for parsing out Uniprot
+re_uniprot_gn = re.compile('(?<=GN=)[^\s]+')
 
 
-# regexes for parsing out query strings
-re_uniprot = re.compile('(?<=GN=)[^\s]+')
+# Process collection of SeqRecords into cache and skipped/kept
+def process_sequences(records, cachepath, fmt='ncbi'):
+    """Triage SeqRecords into those that can/cannot be used
 
+    This function also caches all inputs into the SQLite cache
+    at cachepath
 
-# Add a .query_string attribute to a Biopython SeqRecord object,
-def add_seqrecord_query(record, fmt="ncbi"):
-    """Adds .ncfp attribute to a SeqRecord
-
-    The .ncfp attribute is a dictionary that holds key:values
-
-    header_id - the accession pulled from the FASTA header
-    nt_query  - query term for NCBI nucleotide database
-    aa_query  - query term for NCBI protein database
-
-    The header ID is dependent on the input sequence source.
-    NCBI proteins have the accession as their identifier. UniProt
-    proteins have the originating gene sequence accession as
-    a 'GN=' gene name field in the description.
+    records      - collection of SeqRecords
+    cachepath    - path to SQLite3 cache database
+    fmt          - sequence format: ncbi or uniprot
     """
-    # Identify query string
-    if fmt == 'uniprot':
-        match = re.search(re_uniprot, record.description)
-        if match is None:
-            qstring = None
+    kept, skipped = [], []
+    for record in tqdm(records, desc="Process input sequences"):
+        if fmt == 'uniprot':
+            match = re.search(re_uniprot_gn, record.description)
+            if match is None:
+                qstring = None
+            else:
+                qstring = match.group(0)
+            # Uniprot sequences are added to cache as
+            # (accession, NULL, nt_query)
+            try:
+                add_input_sequence(cachepath, record.id, None, qstring)
+            except sqlite3.IntegrityError:  # Sequence exists
+                continue
         else:
-            qstring = match.group(0)
-    else:
-        qstring = record.id
-
-    # Add query string to record
-    if fmt == 'uniprot':
-        record.ncfp = {'header_id': qstring,
-                       'nt_query': qstring,
-                       'aa_query': None}
-    else:
-        record.ncfp = {'header_id': qstring,
-                       'nt_query': None,
-                       'aa_query': qstring}
-
-    return record
+            # NCBI sequences are added to cache as
+            # (accession, aa_query, NULL)
+            add_input_sequence(cachepath, record.id, record.id, None)
+        # If the record has no query terms, skip it
+        if has_query(cachepath, record.id):
+            kept.append(record)
+        else:
+            skipped.append(record)
+    return kept, skipped
