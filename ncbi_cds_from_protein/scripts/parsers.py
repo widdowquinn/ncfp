@@ -54,9 +54,9 @@ def parse_cmdline():
     parser.add_argument(action='store', dest='infname',
                         default=None,
                         help='input sequence file')
-    parser.add_argument(action='store', dest='outfname',
+    parser.add_argument(action='store', dest='outdirname',
                         default=None,
-                        help='output sequence file')
+                        help='output directory for sequence files')
     parser.add_argument(action='store', dest='email',
                         default=None,
                         help='email address for NCBI/Entrez')
@@ -85,6 +85,9 @@ def parse_cmdline():
                         action='store', default=None, type=int,
                         help='maximum number of sequences to process ' +
                         '(for testing)')
+    parser.add_argument('--filestem', dest='filestem',
+                        action='store', default='ncfp',
+                        help='stem for output sequence files')
     parser.add_argument('--keepcache', dest='keepcache',
                         action='store_true', default=False,
                         help='keep download cache (for testing)')

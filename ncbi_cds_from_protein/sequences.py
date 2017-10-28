@@ -42,6 +42,7 @@ THE SOFTWARE.
 import re
 import sqlite3
 
+from Bio.SeqRecord import SeqRecord
 from tqdm import tqdm
 
 from .caches import (add_input_sequence, has_query)
@@ -85,3 +86,50 @@ def process_sequences(records, cachepath, fmt='ncbi'):
         else:
             skipped.append(record)
     return kept, skipped
+
+
+# Extract a gene feature by locus tag
+def extract_feature_by_locus_tag(record, tag, ftype='CDS'):
+    """Returns the gene feature with passed tag from passed seqrecord.
+
+    record      - Biopython SeqRecord
+    tag         - locus tag to search for
+    ftype       - feature types to search
+    """
+    for feature in [ftr for ftr in record.features if
+                    ftr.type == ftype]:
+        try:
+            if tag in feature.qualifiers['locus_tag']:
+                return feature
+        except KeyError:
+            continue
+    return None
+
+
+# Extract the coding sequence from a feature
+def extract_feature_cds(feature, record, stockholm):
+    """Returns SeqRecord with CDS and translation of GenBank record feature.
+
+    feature      - SeqFeature object
+    record       - SeqRecord object
+    stockholm    - Boolean. If not false, expects (start, end) aa positions
+    """
+    # Extract nucleotide coding sequence
+    ntseq = feature.extract(record.seq)
+
+    # Account for offset start codon and get AA translation
+    if 'codon_start' in feature.qualifiers:
+        startpos = int(feature.qualifiers['codon_start'][0]) - 1
+    else:
+        startpos = 0
+    aaseq = ntseq[startpos:].translate()
+    if aaseq[-1] == '*':
+        aaseq = aaseq[:-1]
+
+    # Return SeqRecords of CDS and conceptual translation
+    ntrecord = SeqRecord(seq=ntseq, description="coding sequence",
+                         id=feature.qualifiers['locus_tag'][0])
+    aarecord = SeqRecord(seq=aaseq, description="conceptual translation",
+                         id=feature.qualifiers['locus_tag'][0])
+    return ntrecord, aarecord
+

@@ -140,6 +140,18 @@ SQL_GET_GBHEADER_LENGTHS = """
            gb_headers ON nt_id=gb_headers.accession;
 """
 
+# Get the full GenBank record corresponding to input sequence accession
+SQL_GET_GBRECORD_BY_SEQ = """
+    SELECT prot_id, nt_id, gb_full.record FROM
+           (SELECT seq_nt.accession AS prot_id,
+                   nt_uid_acc.accession AS nt_id FROM
+                         seq_nt JOIN nt_uid_acc ON seq_nt.uid=nt_uid_acc.uid)
+           JOIN
+           gb_full ON nt_id=gb_full.accession
+           WHERE prot_id=?;
+"""
+
+
 # Get queries for a seqdata row
 SQL_GET_SEQDATA_QUERIES = """
     SELECT nt_query, aa_query FROM seqdata
@@ -389,3 +401,13 @@ def get_nogbfull_nt_acc(cachepath):
         cur = conn.cursor()
         cur.execute(SQL_GET_NOGBFULL_ACC)
     return [uid[0] for uid in cur.fetchall()]
+
+
+def find_record_cds(cachepath, accession):
+    """Return CDS sequence for passed input accession."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_GBRECORD_BY_SEQ, (accession, ))
+    return cur.fetchall()
+

@@ -40,8 +40,11 @@ THE SOFTWARE.
 """
 
 import os
+import re
 import sys
 import time
+
+from io import StringIO
 
 from Bio import SeqIO
 
@@ -49,8 +52,10 @@ from .parsers import parse_cmdline
 from .logger import build_logger
 from .. import __version__
 from ..ncfp_tools import (last_exception, NCFPException)
-from ..sequences import (process_sequences, )
-from ..caches import (initialise_dbcache, )
+from ..sequences import (process_sequences, re_uniprot_gn,
+                         extract_feature_by_locus_tag,
+                         extract_feature_cds)
+from ..caches import (initialise_dbcache, find_record_cds)
 from ..entrez import (set_entrez_email, search_nt_ids,
                       update_gb_accessions,
                       fetch_gb_headers,
@@ -108,6 +113,15 @@ def run_main(namespace=None):
     # Set email address at Entrez
     set_entrez_email(args.email)
 
+    # Make sure we can write to the output directory
+    try:
+        os.makedirs(args.outdirname, exist_ok=True)
+    except OSError:
+        logger.error("Could not use/create output directory %s (exiting)",
+                     args.outdirname)
+        logger.error(last_exception)
+        raise SystemExit(1)
+    
     # Initialise cache
     cachepath = os.path.join(args.cachedir,
                              'ncfpcache_%s.sqlite3' %
@@ -209,6 +223,65 @@ def run_main(namespace=None):
     if len(addedrows) == 0 and countfail == 0:
         logger.warning(
             "No complete GenBank downloads were required! (in cache?)")
+
+    # Now that all the required GenBank nucleotide information is in the
+    # local cache, we extract the CDS for each of the input sequences
+    logger.info("Extracting CDS for each input sequence...")
+    nt_sequences = []  # Holds extracted nucleotide sequences
+    for record in seqrecords:
+        result = find_record_cds(cachepath, record.id)
+        if len(result) == 0:
+            logger.warning("No record found for sequence input %s", record.id)
+        elif len(result) > 1:
+            logger.error("More than one record returned for %s (exiting)",
+                         record.id)
+            raise SystemExit(1)
+        else:
+            gbrecord = SeqIO.read(StringIO(result[0][-1]), 'gb')
+            logger.info("Sequence %s matches GenBank entry %s",
+                        record.id, gbrecord.id)
+            # For Uniprot sequences, we need to extract the gene name
+            if args.uniprot:
+                match = re.search(re_uniprot_gn, record.description)
+                gene_name = match.group(0)
+            else:
+                raise NotImplementedError
+            # Get the matching CDS
+            logger.info("Searching for CDS: %s", gene_name)
+            feature = extract_feature_by_locus_tag(gbrecord, gene_name)
+            if feature is None:
+                logger.info("Could not identify CDS feature for %s", record.id)
+            else:
+                logger.info("\tSequence %s matches CDS feature %s", record.id,
+                            feature.qualifiers['protein_id'][0])
+                logger.info("\tExtracting coding sequence...")
+                ntseq, aaseq = extract_feature_cds(feature, gbrecord,
+                                                   args.stockholm)
+                if aaseq.seq == record.seq:
+                    logger.info("\t\tTranslated sequence matches input sequence")
+                    nt_sequences.append((record, ntseq))
+                else:
+                    logger.warning("\t\tTranslated sequence does not match input sequence!")
+
+    # Write matching nucleotide and protein sequences to file
+    logger.info("Matched %d/%d records", len(nt_sequences),
+                len(seqrecords))
+    for (record, cds) in nt_sequences:
+        logger.info("\t%-40s to CDS: %s", record.id, cds.id)
+        
+    # Write input sequences that were matched
+    aafilename = os.path.join(args.outdirname,
+                              '_'.join([args.filestem, 'aa.fasta']))
+    logger.info("Writing matched input sequences to %s", aafilename)
+    SeqIO.write([aaseq for (aaseq, ntseq) in nt_sequences],
+                aafilename, 'fasta')
+
+    # Write coding sequences
+    ntfilename = os.path.join(args.outdirname,
+                              '_'.join([args.filestem, 'nt.fasta']))
+    logger.info("Writing matched output sequences to %s", ntfilename)
+    SeqIO.write([ntseq for (aaseq, ntseq) in nt_sequences],
+                ntfilename, 'fasta')
 
     # Report success
     logger.info('Completed. Time taken: %.3f',
