@@ -40,6 +40,7 @@ THE SOFTWARE.
 """
 
 import sqlite3
+import sys
 
 from collections import defaultdict
 
@@ -304,7 +305,6 @@ def add_ncbi_uids(cachepath, accession, uids):
             try:
                 cur.execute(SQL_ADD_NT_UID, (uid, None))
                 results.append(cur.fetchone())
-                cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
             except sqlite3.IntegrityError as err:
                 # Skip if the UID exists in the cache
                 if str(err).startswith("UNIQUE constraint failed"):
@@ -313,6 +313,7 @@ def add_ncbi_uids(cachepath, accession, uids):
                     with open(sys.stderr, 'w') as ofh:
                         ofh.write(last_exception())
                     raise SystemExit(1)
+            cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
     return results
 
 

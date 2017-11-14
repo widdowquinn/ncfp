@@ -200,7 +200,7 @@ def run_main(namespace=None):
                      args.outdirname)
         logger.error(last_exception)
         raise SystemExit(1)
-    
+
     # Initialise cache
     cachepath = os.path.join(args.cachedir,
                              'ncfpcache_%s.sqlite3' %
