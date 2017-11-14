@@ -45,6 +45,7 @@ from Bio import (Entrez, SeqIO)
 from tqdm import tqdm
 
 from .caches import (has_nt_query, get_nt_query,
+                     has_aa_query,
                      has_ncbi_uid, add_ncbi_uids,
                      get_nt_noacc_uids, update_nt_uid_acc,
                      get_nt_uids,
@@ -96,6 +97,24 @@ class NCFPMaxretryException(Exception):
     def __init__(self, msg="Maximum retries exceeded"):
         """Instantiate class."""
         Exception.__init__(self, msg)
+
+
+def identify_elink_matches(records, cachepath, retries):
+    """Update cached sequences with nucleotide query term.
+
+    NCBI sequence accessions can't be used directly to acquire nucleotide
+    accessions, so this function enables the ELink query to determine
+    nucleotide sequences to fetch.
+
+    records    - collection of SeqRecords, for input sequences
+    cachepath  - path to sqlite3 cache
+    retries    - number of Entrez retries
+    """
+    for record in records:
+        matches = elink_fetch_with_retries(record.id, "protein",
+                                           "protein_nuccore",
+                                           retries)
+        print(matches)
 
 
 def fetch_gb_headers(cachepath, retries, batchsize):
@@ -180,6 +199,7 @@ def fetch_shortest_genbank(cachepath, retries, batchsize):
 
     return addedrows, (failcount * batchsize)
 
+
 # Query NCBI singly with each record, to recover nucleotide accessions
 def search_nt_ids(records, cachepath, retries):
     """Queries NCBI nucleotide database and populates cache
@@ -190,18 +210,39 @@ def search_nt_ids(records, cachepath, retries):
 
     If the record's ID is in the cache, the ESearch is not
     performed - the cache is presumed to be up to date.
+
+    The cache gets updated in the link table between the query
+    sequence ID, and the nucleotide sequence accession from
+    NCBI (seq_nt).
+
+    If the record has a protein query (aa_query is populated in
+    the cache's seqdata table), then seq_nt is populated from
+    an ELink query; if the record has a nucleotide query
+    (nt_query is populated, but aa_query is not), then a direct
+    ESearch of NCBI's nucleotide databases is performed.
     """
     addedrows = []  # Holds list of added rows in nt_uid_acc
     noresult = 0    # Count of records with no result
     for record in tqdm(records, desc="Search NT IDs"):
         if (not has_ncbi_uid(cachepath, record.id) and
-                has_nt_query(cachepath, record.id)):
+                has_nt_query(cachepath, record.id)):  # direct ESearch
             result = esearch_with_retries(get_nt_query(cachepath,
                                                        record.id),
                                           'nucleotide', retries)
             if len(result['IdList']):
                 addedrows.extend(add_ncbi_uids(cachepath, record.id,
                                                result['IdList']))
+            else:
+                noresult += 1
+        elif (not has_ncbi_uid(cachepath, record.id) and
+              has_aa_query(cachepath, record.id)):  # ELink search
+            result = elink_fetch_with_retries(record.id, "protein",
+                                              "protein_nuccore",
+                                              retries)
+            idlist = [lid['Id'] for lid in result[0]['LinkSetDb'][0]['Link']]
+            if len(idlist):
+                addedrows.extend(add_ncbi_uids(cachepath, record.id,
+                                               idlist))
             else:
                 noresult += 1
     return addedrows, noresult
@@ -252,6 +293,27 @@ def esearch_with_retries(query_id, dbname, maxretries):
                                 (query_id, last_exception()))
 
 
+def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
+    """Entrez ELink fetch for a single query_id.
+
+    query_id        - query term for search
+    dbname          - NCBI target database name for primary query
+    linkdbname      - NCBI target database name for link query
+    maxretries      - maximum number of attempts to make
+    """
+    tries = 0
+    while tries < maxretries:
+        try:
+            matches = Entrez.read(Entrez.elink(dbfrom=dbname,
+                                               linkname=linkdbname,
+                                               id=query_id))
+            return matches
+        except:
+            tries += 1
+    raise NCFPMaxretryException("Query ID %s ELink failed\n%s" %
+                                (query_id, last_exception()))
+
+
 # Run an EFetch on a single ID
 def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
     """Entrez EFetch for a single query ID.
@@ -277,7 +339,7 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
             return StringIO(data)
         except:
             tries += 1
-    raise NCFPMaxretryException("Query ID %s EFetch failed\n" %
+    raise NCFPMaxretryException("Query ID %s EFetch failed\n%s" %
                                 (query_id, last_exception()))
 
 

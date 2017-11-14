@@ -54,9 +54,11 @@ from .. import __version__
 from ..ncfp_tools import (last_exception, NCFPException)
 from ..sequences import (process_sequences, re_uniprot_gn,
                          extract_feature_by_locus_tag,
+                         extract_feature_by_protein_id,
                          extract_feature_cds)
 from ..caches import (initialise_dbcache, find_record_cds)
 from ..entrez import (set_entrez_email, search_nt_ids,
+                      identify_elink_matches,
                       update_gb_accessions,
                       fetch_gb_headers,
                       fetch_shortest_genbank)
@@ -117,11 +119,12 @@ def extract_cds_features(seqrecords, cachepath, args, logger):
             if args.uniprot:
                 match = re.search(re_uniprot_gn, record.description)
                 gene_name = match.group(0)
+                # Get the matching CDS
+                logger.info("Searching for CDS: %s", gene_name)
+                feature = extract_feature_by_locus_tag(gbrecord, gene_name)
             else:
-                raise NotImplementedError
-            # Get the matching CDS
-            logger.info("Searching for CDS: %s", gene_name)
-            feature = extract_feature_by_locus_tag(gbrecord, gene_name)
+                # Get the matching CDS
+                feature = extract_feature_by_protein_id(gbrecord, record.id)
             if feature is None:
                 logger.info("Could not identify CDS feature for %s", record.id)
             else:
@@ -245,16 +248,8 @@ def run_main(namespace=None):
     if len(qrecords) == 0:
         logger.warning("No new input sequences were found! (in cache?)")
 
-    # NCBI protein accessions can't be queried directly against the
-    # nucleotide database, so we must perform an ELink search to
-    # connect protein entries to nuccore entries, and populate the
-    # .ncfp['nt_query'] attribute
-    if not args.uniprot:
-        raise NotImplementedError("Only Uniprot inputs for now")
-
-    # UniProt sequence accessions should have at least one matching
-    # NCBI nucleotide entry, that we need to identify with an ESearch
-    # and put in the cache.
+    # Identify nucleotide accessions corresponding to the input sequences,
+    # and cache them.
     logger.info("Identifying nucleotide accessions...")
     addedrows, countfail = search_nt_ids(qrecords, cachepath, args.retries)
     logger.info("Added %d new UIDs to cache", len(addedrows))

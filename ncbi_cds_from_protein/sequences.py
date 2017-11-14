@@ -79,7 +79,10 @@ def process_sequences(records, cachepath, fmt='ncbi'):
         else:
             # NCBI sequences are added to cache as
             # (accession, aa_query, NULL)
-            add_input_sequence(cachepath, record.id, record.id, None)
+            try:
+                add_input_sequence(cachepath, record.id, record.id, None)
+            except sqlite3.IntegrityError:  # Sequence exists
+                continue
         # If the record has no query terms, skip it
         if has_query(cachepath, record.id):
             kept.append(record)
@@ -100,6 +103,24 @@ def extract_feature_by_locus_tag(record, tag, ftype='CDS'):
                     ftr.type == ftype]:
         try:
             if tag in feature.qualifiers['locus_tag']:
+                return feature
+        except KeyError:
+            continue
+    return None
+
+
+# Extract a gene feature by protein_id
+def extract_feature_by_protein_id(record, tag, ftype='CDS'):
+    """Returns the gene feature with passed tag from passed seqrecord.
+
+    record      - Biopython SeqRecord
+    tag         - locus tag to search for
+    ftype       - feature types to search
+    """
+    for feature in [ftr for ftr in record.features if
+                    ftr.type == ftype]:
+        try:
+            if tag in feature.qualifiers['protein_id']:
                 return feature
         except KeyError:
             continue
@@ -135,9 +156,15 @@ def extract_feature_cds(feature, record, stockholm):
         aaseq = aaseq[:-1]
 
     # Create SeqRecords of CDS and conceptual translation
-    ntrecord = SeqRecord(seq=ntseq, description="coding sequence",
-                         id=feature.qualifiers['locus_tag'][0])
-    aarecord = SeqRecord(seq=aaseq, description="conceptual translation",
-                         id=feature.qualifiers['locus_tag'][0])
+    if 'locus_tag' in feature.qualifiers:
+        ntrecord = SeqRecord(seq=ntseq, description="coding sequence",
+                             id=feature.qualifiers['locus_tag'][0])
+        aarecord = SeqRecord(seq=aaseq, description="conceptual translation",
+                             id=feature.qualifiers['locus_tag'][0])
+    else:
+        ntrecord = SeqRecord(seq=ntseq, description="coding sequence",
+                             id=feature.qualifiers['protein_id'][0])
+        aarecord = SeqRecord(seq=aaseq, description="conceptual translation",
+                             id=feature.qualifiers['protein_id'][0])
 
     return ntrecord, aarecord

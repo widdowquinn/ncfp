@@ -167,6 +167,12 @@ SQL_GET_SEQDATA_NTQUERY = """
            WHERE accession=?;
 """
 
+# Get aa query for a seqdata row
+SQL_GET_SEQDATA_AAQUERY = """
+    SELECT aa_query FROM seqdata
+           WHERE accession=?;
+"""
+
 # Get known nt UIDs for a sequence accession
 SQL_GET_NT_UIDS = """
     SELECT uid FROM seq_nt
@@ -269,7 +275,18 @@ def has_nt_query(cachepath, accession):
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession, ))
-    if cur.fetchone() is None:
+    if cur.fetchone()[0] is None:
+        return False
+    return True
+
+
+def has_aa_query(cachepath, accession):
+    """Returns True if a seqdata row has an aa query."""
+    conn = sqlite3.connect(cachepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_SEQDATA_AAQUERY, (accession, ))
+    if cur.fetchone()[0] is None:
         return False
     return True
 
