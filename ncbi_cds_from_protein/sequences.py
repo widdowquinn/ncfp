@@ -127,8 +127,9 @@ def extract_feature_cds(feature, record, stockholm):
     # If Stockholm (start, end) headers were provided, trime sequences
     if stockholm:
         start, end = stockholm[0], stockholm[1]
-        ntseq = ntseq[(start - 1) * 3:(end * 3) + 1]
-        
+        ntseq = ntseq[(start - 1) * 3:(end * 3)]
+    print(len(ntseq))
+
     # Generate conceptual translation
     aaseq = ntseq.translate()
     if aaseq[-1] == '*':
@@ -141,4 +142,3 @@ def extract_feature_cds(feature, record, stockholm):
                          id=feature.qualifiers['locus_tag'][0])
 
     return ntrecord, aarecord
-
