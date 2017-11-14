@@ -128,14 +128,21 @@ def extract_cds_features(seqrecords, cachepath, args, logger):
                 logger.info("\tSequence %s matches CDS feature %s", record.id,
                             feature.qualifiers['protein_id'][0])
                 logger.info("\tExtracting coding sequence...")
+                if args.stockholm:
+                    locdata = record.id.split('/')[-1]
+                    stockholm = [int(e) for e in locdata.split('-')]
+                else:
+                    stockholm = False
                 ntseq, aaseq = extract_feature_cds(feature, gbrecord,
-                                                   args.stockholm)
-                if aaseq.seq == record.seq:
+                                                   stockholm)
+                if aaseq.seq == record.seq.ungap('-').upper():
                     logger.info("\t\tTranslated sequence matches input sequence")
                     nt_sequences.append((record, ntseq))
                 else:
                     logger.warning("\t\tTranslated sequence does not match " +
                                    "input sequence!")
+                    logger.warning("\t\t%s", aaseq.seq)
+                    logger.warning("\t\t%s", record.seq.ungap('-').upper())
                     
     return nt_sequences
 
@@ -301,6 +308,8 @@ def run_main(namespace=None):
     # Now that all the required GenBank nucleotide information is in the
     # local cache, we extract the CDS for each of the input sequences
     logger.info("Extracting CDS for each input sequence...")
+    if args.stockholm:
+        logger.info("Expecting Stockholm format location data for each sequence")
     nt_sequences = extract_cds_features(seqrecords, cachepath,
                                         args, logger)
     logger.info("Matched %d/%d records", len(nt_sequences),

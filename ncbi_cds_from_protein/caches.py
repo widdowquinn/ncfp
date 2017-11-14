@@ -300,7 +300,7 @@ def add_ncbi_uids(cachepath, accession, uids):
     # Exclude uids that are in the database/cache
     with conn:
         cur = conn.cursor()
-        for uid in set(uids):  # Exclude duplicate UIDs
+        for uid in uids:
             try:
                 cur.execute(SQL_ADD_NT_UID, (uid, None))
                 results.append(cur.fetchone())
@@ -418,6 +418,7 @@ def get_nogbfull_nt_acc(cachepath):
 def find_record_cds(cachepath, accession):
     """Return CDS sequence for passed input accession."""
     conn = sqlite3.connect(cachepath)
+    print(accession)
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_GBRECORD_BY_SEQ, (accession, ))

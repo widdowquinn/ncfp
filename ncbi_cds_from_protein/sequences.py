@@ -112,24 +112,33 @@ def extract_feature_cds(feature, record, stockholm):
 
     feature      - SeqFeature object
     record       - SeqRecord object
-    stockholm    - Boolean. If not false, expects (start, end) aa positions
+    stockholm    - If not False, expects (start, end) aa positions
     """
     # Extract nucleotide coding sequence
     ntseq = feature.extract(record.seq)
 
-    # Account for offset start codon and get AA translation
+    # Account for offset start codon
     if 'codon_start' in feature.qualifiers:
         startpos = int(feature.qualifiers['codon_start'][0]) - 1
     else:
         startpos = 0
-    aaseq = ntseq[startpos:].translate()
+    ntseq = ntseq[startpos:]
+
+    # If Stockholm (start, end) headers were provided, trime sequences
+    if stockholm:
+        start, end = stockholm[0], stockholm[1]
+        ntseq = ntseq[(start - 1) * 3:(end * 3) + 1]
+        
+    # Generate conceptual translation
+    aaseq = ntseq.translate()
     if aaseq[-1] == '*':
         aaseq = aaseq[:-1]
 
-    # Return SeqRecords of CDS and conceptual translation
+    # Create SeqRecords of CDS and conceptual translation
     ntrecord = SeqRecord(seq=ntseq, description="coding sequence",
                          id=feature.qualifiers['locus_tag'][0])
     aarecord = SeqRecord(seq=aaseq, description="conceptual translation",
                          id=feature.qualifiers['locus_tag'][0])
+
     return ntrecord, aarecord
 
