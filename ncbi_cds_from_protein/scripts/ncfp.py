@@ -198,6 +198,7 @@ def run_main(namespace=None):
     cachepath = os.path.join(args.cachedir,
                              'ncfpcache_%s.sqlite3' %
                              args.cachestem)
+    os.makedirs(args.cachedir, exist_ok=True)
     # Use the old SQLite3 database if --keepcache set
     if (args.keepcache and os.path.isfile(cachepath)):
         logger.info("Not overwriting old cache at %s...",
