@@ -43,6 +43,8 @@ import sqlite3
 
 from collections import defaultdict
 
+from .ncfp_tools import last_exception
+
 # SQL QUERIES
 # ===========
 # The SQL below mediates cache database creation, update, and querying. It's
@@ -295,12 +297,22 @@ def add_ncbi_uids(cachepath, accession, uids):
     """Add collection of nt UIDs to cache for a record."""
     conn = sqlite3.connect(cachepath)
     results = []
+    # Exclude uids that are in the database/cache
     with conn:
         cur = conn.cursor()
-        for uid in uids:
-            cur.execute(SQL_ADD_NT_UID, (uid, None))
-            results.append(cur.fetchone())
-            cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
+        for uid in set(uids):  # Exclude duplicate UIDs
+            try:
+                cur.execute(SQL_ADD_NT_UID, (uid, None))
+                results.append(cur.fetchone())
+                cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
+            except sqlite3.IntegrityError as err:
+                # Skip if the UID exists in the cache
+                if str(err).startswith("UNIQUE constraint failed"):
+                    pass
+                else:
+                    with open(sys.stderr, 'w') as ofh:
+                        ofh.write(last_exception())
+                    raise SystemExit(1)
     return results
 
 
