@@ -128,7 +128,6 @@ def extract_feature_cds(feature, record, stockholm):
     if stockholm:
         start, end = stockholm[0], stockholm[1]
         ntseq = ntseq[(start - 1) * 3:(end * 3)]
-    print(len(ntseq))
 
     # Generate conceptual translation
     aaseq = ntseq.translate()
