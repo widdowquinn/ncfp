@@ -9,6 +9,7 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install codecov
+  - pip install coverage
 
 # command to run tests
 # Use --nocapture with nosetests to get extra verbose output for debugging on Travis
