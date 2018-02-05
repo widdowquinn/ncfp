@@ -10,26 +10,23 @@ Welcome to ncfp's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
-========
-``ncfp``
-========
-
-``ncfp`` is a program and Python package that, given a set of protein sequences with appropriate identifier
-values, retrieves corresponding coding nucleotide sequences from ``NCBI``.
-
-
-------------
-Installation
-------------
+   about
+   installation
+   basic_use
+   examples
+   testing
+   contributing
+   licensing
 
 
-
-
-
-Indices and tables
-==================
+^^^^^^^^^^^^^^^^^^^
+Indexing and Search
+^^^^^^^^^^^^^^^^^^^
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+
+
