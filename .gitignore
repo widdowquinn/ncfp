@@ -18,3 +18,10 @@ venv*
 tests/test_output
 skipped.fas
 .ncfp_cache
+test.log
+
+# Exclude local VS Code settings
+.vscode/
+
+# Exclude unneeded documentation files
+docs/_build/
