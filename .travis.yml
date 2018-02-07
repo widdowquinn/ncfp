@@ -14,7 +14,7 @@ install:
 # command to run tests
 # Use --nocapture with nosetests to get extra verbose output for debugging on Travis
 script:
-  - nosetests -v --with-coverage --cover-package=ncfp
+  - nosetests
 
 # Ubuntu distribution to use on Travis-CI
 dist: trusty
