@@ -15,6 +15,8 @@ Welcome to ncfp's documentation!
    :target: https://travis-ci.org/widdowquinn/ncfp
 .. image:: https://img.shields.io/codecov/c/github/widdowquinn/ncfp.svg?style=flat-square
    :target: https://codecov.org/widdowquinn/ncfp
+.. image:: https://readthedocs.org/projects/ncfp/badge/?version=latest
+   :target: https://ncfp.readthedocs.io/en/latest/?badge=latest
 
 If you're feeling impatient, please head over to the :ref:`QuickStart Guide <ncfp-quickstart>`
 
