@@ -7,7 +7,16 @@
 Welcome to ncfp's documentation!
 ================================
 
-If you're impatient, please head over to the :ref:`QuickStart Guide <ncfp-quickstart>`
+.. image:: https://img.shields.io/pypi/v/package.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/package
+.. image:: https://img.shields.io/pypi/l/ncfp.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/ncfp
+.. image:: https://img.shields.io/travis/widdowquinn/ncfp.svg?style=flat-square
+   :target: https://travis-ci.org/widdowquinn/ncfp
+.. image:: https://img.shields.io/codecov/c/github/widdowquinn/ncfp.svg?style=flat-square
+   :target: https://codecov.org/widdowquinn/ncfp
+
+If you're feeling impatient, please head over to the :ref:`QuickStart Guide <ncfp-quickstart>`
 
 -----------
 Description

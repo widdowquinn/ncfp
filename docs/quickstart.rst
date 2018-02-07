@@ -26,13 +26,13 @@ Install the package and program, using the ``setup.py`` file:
 
     python setup.py install
 
-(other installation methods can be found at :ref:`ncfp-installation`)
+(other installation methods can be found on the :ref:`ncfp-installation` page)
 
-------------------------
-``ncfp`` Program Example
-------------------------
+----------------
+``ncfp`` Example
+----------------
 
-To see the options available for the ``ncfp`` program, use the ``-h``
+To see options available for the ``ncfp`` program, use the ``-h``
 (help) option:
 
 .. code-block:: bash
@@ -70,3 +70,32 @@ contents:
     example_output/
     ├── ncfp_aa.fasta
     └── ncfp_nt.fasta
+
+The two files should contain corresponding amino acid and nucleotide sequences:
+
+.. code-block:: bash
+
+    $ head example_output/*.fasta
+    ==> example_output/ncfp_aa.fasta <==
+    >XP_004520832.1 kunitz-type serine protease inhibitor homolog dendrotoxin I-like [Ceratitis capitata]
+    MRTKFVLVFALIVCVLNGLGEAQRPAHCLQPHPQGVGRCDMLISGFFYNSERNECEQWTE
+    EGCRVQGGHTYDFKEDCVNECIEIN
+    >XP_017966559.1 PREDICTED: kunitz-type serine protease inhibitor homolog dendrotoxin I-like [Drosophila navojoa]
+    MKFILLLACLCVYVATLEAQRPPCKGIVPPWLTNCVGGKNEGRGNLRSCARNANSRMWWY
+    DSRSRSCKKMAYKGCGGNRNRYCTREACRRACRRRN
+    >XP_017841791.1 PREDICTED: kunitz-type serine protease inhibitor homolog dendrotoxin K-like [Drosophila busckii]
+    MKVCLILSALVLQYIVFVNAEGCPLRPAEQNCQSSRNVGVSSYSNCILTKRLMWYYNPTI
+    RDCLPLDFRGCGGNGNRYCSLKDCQQSCKHT
+    >XP_017046608.1 PREDICTED: kunitz-type serine protease inhibitor homolog dendrotoxin I [Drosophila ficusphila]
+
+    ==> example_output/ncfp_nt.fasta <==
+    >XP_004520832.1 coding sequence
+    ATGAGAACTAAATTTGTTTTGGTATTCGCGCTCATTGTTTGTGTACTCAACGGTTTAGGT
+    GAAGCGCAAAGACCAGCACATTGCTTACAACCACATCCACAAGGAGTTGGCCGTTGTGAT
+    ATGCTTATCAGTGGTTTCTTCTATAACTCGGAGCGTAATGAGTGCGAGCAATGGACAGAG
+    GAGGGCTGCCGTGTGCAGGGTGGGCACACATACGATTTCAAAGAAGATTGTGTAAATGAG
+    TGCATTGAAATTAATTAA
+    >XP_017966559.1 coding sequence
+    ATGAAATTCATTCTGCTCCTCGCTTGTCTCTGCGTCTACGTGGCCACCCTTGAGGCTCAG
+    CGACCCCCTTGCAAGGGAATAGTGCCTCCATGGTTGACCAATTGTGTTGGAGGCAAGAAC
+    GAGGGCAGGGGTAACCTTCGCTCGTGCGCCAGGAACGCGAATTCCAGAATGTGGTGGTAT
