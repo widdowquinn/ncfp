@@ -3,33 +3,56 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+================================
 Welcome to ncfp's documentation!
 ================================
+
+.. image:: https://img.shields.io/pypi/v/package.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/package
+.. image:: https://img.shields.io/pypi/l/ncfp.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/ncfp
+.. image:: https://img.shields.io/travis/widdowquinn/ncfp.svg?style=flat-square
+   :target: https://travis-ci.org/widdowquinn/ncfp
+.. image:: https://img.shields.io/codecov/c/github/widdowquinn/ncfp.svg?style=flat-square
+   :target: https://codecov.org/widdowquinn/ncfp
+.. image:: https://readthedocs.org/projects/ncfp/badge/?version=latest
+   :target: https://ncfp.readthedocs.io/en/latest/?badge=latest
+
+If you're feeling impatient, please head over to the :ref:`QuickStart Guide <ncfp-quickstart>`
+
+-----------
+Description
+-----------
+
+``ncfp`` is a program and Python package that, given a set of protein sequences
+with appropriate identifier values, retrieves corresponding coding nucleotide
+sequences from the ``NCBI nucleotide`` databases. This is useful, for instance,
+to help backthread coding sequences onto protein alignments for phylogenetic
+analyses.
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-
-========
-``ncfp``
-========
-
-``ncfp`` is a program and Python package that, given a set of protein sequences with appropriate identifier
-values, retrieves corresponding coding nucleotide sequences from ``NCBI``.
-
-
-------------
-Installation
-------------
+   about
+   installation
+   quickstart
+   basic_use
+   examples
+   testing
+   contributing
+   licensing
 
 
-
-
-
-Indices and tables
-==================
+^^^^^^^^^^^^^^^^^^^
+Indexing and Search
+^^^^^^^^^^^^^^^^^^^
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+
+
