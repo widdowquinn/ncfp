@@ -7,8 +7,8 @@
 Welcome to ncfp's documentation!
 ================================
 
-.. image:: https://img.shields.io/pypi/v/package.svg?style=flat-square
-   :target: https://pypi.python.org/pypi/package
+.. image:: https://img.shields.io/pypi/v/ncfp.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/ncfp
 .. image:: https://img.shields.io/pypi/l/ncfp.svg?style=flat-square
    :target: https://pypi.python.org/pypi/ncfp
 .. image:: https://img.shields.io/travis/widdowquinn/ncfp.svg?style=flat-square
@@ -30,6 +30,7 @@ sequences from the ``NCBI nucleotide`` databases. This is useful, for instance,
 to help backthread coding sequences onto protein alignments for phylogenetic
 analyses.
 
+To get started, please read the documentation:
 
 .. toctree::
    :maxdepth: 2

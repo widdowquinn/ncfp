@@ -23,6 +23,7 @@ translation identical to the corresponding input protein sequence.
 Any protein sequences for which a partner nucleotide coding sequence could not be found will be written
 to the file ``<OUTPUT>/skipped.fas``
 
+.. _input-sequence-formats:
 
 ----------------------
 Input sequence formats
