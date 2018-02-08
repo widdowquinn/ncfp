@@ -1,6 +1,6 @@
 # README.md - `ncfp`
 
-This repository contains code for a script that identifies and writes the corresponding nucleotide sequences for each protein in an input multiple sequence file to be used, for example, in backthreading coding sequences onto protein alignments for phylogenetic analyses. `ncfp` uses the NCBI accession or UniProt gene name (as appropriate) to identify source nucleotide sequences in the NCBI databases, and writes them to a file.
+This repository contains code for a script that identifies and writes the corresponding nucleotide sequences for each protein in an input multiple sequence file to be used, for example, in backthreading coding sequences onto protein alignments for phylogenetic analyses. `ncfp` uses the NCBI accession or UniProt gene name (as appropriate) to identify source nucleotide sequences in the NCBI databases, download them, and write them to a file.
 
 [![ncfp PyPi version](https://img.shields.io/pypi/v/ncfp.svg "PyPi version")](https://pypi.python.org/pypi/ncfp)
 [![ncfp licence](https://img.shields.io/pypi/l/ncfp.svg "PyPi licence")](https://github.com/widdowquinn/ncfp/blob/master/LICENSE)
