@@ -1,10 +1,14 @@
-# README.md - `ncbi_cds_from_protein`
+# README.md - `ncfp`
 
-This repository contains code for a script that identifies and writes the corresponding nucleotide sequences for each protein in an input multiple sequence file to be used, for example, in backthreading coding sequences onto protein alignments for phylogenetic analyses. It uses the NCBI accession or UniProt gene name (as appropriate) to identify source nucleotide sequences in the NCBI databases, and writes them to a file.
+This repository contains code for a script that identifies and writes the corresponding nucleotide sequences for each protein in an input multiple sequence file to be used, for example, in backthreading coding sequences onto protein alignments for phylogenetic analyses. `ncfp` uses the NCBI accession or UniProt gene name (as appropriate) to identify source nucleotide sequences in the NCBI databases, download them, and write them to a file.
 
-Downloaded results are cached locally to an SQLite database for ease of recovery.
+[![ncfp PyPi version](https://img.shields.io/pypi/v/ncfp.svg "PyPi version")](https://pypi.python.org/pypi/ncfp)
+[![ncfp licence](https://img.shields.io/pypi/l/ncfp.svg "PyPi licence")](https://github.com/widdowquinn/ncfp/blob/master/LICENSE)
+[![ncfp TravisCI build status](https://api.travis-ci.org/widdowquinn/ncfp.svg?branch=master)](https://travis-ci.org/widdowquinn/ncfp/branches)
+[![ncfp codecov.io coverage](https://img.shields.io/codecov/c/github/widdowquinn/ncfp/master.svg)](https://codecov.io/github/widdowquinn/ncfp)
+[![ncfp documentation](https://readthedocs.org/projects/ncfp/badge/?version=latest)](https://ncfp.readthedocs.io/en/latest/?badge=latest)
 
-## Usage
+## Quickstart: `ncfp` at the command-line
 
 Providing an input file of protein sequences as `<INPUT>.fasta`, and writing output to the directory `<OUTPUT>`, while specifying a user email to NCBI of `<EMAIL>` will generate two files: `<OUTPUT>/ncfp_aa.fasta` and `<OUTPUT>/ncfp_nt.fasta`.
 
@@ -18,131 +22,56 @@ The file `<OUTPUT>/ncfp_nt.fasta` contains nucleotide coding sequences, where th
 
 Any input protein sequences for which a corresponding nucleotide sequence cannot be recovered, for any reason, are placed in the file `<OUTPUT>/skipped.fas`.
 
-
-### NCBI format protein input
-
-By default, `ncfp` will assume that sequences are in NCBI format (as though downloaded from an NCBI search) with the accession for each sequence as the sequence identifier string. 
+To find out more about what `ncfp` can do, try
 
 ```bash
-ncfp <INPUT>.fasta <OUTPUT> <EMAIL>
+ncfp --help
 ```
 
-The input FASTA sequence identifiers (the string immediately following the `>` symbol) for each protein sequence are retained in the nucleotide sequence output. For example:
+at the command-line
 
-```
->XP_004520832.1 kunitz-type serine protease inhibitor homolog dendrotoxin I-like [Ceratitis capitata]
-MRTKFVLVFALIVCVLNGLGEAQRPAHCLQPHPQGVGRCDMLISGFFYNSERNECEQWTE
-EGCRVQGGHTYDFKEDCVNECIEIN
-```
+## Documentation
 
-is recovered as:
+For more detailed information about `ncfp` as a program, or using the underlying `ncbi_cds_from_protein` Python module, please see the most recent documentation at <https://ncfp.readthedocs.io/en/latest/>
 
-```
->XP_004520832.1 coding sequence
-ATGAGAACTAAATTTGTTTTGGTATTCGCGCTCATTGTTTGTGTACTCAACGGTTTAGGT
-GAAGCGCAAAGACCAGCACATTGCTTACAACCACATCCACAAGGAGTTGGCCGTTGTGAT
-ATGCTTATCAGTGGTTTCTTCTATAACTCGGAGCGTAATGAGTGCGAGCAATGGACAGAG
-GAGGGCTGCCGTGTGCAGGGTGGGCACACATACGATTTCAAAGAAGATTGTGTAAATGAG
-TGCATTGAAATTAATTAA
-```
+## License
 
-### UniProt format protein input
+Unless otherwise indicated, all code is licensed under the MIT license and subject to the following agreement:
 
-To specify that the input file contains protein sequences derived from UniProt, use the `-u` or `--uniprot` argument. 
+    (c) The James Hutton Institute 2017-2018
+    Author: Leighton Pritchard
 
-```bash
-ncfp -u <INPUT>.fasta <OUTPUT> <EMAIL>
-ncfp --uniprot <INPUT>.fasta <OUTPUT> <EMAIL>
-```
+    Contact: leighton.pritchard@hutton.ac.uk
 
-This instructs `ncfp` to use the provided *gene name* in the description string of the UniProt sequence as the identifier, located using the regular expression `(?<=GN=)[^\s]+`. This gene name is used as the identifier in the nucleotide sequence output.
+    Address:
+    Leighton Pritchard,
+    Information and Computational Sciences,
+    James Hutton Institute,
+    Errol Road,
+    Invergowrie,
+    Dundee,
+    DD6 9LH,
+    Scotland,
+    UK
 
-```
->tr|D8LFH3|D8LFH3_ECTSI Glucosylceramidase, family GH30 OS=Ectocarpus siliculosus GN=Esi_0015_0036 PE=4 SV=1
-MRGYNRIPEGASPGESDAQGAREEGNVRTPLRSSSGSAAEGQGGETRNRRLAVAVPLGVL
-GVLGVLLITSGGGGRRLRPEPEAGSPASFESQHSVAGVSVFESSFHDGTRLDQGFPAPAS
-LKQVIAVCAERGVSGTVVVESDDKLQEIIGFGGAFTDAATINFFKLPEDVQEQVLDAYFG
-PNGIEYSVGRIPMGSCDFSVEQYSFDEVPGDYNLTHFDDGVEKDTAQRIPMLLSALARRE
-DLKLFTSPWSPPAWMKEPKDGVQSMIESALPQGLLADPGVHAAWALFFSRFISAYKEQGV
-DLWGLTIQNESENPGPWEACVYTPSSQAKFIRDHLGPVIRRDHPDVKIMAFDHNRDHLVT
-WAEEMMSNEETAQYVDGMAFHWYVASWNRLLDGSMGWGALNTTHNLLSGRDKFILSTESC
-NCPNVDHSLEGGWKRAEHTLHEMIADVNSWSTGWVDWNLMLSYDGGPNHAGNLCDTPIVS
-NENHTDVIFQPMFYSIGHMSKFAQPGARRLKSHVTGLYQNGGSGPSTALAGYEATLYGCE
-GSVRQSWEMSATGRISLADNFGAQYDWFQPLCLSKDISESFKSVNLVPCDSDQAGTFVYD
-QDSGRIALQADASSPPDADPQTVADAEDPVVSGSTESVCLDVLDGSTDDGVVLTLNPCDL
-ESTSEDTSSGQRWEFAEAKSGDGGGGSLVSAATGRCMTAGWPFFTGAAFEMSDASKDRYG
-KDYAVVLLNEAEEPVEFDLSFPSEGFSVRAIIGPRAIQTILA
-```
+The MIT License
 
-is recovered as:
+Copyright (c) 2017-2018 The James Hutton Institute
 
-```
->Esi_0015_0036 coding sequence
-ATGCGGGGCTACAACAGGATCCCGGAGGGCGCTTCACCAGGGGAGTCGGATGCACAGGGC
-GCGCGCGAGGAGGGCAACGTGCGTACCCCCCTCCGCAGCAGCAGCGGCTCTGCGGCAGAG
-GGACAAGGCGGTGAGACCCGTAACAGGAGGCTCGCCGTTGCCGTACCTCTCGGAGTTCTC
-GGCGTTCTCGGGGTTCTTTTGATCACGTCGGGGGGTGGGGGTCGACGGCTGCGGCCGGAG
-CCGGAAGCTGGCTCGCCCGCCAGCTTTGAAAGCCAGCACTCGGTTGCTGGGGTGTCGGTG
-TTCGAGAGCTCCTTTCACGATGGGACAAGGCTTGACCAGGGCTTCCCTGCCCCGGCGAGC
-TTGAAACAGGTCATAGCGGTCTGCGCAGAGAGGGGCGTGTCTGGGACGGTGGTGGTGGAG
-TCGGACGACAAGCTGCAGGAGATTATCGGATTCGGGGGAGCTTTCACCGACGCCGCCACG
-ATAAACTTCTTCAAGCTGCCGGAGGATGTTCAGGAGCAGGTGTTGGACGCATACTTCGGA
-CCCAACGGCATCGAGTACAGCGTTGGCCGCATCCCCATGGGCAGCTGCGACTTCAGCGTG
-GAGCAGTACAGCTTCGACGAAGTGCCGGGAGACTACAACCTCACGCACTTCGATGATGGC
-GTGGAGAAGGACACCGCTCAGAGGATCCCGATGCTCCTCTCGGCCCTCGCGCGCCGGGAG
-GACCTGAAGCTCTTCACGTCTCCGTGGAGCCCTCCCGCATGGATGAAGGAGCCGAAAGAC
-GGAGTTCAGAGCATGATCGAGAGCGCTCTGCCGCAGGGACTGCTGGCGGACCCCGGGGTG
-CACGCTGCGTGGGCACTCTTCTTCAGCCGCTTTATATCGGCCTACAAGGAACAGGGGGTG
-GATTTGTGGGGGCTGACGATCCAGAATGAGTCTGAGAACCCGGGTCCGTGGGAGGCTTGC
-GTGTACACGCCCTCATCTCAGGCTAAATTCATCCGCGACCACCTCGGTCCCGTCATCCGG
-AGGGACCACCCGGACGTGAAGATCATGGCCTTCGACCACAACAGAGACCACCTGGTAACG
-TGGGCGGAGGAGATGATGAGCAACGAAGAGACGGCTCAGTACGTCGACGGCATGGCCTTC
-CACTGGTACGTGGCTTCGTGGAACAGGCTGCTGGACGGCAGCATGGGCTGGGGCGCTCTC
-AACACGACCCACAACCTGCTGAGCGGAAGAGACAAGTTCATCCTCTCGACGGAGAGCTGC
-AACTGCCCCAACGTGGACCACTCCCTGGAGGGGGGCTGGAAGAGGGCAGAACACACGCTG
-CACGAAATGATCGCCGACGTCAACAGCTGGTCCACTGGATGGGTGGACTGGAACCTGATG
-CTCAGTTATGACGGTGGACCGAACCACGCTGGCAACCTGTGCGACACTCCCATCGTCAGC
-AACGAGAACCACACGGACGTCATCTTCCAGCCGATGTTCTACTCCATCGGCCACATGTCG
-AAGTTTGCCCAGCCCGGAGCGAGGCGGCTCAAGAGTCACGTAACGGGGCTGTACCAGAAC
-GGTGGGAGCGGGCCTTCCACAGCCTTGGCCGGCTACGAGGCCACCCTGTACGGGTGCGAG
-GGCAGCGTGCGCCAGAGCTGGGAGATGTCGGCGACGGGCAGGATATCCCTGGCGGACAAC
-TTCGGTGCCCAGTACGACTGGTTCCAGCCCTTGTGCCTGTCGAAAGACATTTCGGAATCC
-TTCAAGTCCGTTAACTTGGTGCCCTGCGACTCCGACCAAGCCGGCACGTTCGTCTATGAC
-CAAGACAGCGGCCGCATCGCCCTGCAGGCCGACGCCTCCTCCCCCCCCGACGCGGACCCC
-CAAACCGTGGCCGACGCCGAGGATCCCGTAGTTTCAGGATCGACGGAGTCAGTCTGCCTG
-GATGTGCTCGACGGGTCTACCGATGACGGGGTGGTGCTAACCCTTAACCCGTGCGATCTG
-GAATCCACATCAGAGGACACTAGCAGCGGTCAGCGATGGGAATTTGCTGAGGCGAAATCC
-GGCGACGGGGGAGGGGGGAGCCTGGTGTCCGCCGCCACCGGCCGGTGCATGACCGCCGGG
-TGGCCCTTCTTCACCGGGGCCGCCTTCGAGATGAGCGACGCCTCCAAGGACCGCTACGGC
-AAGGACTACGCGGTGGTCCTGCTCAACGAGGCGGAGGAACCGGTGGAGTTCGACCTCTCC
-TTCCCTTCGGAGGGGTTCTCGGTCAGGGCGATCATCGGGCCCCGCGCCATCCAGACCATC
-CTCGCCTAA
-```
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-### Stockholm domain format input
-
-UniProt and other sources use Stockholm format to indicate that an amino acid sequence represents a portion of a protein (such as a domain). Sequences in this format can be recovered using the `-s` or `--stockholm` argument.
-
-```bash
-ncfp -u -s <INPUT>.fasta <OUTPUT> <EMAIL>
-ncfp --uniprot --stockholm <INPUT>.fasta <OUTPUT> <EMAIL>
-```
-
-The Stockholm format location information is not preserved in the nucleotide sequence output, and gaps are not preserved. For instance,
-
-```
->tr|B7G6L2|B7G6L2_PHATC/43-112 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_48282 PE=4 SV=1
------------------------------SLCV-EVAGA-SQD---DGASIFQGDCN-dG
-NKHQVFDFipaPG---TdsgFHRIRA--SHSN-KCLGVADGAL--APG-AEVVQ-
-```
-
-is recovered as
-
-```
->PHATRDRAFT_48282 coding sequence
-TCGCTCTGCGTGGAGGTGGCTGGAGCGAGCCAAGACGACGGGGCCTCCATATTTCAAGGG
-GATTGTAATGACGGAAACAAGCATCAAGTCTTCGACTTCATTCCTGCTCCCGGTACAGAC
-AGCGGTTTTCATCGAATTCGAGCCTCGCACTCCAACAAGTGCCTTGGCGTGGCTGATGGG
-GCTTTAGCACCTGGAGCTGAGGTAGTGCAA
-```
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
