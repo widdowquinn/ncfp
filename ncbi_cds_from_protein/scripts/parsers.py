@@ -47,7 +47,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 # Process command-line for ncbi_cds_from_protein script
 def parse_cmdline():
     """Parse command-line arguments for script."""
-    parser = ArgumentParser(prog="ncbi_cds_from_protein",
+    parser = ArgumentParser(prog="ncfp",
                                  formatter_class=ArgumentDefaultsHelpFormatter)
 
     # Add compulsory arguments
