@@ -100,7 +100,7 @@ Stockholm domain format
 
 UniProt and other sources use Stockholm format to indicate that an amino acid sequence represents a
 portion of a protein (such as a domain). ``ncfp`` can recognise this format and trim the coding sequence to
-correspond only to the specified region.
+correspond only to the specified region of the protein.
 
 Stockholm format domains are indicated by the syntax ``/<start>-<stop>`` immediately following the sequence
 identifier in FASTA format, e.g.
