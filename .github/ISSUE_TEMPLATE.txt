@@ -1,0 +1,28 @@
+#### Summary:
+Please provide a short summary of the issue (just a couple of sentences).
+
+
+#### Description:
+Please describe the issue as clearly as possible, taking as much space as you need.
+
+
+#### Reproducible Steps:
+Please report steps we can take to reproduce the issue. If it's not possible to reproduce
+the issue, please include a description of how you discovered the issue.
+
+If you have a reproducible example (with data if needed/possible), please include it.
+
+
+#### Current Output:
+The current output showing the error. It is helpful to understand the current behaviour.
+
+
+#### Expected Output:
+Describe what you expected the output to be. Knowing the correct behaviour is also very useful.
+
+
+#### `ncfp` Version:
+
+#### Python Version:
+
+#### Operating System:
