@@ -86,9 +86,9 @@ Specifying the cache location
 By default a new cache database is created every time that ``ncfp`` is
 run, in the ``.ncfp_cache`` hidden subdirectory. The default cache
 database filename is ``ncfpcache_YYYY-MM-DD-HH-MM-SS.sqlite3``,
-indicating the time that the command was run. This can be overridden
-with the ``-d``/``--cachedir`` and ``-c``/``--cachestem`` arguments, as
-in the command below.
+indicating the time that the command was run. This location and
+naming convention can be overridden with the ``-d``/``--cachedir`` and
+``-c``/``--cachestem`` arguments, as in the command below.
 
 .. code-block:: bash
 
