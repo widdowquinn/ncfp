@@ -52,7 +52,7 @@ recorded in the cache as header information. Some specific data are extracted, (
 is identified. If the sequence is not already present in the cache, it is downloaded.
 
 6. Pairs of protein and corresponding coding sequences are written to two files: one for nucleotide sequences,
-and one for protein sequences. Sequences are written to each file in teh same order, so they can be used for
+and one for protein sequences. Sequences are written to each file in the same order, so they can be used for
 backtranslation with a tool such as `T-Coffee`_. If any proteins could not be matched to their coding
 sequence at ``NCBI``, they are written to a third file.
 

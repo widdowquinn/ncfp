@@ -30,7 +30,24 @@ sequences from the ``NCBI nucleotide`` databases. This is useful, for instance,
 to help backthread coding sequences onto protein alignments for phylogenetic
 analyses.
 
-To get started, please read the documentation:
+----------------------------------------------
+Reporting problems and requesting improvements
+----------------------------------------------
+
+If you encounter bugs or errors, or would like to suggest ways in which
+``ncfp`` can be improved, please raise a new issue at the ``ncfp``
+`GitHub issues page`_.
+
+If you'd like to fix a bug or make an improvement yourself,
+contributions are welcomed, and guidelines on how to do this can be
+found at the :ref:`ncfp-contributing` documentation page.
+
+
+---------------
+Getting started
+---------------
+
+To get started, please read the documentation, below:
 
 .. toctree::
    :maxdepth: 2
@@ -55,5 +72,5 @@ Indexing and Search
 * :ref:`search`
 
 
-
+.. _GitHub issues page: https://github.com/widdowquinn/ncfp/issues
 
