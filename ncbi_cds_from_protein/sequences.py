@@ -52,7 +52,7 @@ re_uniprot_gn = re.compile('(?<=GN=)[^\s]+')
 
 
 # Process collection of SeqRecords into cache and skipped/kept
-def process_sequences(records, cachepath, fmt='ncbi'):
+def process_sequences(records, cachepath, fmt='ncbi', disabletqdm=True):
     """Triage SeqRecords into those that can/cannot be used
 
     This function also caches all inputs into the SQLite cache
@@ -63,7 +63,8 @@ def process_sequences(records, cachepath, fmt='ncbi'):
     fmt          - sequence format: ncbi or uniprot
     """
     kept, skipped = [], []
-    for record in tqdm(records, desc="Process input sequences"):
+    for record in tqdm(records, desc="Process input sequences",
+                       disable=disabletqdm):
         if fmt == 'uniprot':
             match = re.search(re_uniprot_gn, record.description)
             if match is None:

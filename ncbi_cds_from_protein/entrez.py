@@ -117,7 +117,7 @@ def identify_elink_matches(records, cachepath, retries):
         print(matches)
 
 
-def fetch_gb_headers(cachepath, retries, batchsize):
+def fetch_gb_headers(cachepath, retries, batchsize, disabletqdm=True):
     """Update cache with NCBI GenBank headers for passed records
 
     cachepath - path to cache
@@ -138,7 +138,8 @@ def fetch_gb_headers(cachepath, retries, batchsize):
                                                           'nucleotide',
                                                           retries))
     for history in tqdm(epost_histories,
-                        desc="Fetching GenBank headers"):
+                        desc="Fetching GenBank headers",
+                        disable=disabletqdm):
         try:
             records = SeqIO.parse(efetch_history_with_retries(history,
                                                               'nucleotide',
@@ -157,7 +158,7 @@ def fetch_gb_headers(cachepath, retries, batchsize):
     return addedrows, (failcount * batchsize)
 
 
-def fetch_shortest_genbank(cachepath, retries, batchsize):
+def fetch_shortest_genbank(cachepath, retries, batchsize, disabletqdm=True):
     """Update cache with shortest full GenBank record for each input.
 
     cachepath     - path to cache database
@@ -186,14 +187,16 @@ def fetch_shortest_genbank(cachepath, retries, batchsize):
                                                           'nucleotide',
                                                           retries))
     for history in tqdm(epost_histories,
-                        desc="Fetching full GenBank records"):
+                        desc="Fetching full GenBank records",
+                        disable=disabletqdm):
         try:
             records = SeqIO.parse(efetch_history_with_retries(history,
                                                               'nucleotide',
                                                               'gbwithparts', 'text',
                                                               retries), 'gb')
             for record in records:
-                addedrows.append(add_gbfull(cachepath, record.id, record.format('gb')))
+                addedrows.append(add_gbfull(
+                    cachepath, record.id, record.format('gb')))
         except NCFPMaxretryException:
             failcount += 1
 
@@ -201,7 +204,7 @@ def fetch_shortest_genbank(cachepath, retries, batchsize):
 
 
 # Query NCBI singly with each record, to recover nucleotide accessions
-def search_nt_ids(records, cachepath, retries):
+def search_nt_ids(records, cachepath, retries, disabletqdm=True):
     """Queries NCBI nucleotide database and populates cache
 
     records - collection of SeqRecords
@@ -223,7 +226,8 @@ def search_nt_ids(records, cachepath, retries):
     """
     addedrows = []  # Holds list of added rows in nt_uid_acc
     noresult = 0    # Count of records with no result
-    for record in tqdm(records, desc="Search NT IDs"):
+    for record in tqdm(records, desc="Search NT IDs",
+                       disable=disabletqdm):
         if (not has_ncbi_uid(cachepath, record.id) and
                 has_nt_query(cachepath, record.id)):  # direct ESearch
             result = esearch_with_retries(get_nt_query(cachepath,
@@ -249,7 +253,7 @@ def search_nt_ids(records, cachepath, retries):
 
 
 # Update existing cache nt_uid_acc table with accessions from NCBI
-def update_gb_accessions(cachepath, retries):
+def update_gb_accessions(cachepath, retries, disabletqdm=True):
     """Updates the cache table with GenBank accession for each UID.
 
     cachepath     - path to cache database
@@ -261,7 +265,8 @@ def update_gb_accessions(cachepath, retries):
     updatedrows = []
     noupdate = 0
     for uid in tqdm(get_nt_noacc_uids(cachepath),
-                    desc="Fetch UID accessions"):
+                    desc="Fetch UID accessions",
+                    disable=disabletqdm):
         result = efetch_with_retries(uid, 'nucleotide', 'acc',
                                      'text', retries).read().strip()
         if result is None:

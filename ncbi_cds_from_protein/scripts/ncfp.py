@@ -139,14 +139,15 @@ def extract_cds_features(seqrecords, cachepath, args, logger):
                 ntseq, aaseq = extract_feature_cds(feature, gbrecord,
                                                    stockholm)
                 if aaseq.seq == record.seq.ungap('-').upper():
-                    logger.info("\t\tTranslated sequence matches input sequence")
+                    logger.info(
+                        "\t\tTranslated sequence matches input sequence")
                     nt_sequences.append((record, ntseq))
                 else:
                     logger.warning("\t\tTranslated sequence does not match " +
                                    "input sequence!")
                     logger.warning("\t\t%s", aaseq.seq)
                     logger.warning("\t\t%s", record.seq.ungap('-').upper())
-                    
+
     return nt_sequences
 
 
@@ -174,7 +175,7 @@ def write_sequences(aa_nt_seqs, args, logger):
 
 
 # Main script function
-def run_main(namespace=None):
+def run_main(namespace=None, logger=None):
     """Run main process for ncfp script."""
     # Parse command-line if no namespace provided
     if namespace is None:
@@ -190,7 +191,8 @@ def run_main(namespace=None):
 
     # Set up logging
     time0 = time.time()
-    logger = build_logger('ncfp', args)
+    if logger is None:
+        logger = build_logger('ncfp', args)
 
     # Set email address at Entrez
     set_entrez_email(args.email)
@@ -235,7 +237,8 @@ def run_main(namespace=None):
     else:
         fmt = 'ncbi'
     logger.info("Processing input sequences as %s format", fmt)
-    qrecords, qskipped = process_sequences(seqrecords, cachepath, fmt)
+    qrecords, qskipped = process_sequences(seqrecords, cachepath, fmt,
+                                           args.disabletqdm)
     if len(qskipped):
         logger.warning("Skipped %d sequences (no query term found)",
                        len(qskipped))
@@ -251,7 +254,8 @@ def run_main(namespace=None):
     # Identify nucleotide accessions corresponding to the input sequences,
     # and cache them.
     logger.info("Identifying nucleotide accessions...")
-    addedrows, countfail = search_nt_ids(qrecords, cachepath, args.retries)
+    addedrows, countfail = search_nt_ids(qrecords, cachepath, args.retries,
+                                         disabletqdm=args.disabletqdm)
     logger.info("Added %d new UIDs to cache", len(addedrows))
     if countfail:
         logger.warning("NCBI nucleotide accession search failed for " +
@@ -265,7 +269,8 @@ def run_main(namespace=None):
     # First, we associate GenBank accessions with a UID. This can be done
     # without reference to the records, using only the cache.
     logger.info("Collecting GenBank accessions...")
-    updatedrows, countfail = update_gb_accessions(cachepath, args.retries)
+    updatedrows, countfail = update_gb_accessions(cachepath, args.retries,
+                                                  disabletqdm=args.disabletqdm)
     logger.info("Updated GenBank accessions for %d UIDs", len(updatedrows))
     if countfail:
         logger.warning("Unable to update GenBank accessions for %d UIDs",
@@ -278,7 +283,8 @@ def run_main(namespace=None):
     # sequence length, taxonomy, and so on.
     logger.info("Fetching GenBank headers...")
     addedrows, countfail = fetch_gb_headers(cachepath,
-                                            args.retries, args.batchsize)
+                                            args.retries, args.batchsize,
+                                            disabletqdm=args.disabletqdm)
     logger.info("Fetched GenBank headers for %d UIDs", len(addedrows))
     if countfail:
         logger.warning("Unable to update GenBank headers for %d UIDs",
@@ -291,7 +297,8 @@ def run_main(namespace=None):
     # sequence
     logger.info("Fetching shortest complete GenBank records...")
     addedrows, countfail = fetch_shortest_genbank(cachepath,
-                                                  args.retries, args.batchsize)
+                                                  args.retries, args.batchsize,
+                                                  disabletqdm=args.disabletqdm)
     logger.info("Fetched GenBank records for %d UIDs", len(addedrows))
     if countfail:
         logger.warning("Unable to get complete GenBank files for %d UIDs",
@@ -304,7 +311,8 @@ def run_main(namespace=None):
     # local cache, we extract the CDS for each of the input sequences
     logger.info("Extracting CDS for each input sequence...")
     if args.stockholm:
-        logger.info("Expecting Stockholm format location data for each sequence")
+        logger.info(
+            "Expecting Stockholm format location data for each sequence")
     nt_sequences = extract_cds_features(seqrecords, cachepath,
                                         args, logger)
     logger.info("Matched %d/%d records", len(nt_sequences),
