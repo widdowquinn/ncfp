@@ -40,8 +40,11 @@ THE SOFTWARE.
 """
 
 import logging
+import os
 import sys
 import time
+
+from ..ncfp_tools import (last_exception, )
 
 
 def build_logger(name, args):
@@ -66,6 +69,8 @@ def build_logger(name, args):
     # If a logfile was specified, use it
     if args.logfile is not None:
         try:
+            os.makedirs(os.path.join(*os.path.split(args.logfile)[:-1]),
+                        exist_ok=True)
             logstream = open(args.logfile, 'w')
         except OSError:
             logger.error('Could not open %s for logging', args.logfile)
