@@ -28,3 +28,7 @@ example_output
 
 # Exclude unneeded documentation files
 docs/_build/
+
+# Exclude distribution files
+dist/
+build/
