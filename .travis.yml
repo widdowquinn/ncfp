@@ -14,12 +14,12 @@ install:
 # command to run tests
 # Use --nocapture with nosetests to get extra verbose output for debugging on Travis
 script:
-  - nosetests
+  - nosetests --with-coverage --cover-package=ncbi_cds_from_protein
 
 # Ubuntu distribution to use on Travis-CI
 dist: trusty
 sudo: false
 
 # Use codecov for code coverage
-#after_success:
-#  - codecov
+after_success:
+  - codecov

@@ -92,7 +92,7 @@ def parse_cmdline():
                         action='store_true', default=False,
                         help='keep download cache (for testing)')
     parser.add_argument('--skippedfile', dest='skippedfname',
-                        action='store', default='skipped.fas',
+                        action='store', default='skipped.fasta',
                         help='path to file with skipped sequences')
     parser.add_argument('-l', '--logfile', dest='logfile',
                         action='store', default=None,
@@ -100,6 +100,9 @@ def parse_cmdline():
     parser.add_argument('-v', '--verbose', dest='verbose',
                         action='store_true', default=False,
                         help='report verbose progress')
+    parser.add_argument('--disabletqdm', dest='disabletqdm',
+                        action='store_true', default=False,
+                        help='disable progress bar (for testing)')
 
     # Parse arguments
     return parser.parse_args()
