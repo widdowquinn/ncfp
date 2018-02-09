@@ -1,3 +1,5 @@
+.. README.rst file for the ncfp package
+
 ====================
 README.md - ``ncfp``
 ====================

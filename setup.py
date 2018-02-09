@@ -10,7 +10,6 @@ try:
 except ImportError:
     from distutils.core import setup
 
-import os
 import sys
 import re
 
@@ -23,7 +22,7 @@ with open('ncbi_cds_from_protein/__init__.py') as fh:
             break
 
 if sys.version_info < (3, 5):
-    sys.stderr.write("ERROR: pyani requires Python 3.5 " +
+    sys.stderr.write("ERROR: ncfp requires Python 3.5 " +
                      "or above...exiting.\n")
     sys.exit(1)
 
@@ -33,18 +32,23 @@ setup(
     author="Leighton Pritchard",
     author_email="leighton.pritchard@hutton.ac.uk",
     description=' '.join(["ncfp is a script and module that facilitates",
-                          "recovery of nucleotide sequences from NCBI,",
-                          "coding for a set of input protein sequences"]),
+                          "recovery of nucleotide sequences from NCBI",
+                          "that encode a set of input protein sequences"]),
     license="MIT",
     keywords="genome bioinformatics sequence",
     platforms="Posix; MacOS X",
     url="http://widdowquinn.github.io/ncfp/",  # project home page
     download_url="https://github.com/widdowquinn/ncfp/releases",
-    scripts=[os.path.join('bin', 'ncfp')],
     packages=['ncbi_cds_from_protein'],
     package_data={},
     include_package_date=True,
     install_requires=['biopython', 'tqdm'],
+    python_requires="~=3.5",
+    entry_points={
+        'console_scripts': [
+            'ncfp = ncbi_cds_from_protein.scripts.ncfp:run_main',
+        ]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
