@@ -32,3 +32,5 @@ docs/_build/
 # Exclude distribution files
 dist/
 build/
+*.egg-info
+_build/
