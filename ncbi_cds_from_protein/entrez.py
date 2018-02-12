@@ -99,24 +99,6 @@ class NCFPMaxretryException(Exception):
         Exception.__init__(self, msg)
 
 
-def identify_elink_matches(records, cachepath, retries):
-    """Update cached sequences with nucleotide query term.
-
-    NCBI sequence accessions can't be used directly to acquire nucleotide
-    accessions, so this function enables the ELink query to determine
-    nucleotide sequences to fetch.
-
-    records    - collection of SeqRecords, for input sequences
-    cachepath  - path to sqlite3 cache
-    retries    - number of Entrez retries
-    """
-    for record in records:
-        matches = elink_fetch_with_retries(record.id, "protein",
-                                           "protein_nuccore",
-                                           retries)
-        print(matches)
-
-
 def fetch_gb_headers(cachepath, retries, batchsize, disabletqdm=True):
     """Update cache with NCBI GenBank headers for passed records
 

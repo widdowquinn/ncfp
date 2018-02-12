@@ -436,9 +436,7 @@ def get_nogbfull_nt_acc(cachepath):
 def find_record_cds(cachepath, accession):
     """Return CDS sequence for passed input accession."""
     conn = sqlite3.connect(cachepath)
-    print(accession)
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_GBRECORD_BY_SEQ, (accession, ))
     return cur.fetchall()
-

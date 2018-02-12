@@ -183,7 +183,6 @@ def run_main(argv=None, logger=None):
                 create one.
     """
     # Parse command-line if no namespace provided
-    print(argv)
     if argv is None:
         args = parse_cmdline()
     elif type(argv) is list:
