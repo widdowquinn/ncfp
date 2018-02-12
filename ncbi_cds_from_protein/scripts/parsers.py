@@ -39,13 +39,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import sys
 import time
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
 # Process command-line for ncbi_cds_from_protein script
-def parse_cmdline():
+def parse_cmdline(args=None):
     """Parse command-line arguments for script."""
     parser = ArgumentParser(prog="ncfp",
                                  formatter_class=ArgumentDefaultsHelpFormatter)
@@ -105,4 +106,6 @@ def parse_cmdline():
                         help='disable progress bar (for testing)')
 
     # Parse arguments
-    return parser.parse_args()
+    if args is None:
+        args = sys.argv[1:]
+    return parser.parse_args(args)

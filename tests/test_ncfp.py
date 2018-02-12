@@ -61,13 +61,13 @@ import unittest
 
 from argparse import Namespace
 
-from nose.tools import (assert_equal, raises)
+from nose.tools import (assert_equal,)
 
 from ncbi_cds_from_protein.scripts import ncfp
 
 
 class TestBasicUse(unittest.TestCase):
-    """Class defining tests of basic ncfp command lines."""
+    """Class defining tests of basic ncfp usage."""
 
     def setUp(self):
         """Set attributes for tests."""

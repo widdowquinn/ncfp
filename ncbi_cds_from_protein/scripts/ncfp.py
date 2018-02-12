@@ -58,7 +58,6 @@ from ..sequences import (process_sequences, re_uniprot_gn,
                          extract_feature_cds)
 from ..caches import (initialise_dbcache, find_record_cds)
 from ..entrez import (set_entrez_email, search_nt_ids,
-                      identify_elink_matches,
                       update_gb_accessions,
                       fetch_gb_headers,
                       fetch_shortest_genbank)
@@ -175,13 +174,22 @@ def write_sequences(aa_nt_seqs, args, logger):
 
 
 # Main script function
-def run_main(namespace=None, logger=None):
-    """Run main process for ncfp script."""
+def run_main(argv=None, logger=None):
+    """Run main process for ncfp script.
+
+    - argv      arguments for program. If None, parse command-line; if list
+                pass the list to the parser; if a Namespace, use it directly
+    - logger    logger for the script. If one is passed, use it; if not then
+                create one.
+    """
     # Parse command-line if no namespace provided
-    if namespace is None:
+    print(argv)
+    if argv is None:
         args = parse_cmdline()
+    elif type(argv) is list:
+        args = parse_cmdline(argv)
     else:
-        args = namespace
+        args = argv
 
     # Catch execution with no arguments
     if len(sys.argv) == 1:
