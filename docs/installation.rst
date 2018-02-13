@@ -27,6 +27,12 @@ the ``conda install ncfp`` command to install the package:
 
 .. code-block:: bash
 
+    conda install -c bioconda ncfp
+
+Alternatively:
+
+.. code-block:: bash
+
     conda config --add channels defaults
     conda config --add channels conda-forge
     conda config --add channels bioconda
