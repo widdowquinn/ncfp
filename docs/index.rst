@@ -7,16 +7,35 @@
 Welcome to ncfp's documentation!
 ================================
 
-.. image:: https://img.shields.io/pypi/v/ncfp.svg?style=flat-square
-   :target: https://pypi.python.org/pypi/ncfp
-.. image:: https://img.shields.io/pypi/l/ncfp.svg?style=flat-square
-   :target: https://pypi.python.org/pypi/ncfp
 .. image:: https://img.shields.io/travis/widdowquinn/ncfp.svg?style=flat-square
    :target: https://travis-ci.org/widdowquinn/ncfp
 .. image:: https://img.shields.io/codecov/c/github/widdowquinn/ncfp.svg?style=flat-square
    :target: https://codecov.org/widdowquinn/ncfp
 .. image:: https://readthedocs.org/projects/ncfp/badge/?version=latest
    :target: https://ncfp.readthedocs.io/en/latest/?badge=latest
+
+|
+
+.. image:: https://img.shields.io/pypi/v/ncfp.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/ncfp
+.. image:: https://img.shields.io/pypi/l/ncfp.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/ncfp
+
+| 
+
+.. image:: https://anaconda.org/bioconda/ncfp/badges/version.svg
+   :target: https://anaconda.org/bioconda/ncfp
+.. image:: https://anaconda.org/bioconda/ncfp/badges/latest_release_date.svg
+   :target: https://anaconda.org/bioconda/ncfp
+
+|
+
+.. image:: https://anaconda.org/bioconda/ncfp/badges/installer/conda.svg
+   :target: https://conda.anaconda.org/bioconda
+.. image:: https://anaconda.org/bioconda/ncfp/badges/downloads.svg
+   :target: https://anaconda.org/bioconda/ncfp
+.. image:: https://anaconda.org/bioconda/ncfp/badges/platforms.svg
+   :target: https://anaconda.org/bioconda/ncfp
 
 If you're feeling impatient, please head over to the :ref:`QuickStart Guide <ncfp-quickstart>`
 
@@ -54,8 +73,9 @@ To get started, please read the documentation, below:
    :caption: Contents:
 
    about
-   installation
    quickstart
+   requirements
+   installation
    basic_use
    examples
    testing

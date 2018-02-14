@@ -2,11 +2,20 @@
 
 This repository contains code for a script that identifies and writes the corresponding nucleotide sequences for each protein in an input multiple sequence file to be used, for example, in backthreading coding sequences onto protein alignments for phylogenetic analyses. `ncfp` uses the NCBI accession or UniProt gene name (as appropriate) to identify source nucleotide sequences in the NCBI databases, download them, and write them to a file.
 
-[![ncfp PyPi version](https://img.shields.io/pypi/v/ncfp.svg "PyPi version")](https://pypi.python.org/pypi/ncfp)
-[![ncfp licence](https://img.shields.io/pypi/l/ncfp.svg "PyPi licence")](https://github.com/widdowquinn/ncfp/blob/master/LICENSE)
 [![ncfp TravisCI build status](https://api.travis-ci.org/widdowquinn/ncfp.svg?branch=master)](https://travis-ci.org/widdowquinn/ncfp/branches)
 [![ncfp codecov.io coverage](https://img.shields.io/codecov/c/github/widdowquinn/ncfp/master.svg)](https://codecov.io/github/widdowquinn/ncfp)
 [![ncfp documentation](https://readthedocs.org/projects/ncfp/badge/?version=latest)](https://ncfp.readthedocs.io/en/latest/?badge=latest)
+
+[![ncfp PyPi version](https://img.shields.io/pypi/v/ncfp.svg "PyPi version")](https://pypi.python.org/pypi/ncfp)
+[![ncfp licence](https://img.shields.io/pypi/l/ncfp.svg "PyPi licence")](https://github.com/widdowquinn/ncfp/blob/master/LICENSE)
+
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/version.svg)](https://anaconda.org/bioconda/ncfp)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/latest_release_date.svg)](https://anaconda.org/bioconda/ncfp)
+
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/installer/conda.svg)](https://conda.anaconda.org/bioconda)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/downloads.svg)](https://anaconda.org/bioconda/ncfp)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/platforms.svg)](https://anaconda.org/bioconda/ncfp)
+
 
 ## Quickstart: `ncfp` at the command-line
 

@@ -8,6 +8,21 @@ QuickStart Guide
 Installation
 ------------
 
+^^^^^^^^^^^^^^^
+Using ``conda``
+^^^^^^^^^^^^^^^
+
+``ncfp`` is available through the ``bioconda`` channel of Anaconda:
+
+.. code-block:: bash
+
+    conda install -c bioconda ncfp 
+
+
+^^^^^^^^^^^
+From source
+^^^^^^^^^^^
+
 At the command-line, use ``git`` to clone the current version of the ``ncfp`` repository:
 
 .. code-block:: bash
