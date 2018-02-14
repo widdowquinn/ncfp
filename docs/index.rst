@@ -73,8 +73,9 @@ To get started, please read the documentation, below:
    :caption: Contents:
 
    about
-   installation
    quickstart
+   requirements
+   installation
    basic_use
    examples
    testing
