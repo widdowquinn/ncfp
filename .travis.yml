@@ -29,6 +29,7 @@ deploy:
   user: widdowquinn
   password:
     secure: FB2hIhdqtg/DPSEH3LwEhEyVFlzbOMYV3S9cRmR7CCWBO2/UjCW8yIsMmZBc8EglqhmGX182nC2CTE52CGEqPqf56JwjHozqkdtGxOGjUPve8yiKt85nDr9xPcQqSc6PgfYNT1aM+yWo9gcfUJSkJn8CZgjHyJsLJZgptbj2vkauPP494nlh3adMwvWwJUI05nxZuh91DsxQ88TTQaRH4iPUkvOfFDlqnGzkq/xgrAsaO9cgI2gxYB4D9gp6dXaj8Wi/Z4rm2Ty8ibhB1I6FVMl2w0hbnNBnRMVupahYu2XfEocb7qyhH6AL9ZhJ0FyVl5f9n5mIb8gXfx+TlKr8qsdCc3AqD3RTskLZfwDDKsGbb640WcHrdQlJfHrWb7I0baNJqilTcL/zhINJ2s/sosYgQqtLRqCX86eQU07aO9DB47HU87aEFPwZoANfT7evo2iT66YIKujPtfgaTu3RS25++GkqVQi7vvfbrewz0lzmLU5+gH4SRfbSXpwqx+YrRDIrfLPKeFhyyOAwLoV7qzHF+ZjLMPivZIph/6Yw54QGqUd2emd+zqZgV5ivxGJoQtNYBk6mYcxuY9k8HwZ/IB9+7wcONfQ3GILlMq1OMZAhOrAd7UNwm2/m9Iz0G+cU0VYc/BXX8VRzEufRM5Uhedc5oJ52YcyfuqCD+FT61sk=
+  distributions: sdist bdist_wheel
   on:
     tags: true
-    branch: master
+
