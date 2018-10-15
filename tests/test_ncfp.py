@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""test_cmdlines.py
+"""test_ncfp.py
 
 Test commandline entry for the ncfp program.
 
@@ -61,7 +61,7 @@ import unittest
 
 from argparse import Namespace
 
-from nose.tools import (assert_equal,)
+from nose.tools import assert_equal
 
 from ncbi_cds_from_protein.scripts import ncfp
 
@@ -72,22 +72,22 @@ class TestBasicUse(unittest.TestCase):
     def setUp(self):
         """Set attributes for tests."""
         # Paths to test file directories
-        self.datadir = os.path.join('tests', 'test_input', 'sequences')
-        self.outdir = os.path.join('tests', 'test_output')
-        self.targetdir = os.path.join('tests', 'test_targets')
+        self.datadir = os.path.join("tests", "test_input", "sequences")
+        self.outdir = os.path.join("tests", "test_output")
+        self.targetdir = os.path.join("tests", "test_targets")
 
         # Null logger instance
-        self.logger = logging.getLogger('TestBasicUse logger')
+        self.logger = logging.getLogger("TestBasicUse logger")
         self.logger.addHandler(logging.NullHandler())
 
         # Default command-line namespace
         self.base_namespace = Namespace(
-            infname=os.path.join(self.datadir, 'input_ncbi.fasta'),
-            outdirname=os.path.join(self.outdir, 'basic_ncbi'),
+            infname=os.path.join(self.datadir, "input_ncbi.fasta"),
+            outdirname=os.path.join(self.outdir, "basic_ncbi"),
             email="ncfp@dev.null",
             uniprot=False,
             stockholm=False,
-            cachedir='.ncfp_cache',
+            cachedir=".ncfp_cache",
             cachestem=time.strftime("%Y-%m-%d-%H-%m-%S"),
             batchsize=100,
             retries=10,
@@ -97,33 +97,29 @@ class TestBasicUse(unittest.TestCase):
             skippedfname="skipped.fasta",
             logfile=None,
             verbose=False,
-            disabletqdm=True
+            disabletqdm=True,
         )
 
     def test_basic_ncbi(self):
         """ncfp collects correct coding sequences for basic NCBI input."""
         # Modify default arguments
-        outdirname = 'basic_ncbi'        # common dirname for output,target
+        outdirname = "basic_ncbi"  # common dirname for output,target
         namespace = self.base_namespace
-        namespace.infname = os.path.join(
-            self.datadir, 'input_ncbi.fasta')
+        namespace.infname = os.path.join(self.datadir, "input_ncbi.fasta")
         namespace.outdirname = os.path.join(self.outdir, outdirname)
 
         # Run ersatz command-line
         ncfp.run_main(namespace)
 
         # Compare output
-        for fname in ('ncfp_aa.fasta', 'ncfp_nt.fasta'):
-            with open(os.path.join(namespace.outdirname, fname)) as fh1:
-                with open(os.path.join(self.targetdir, outdirname, fname)) as fh2:
-                    assert_equal(fh1.read(), fh2.read())
+        self.check_files(outdirname, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
 
     def test_basic_uniprot(self):
         """ncfp collects correct coding sequences for basic UniProt input."""
         # Modify default arguments
-        outdirname = 'basic_uniprot'        # common dirname for output,target
+        outdirname = "basic_uniprot"  # common dirname for output,target
         namespace = self.base_namespace
-        namespace.infname = os.path.join(self.datadir, 'input_uniprot.fasta')
+        namespace.infname = os.path.join(self.datadir, "input_uniprot.fasta")
         namespace.outdirname = os.path.join(self.outdir, outdirname)
         namespace.uniprot = True
 
@@ -131,18 +127,18 @@ class TestBasicUse(unittest.TestCase):
         ncfp.run_main(namespace, self.logger)
 
         # Compare output
-        for fname in ('ncfp_aa.fasta', 'ncfp_nt.fasta', 'skipped.fasta'):
-            with open(os.path.join(namespace.outdirname, fname)) as fh1:
-                with open(os.path.join(self.targetdir, outdirname, fname)) as fh2:
-                    assert_equal(fh1.read(), fh2.read())
+        self.check_files(
+            outdirname, ("ncfp_aa.fasta", "ncfp_nt.fasta", "skipped.fasta")
+        )
 
     def test_basic_stockholm(self):
         """ncfp collects correct coding sequences for basic UniProt/Stockholm input."""
         # Modify default arguments
-        outdirname = 'small_stockholm'        # common dirname for output,target
+        outdirname = "small_stockholm"  # common dirname for output,target
         namespace = self.base_namespace
         namespace.infname = os.path.join(
-            self.datadir, 'input_uniprot_stockholm_small.fasta')
+            self.datadir, "input_uniprot_stockholm_small.fasta"
+        )
         namespace.outdirname = os.path.join(self.outdir, outdirname)
         namespace.uniprot = True
         namespace.stockholm = True
@@ -151,7 +147,11 @@ class TestBasicUse(unittest.TestCase):
         ncfp.run_main(namespace)
 
         # Compare output
-        for fname in ('ncfp_aa.fasta', 'ncfp_nt.fasta'):
-            with open(os.path.join(namespace.outdirname, fname)) as fh1:
+        self.check_files(outdirname, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
+
+    def check_files(self, outdirname, fnames):
+        """Test whether output and target files are identical"""
+        for fname in fnames:
+            with open(os.path.join(self.outdir, outdirname, fname)) as fh1:
                 with open(os.path.join(self.targetdir, outdirname, fname)) as fh2:
                     assert_equal(fh1.read(), fh2.read())

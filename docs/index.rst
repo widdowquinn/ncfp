@@ -11,6 +11,8 @@ Welcome to ncfp's documentation!
    :target: https://travis-ci.org/widdowquinn/ncfp
 .. image:: https://img.shields.io/codecov/c/github/widdowquinn/ncfp.svg?style=flat-square
    :target: https://codecov.org/widdowquinn/ncfp
+.. image:: https://api.codacy.com/project/badge/Grade/99a037e5eb2c4ae48e27e44c8974a3f8
+   :target: https://www.codacy.com/app/widdowquinn/ncfp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=widdowquinn/ncfp&amp;utm_campaign=Badge_Grade
 .. image:: https://readthedocs.org/projects/ncfp/badge/?version=latest
    :target: https://ncfp.readthedocs.io/en/latest/?badge=latest
 

@@ -6,6 +6,7 @@
 
 # Exclude virtualenvs
 venv*
+.python-version
 
 # Exclude dist files
 *.egg-info
