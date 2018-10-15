@@ -4,25 +4,22 @@ python:
 - 3.5-dev
 - '3.6'
 - 3.6-dev
+
 matrix:
   include:
   - python: 3.7
     dist: xenial
     sudo: true
+
 install:
 - pip install -r requirements.txt
 - pip install codecov
+
 script:
 - nosetests -v --with-coverage --cover-package=ncbi_cds_from_protein
+
 dist: trusty
 sudo: false
+
 after_success:
 - codecov
-deploy:
-  provider: pypi
-  user: widdowquinn
-  password:
-    secure: KtPUIohp1I7LCjS/83fOzO8zU0MFrw6rFx8bNC38PP4LirfQCCpWlVIkoRy2zPKDLlPMG6CxfgvEyJedz9VmiQPbEBE91Gr1jn/d/l1nvl38wrFwHJnbh+VjgOt2yE+noqp0hQF7xoXBvn98a69b7IC706qdYpaMYn57UWdUuB1mLk1c7GHL53XEJtdfkg/2cKkx6s0o3JnxqlogPBz6v2F523Fj1OO51miO4IPcVcWUFrWocJ0CkYQqaWKybqwXsiZiqz4/PG1y1Un7DJUH8GvlMhXAMuie+a9Dp0WRUYGFt47fzYG9Xgu9hA1/qC+jbWRIiUsUsNO9V6QBPt5yxHyaQK0ARfAP1Zz6e/HdE9Hon8eGtKI06x+xFkzUdOiPHFrjZazaVFPhSb+ICez1K/QamMelAMo/mis1MxUfxlkBm4dz5sQJLmc8ohEYOkiDs6F4QOt62pTfYjkTs74wkx5W8dLZOsbG3JOBZX6kYb7LTNNYosDCzDJS0gU091BsedLDBjpXoXmlHB9N92Z3YSZT+DA+jyZhoudBFb4/WS1NVbWAM404Io18R1wMuX15bYfnJis+0eWdu3n0O7uvoCmsdr+bbMeTIb69bImo2WcrxBHvo4XeEQdWkHX/hkukeE2W66HYyro6GtvHuZBvPTKF/Hi9K+T58JVrWT3uzqU=
-  distributions: sdist bdist_wheel
-  on:
-    tags: true
