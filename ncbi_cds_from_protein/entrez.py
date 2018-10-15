@@ -346,7 +346,7 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
                     )
             # Return data string as stream
             return StringIO(data)
-        except:
+        except Exception:
             tries += 1
     raise NCFPMaxretryException(
         "Query ID %s EFetch failed\n%s" % (query_id, last_exception())
@@ -368,7 +368,7 @@ def epost_history_with_retries(qids, dbname, maxretries):
         try:
             history = Entrez.read(Entrez.epost(dbname, id=",".join(qids)))
             return history
-        except:
+        except Exception:
             tries += 1
     raise NCFPMaxretryException("Batch EPost failed.")
 
@@ -400,7 +400,7 @@ def efetch_history_with_retries(history, dbname, rettype, retmode, maxretries):
                         "Returned data does not begin with string LOCUS"
                     )
             return StringIO(data)
-        except:
+        except Exception:
             tries += 1
     raise NCFPMaxretryException("Failed to recover batch EFetch")
 
