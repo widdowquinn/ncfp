@@ -313,7 +313,7 @@ def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
                 Entrez.elink(dbfrom=dbname, linkname=linkdbname, id=query_id)
             )
             return matches
-        except:
+        except Exception:
             tries += 1
     raise NCFPMaxretryException(
         "Query ID %s ELink failed\n%s" % (query_id, last_exception())
@@ -395,7 +395,10 @@ def efetch_history_with_retries(history, dbname, rettype, retmode, maxretries):
                 query_key=history["QueryKey"],
             ).read()
             if rettype in ["gb", "gbwithparts"] and retmode == "text":
-                assert data.startswith("LOCUS")
+                if not data.startswith("LOCUS"):
+                    raise NCFPEFetchException(
+                        "Returned data does not begin with string LOCUS"
+                    )
             return StringIO(data)
         except:
             tries += 1
