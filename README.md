@@ -5,6 +5,7 @@ This repository contains code for a script that identifies and writes the corres
 [![ncfp TravisCI build status](https://api.travis-ci.org/widdowquinn/ncfp.svg?branch=master)](https://travis-ci.org/widdowquinn/ncfp/branches)
 [![ncfp codecov.io coverage](https://img.shields.io/codecov/c/github/widdowquinn/ncfp/master.svg)](https://codecov.io/github/widdowquinn/ncfp)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/99a037e5eb2c4ae48e27e44c8974a3f8)](https://www.codacy.com/app/widdowquinn/ncfp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=widdowquinn/ncfp&amp;utm_campaign=Badge_Grade)
+[![CodeFactor](https://www.codefactor.io/repository/github/widdowquinn/ncfp/badge)](https://www.codefactor.io/repository/github/widdowquinn/ncfp)
 [![ncfp documentation](https://readthedocs.org/projects/ncfp/badge/?version=latest)](https://ncfp.readthedocs.io/en/latest/?badge=latest)
 
 [![ncfp PyPi version](https://img.shields.io/pypi/v/ncfp.svg "PyPi version")](https://pypi.python.org/pypi/ncfp)
