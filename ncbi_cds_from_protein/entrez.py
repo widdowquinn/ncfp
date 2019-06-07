@@ -227,7 +227,7 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
             result = esearch_with_retries(
                 get_nt_query(cachepath, record.id), "nucleotide", retries
             )
-            if len(result["IdList"]):
+            if result["IdList"]:
                 addedrows.extend(add_ncbi_uids(cachepath, record.id, result["IdList"]))
             else:
                 noresult += 1
@@ -241,7 +241,7 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
                 idlist = [lid["Id"] for lid in result[0]["LinkSetDb"][0]["Link"]]
             except IndexError:  # No result returned - possible deleted record
                 raise NCFPEFetchException("No link/record returned for %s" % record.id)
-            if len(idlist):
+            if idlist:
                 addedrows.extend(add_ncbi_uids(cachepath, record.id, idlist))
             else:
                 noresult += 1
