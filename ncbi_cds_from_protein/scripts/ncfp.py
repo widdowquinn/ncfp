@@ -111,7 +111,7 @@ def extract_cds_features(seqrecords, cachepath, args, logger):
     nt_sequences = []  # Holds extracted nucleotide sequences
     for record in seqrecords:
         result = find_record_cds(cachepath, record.id)
-        if len(result) == 0:
+        if not result:
             logger.warning("No record found for sequence input %s", record.id)
         elif len(result) > 1:
             logger.error("More than one record returned for %s (exiting)", record.id)
@@ -246,13 +246,13 @@ def run_main(argv=None, logger=None):
         fmt = "ncbi"
     logger.info("Processing input sequences as %s format", fmt)
     qrecords, qskipped = process_sequences(seqrecords, cachepath, fmt, args.disabletqdm)
-    if len(qskipped):
+    if qskipped:
         logger.warning("Skipped %d sequences (no query term found)", len(qskipped))
         skippedpath = os.path.join(args.outdirname, args.skippedfname)
         SeqIO.write(qskipped, skippedpath, "fasta")
         logger.warning("Skipped sequences were written to %s", skippedpath)
     logger.info("%d sequences taken forward with query", len(qrecords))
-    if len(qrecords) == 0:
+    if not qrecords:
         logger.warning("No new input sequences were found! (in cache?)")
 
     # Identify nucleotide accessions corresponding to the input sequences,
@@ -266,7 +266,7 @@ def run_main(argv=None, logger=None):
         logger.warning(
             "NCBI nucleotide accession search failed for " + "%d records", countfail
         )
-    if len(addedrows) == 0 and countfail == 0:
+    if not addedrows and countfail == 0:
         logger.warning("No nucleotide accession downloads were required! (in cache?)")
 
     # At this point, we want to retrieve all records that are
@@ -280,7 +280,7 @@ def run_main(argv=None, logger=None):
     logger.info("Updated GenBank accessions for %d UIDs", len(updatedrows))
     if countfail:
         logger.warning("Unable to update GenBank accessions for %d UIDs", countfail)
-    if len(updatedrows) == 0 and countfail == 0:
+    if not updatedrows and countfail == 0:
         logger.warning("No GenBank accession downloads were required! (in cache?)")
 
     # Next we recover GenBank headers and extract useful information -
@@ -292,7 +292,7 @@ def run_main(argv=None, logger=None):
     logger.info("Fetched GenBank headers for %d UIDs", len(addedrows))
     if countfail:
         logger.warning("Unable to update GenBank headers for %d UIDs", countfail)
-    if len(addedrows) == 0 and countfail == 0:
+    if not addedrows and countfail == 0:
         logger.warning("No GenBank header downloads were required! (in cache?)")
 
     # Next we recover the shortest complete GenBank record for each input
@@ -304,7 +304,7 @@ def run_main(argv=None, logger=None):
     logger.info("Fetched GenBank records for %d UIDs", len(addedrows))
     if countfail:
         logger.warning("Unable to get complete GenBank files for %d UIDs", countfail)
-    if len(addedrows) == 0 and countfail == 0:
+    if not addedrows and countfail == 0:
         logger.warning("No complete GenBank downloads were required! (in cache?)")
 
     # Now that all the required GenBank nucleotide information is in the
