@@ -1,0 +1,6 @@
+bandit
+pycodestyle
+pylint
+flake8
+mypy
+black
