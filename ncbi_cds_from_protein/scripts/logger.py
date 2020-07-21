@@ -39,11 +39,10 @@
 """Code providing a script logger"""
 
 import logging
-import os
 import sys
 import time
 
-from ..ncfp_tools import last_exception
+from pathlib import Path
 
 
 def build_logger(name, args):
@@ -67,11 +66,10 @@ def build_logger(name, args):
     # If a logfile was specified, use it
     if args.logfile is not None:
         try:
-            os.makedirs(os.path.join(*os.path.split(args.logfile)[:-1]), exist_ok=True)
-            logstream = open(args.logfile, "w")
+            args.logfile.mkdir(parents=True, exist_ok=True)
+            logstream = args.logfile.open("w")
         except OSError:
-            logger.error("Could not open %s for logging", args.logfile)
-            logger.error(last_exception())
+            logger.error("Could not open %s for logging", args.logfile, exc_info=True)
             sys.exit(1)
         err_handler_file = logging.StreamHandler(logstream)
         err_handler_file.setFormatter(err_formatter)
