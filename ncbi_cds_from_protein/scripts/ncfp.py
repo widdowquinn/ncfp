@@ -1,43 +1,43 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Implements the ncbi_cds_from_protein script for getting nt sequences
-
-(c) The James Hutton Institute 2017
-Author: Leighton Pritchard
-
-Contact: leighton.pritchard@hutton.ac.uk
-Leighton Pritchard,
-Information and Computing Sciences,
-James Hutton Institute,
-Errol Road,
-Invergowrie,
-Dundee,
-DD6 9LH,
-Scotland,
-UK
-
-The MIT License
-
-Copyright (c) 2017 The James Hutton Institute
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-"""
+# (c) The James Hutton Institute 2017-2019
+# (c) University of Strathclyde 2019-2020
+# Author: Leighton Pritchard
+#
+# Contact:
+# leighton.pritchard@strath.ac.uk
+#
+# Leighton Pritchard,
+# Strathclyde Institute for Pharmacy and Biomedical Sciences,
+# Cathedral Street,
+# Glasgow,
+# G1 1XQ
+# Scotland,
+# UK
+#
+# The MIT License
+#
+# Copyright (c) 2017-2019 The James Hutton Institute
+# Copyright (c) 2019-2020 University of Strathclyde
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+"""Implements the ncbi_cds_from_protein script for getting nt sequences"""
 
 import os
 import re
@@ -93,9 +93,7 @@ def load_input_sequences(args, logger):
         logger.error("Could not parse sequence file %s", args.infname)
         logger.error(last_exception())
         sys.exit(1)
-    logger.info(
-        "%d sequence records read successfully from %s", len(records), args.infname
-    )
+    logger.info("%d sequence records read successfully from %s", len(records), args.infname)
     return records
 
 
@@ -133,9 +131,7 @@ def extract_cds_features(seqrecords, cachepath, args, logger):
                 logger.info("Could not identify CDS feature for %s", record.id)
             else:
                 logger.info(
-                    "\tSequence %s matches CDS feature %s",
-                    record.id,
-                    feature.qualifiers["protein_id"][0],
+                    "\tSequence %s matches CDS feature %s", record.id, feature.qualifiers["protein_id"][0],
                 )
                 logger.info("\tExtracting coding sequence...")
                 if args.stockholm:
@@ -148,9 +144,7 @@ def extract_cds_features(seqrecords, cachepath, args, logger):
                     logger.info("\t\tTranslated sequence matches input sequence")
                     nt_sequences.append((record, ntseq))
                 else:
-                    logger.warning(
-                        "\t\tTranslated sequence does not match " + "input sequence!"
-                    )
+                    logger.warning("\t\tTranslated sequence does not match " + "input sequence!")
                     logger.warning("\t\t%s", aaseq.seq)
                     logger.warning("\t\t%s", record.seq.ungap("-").upper())
 
@@ -195,9 +189,7 @@ def run_main(argv=None, logger=None):
 
     # Catch execution with no arguments
     if len(sys.argv) == 1:
-        sys.stderr.write(
-            "ncbi_cds_from_protein " + "version: {0}\n".format(__version__)
-        )
+        sys.stderr.write("ncbi_cds_from_protein " + "version: {0}\n".format(__version__))
         return 0
 
     # Set up logging
@@ -212,9 +204,7 @@ def run_main(argv=None, logger=None):
     try:
         os.makedirs(args.outdirname, exist_ok=True)
     except OSError:
-        logger.error(
-            "Could not use/create output directory %s (exiting)", args.outdirname
-        )
+        logger.error("Could not use/create output directory %s (exiting)", args.outdirname)
         logger.error(last_exception)
         raise SystemExit(1)
 
@@ -258,14 +248,10 @@ def run_main(argv=None, logger=None):
     # Identify nucleotide accessions corresponding to the input sequences,
     # and cache them.
     logger.info("Identifying nucleotide accessions...")
-    addedrows, countfail = search_nt_ids(
-        qrecords, cachepath, args.retries, disabletqdm=args.disabletqdm
-    )
+    addedrows, countfail = search_nt_ids(qrecords, cachepath, args.retries, disabletqdm=args.disabletqdm)
     logger.info("Added %d new UIDs to cache", len(addedrows))
     if countfail:
-        logger.warning(
-            "NCBI nucleotide accession search failed for " + "%d records", countfail
-        )
+        logger.warning("NCBI nucleotide accession search failed for " + "%d records", countfail)
     if not addedrows and countfail == 0:
         logger.warning("No nucleotide accession downloads were required! (in cache?)")
 
@@ -274,9 +260,7 @@ def run_main(argv=None, logger=None):
     # First, we associate GenBank accessions with a UID. This can be done
     # without reference to the records, using only the cache.
     logger.info("Collecting GenBank accessions...")
-    updatedrows, countfail = update_gb_accessions(
-        cachepath, args.retries, disabletqdm=args.disabletqdm
-    )
+    updatedrows, countfail = update_gb_accessions(cachepath, args.retries, disabletqdm=args.disabletqdm)
     logger.info("Updated GenBank accessions for %d UIDs", len(updatedrows))
     if countfail:
         logger.warning("Unable to update GenBank accessions for %d UIDs", countfail)
@@ -286,9 +270,7 @@ def run_main(argv=None, logger=None):
     # Next we recover GenBank headers and extract useful information -
     # sequence length, taxonomy, and so on.
     logger.info("Fetching GenBank headers...")
-    addedrows, countfail = fetch_gb_headers(
-        cachepath, args.retries, args.batchsize, disabletqdm=args.disabletqdm
-    )
+    addedrows, countfail = fetch_gb_headers(cachepath, args.retries, args.batchsize, disabletqdm=args.disabletqdm)
     logger.info("Fetched GenBank headers for %d UIDs", len(addedrows))
     if countfail:
         logger.warning("Unable to update GenBank headers for %d UIDs", countfail)
@@ -298,9 +280,7 @@ def run_main(argv=None, logger=None):
     # Next we recover the shortest complete GenBank record for each input
     # sequence
     logger.info("Fetching shortest complete GenBank records...")
-    addedrows, countfail = fetch_shortest_genbank(
-        cachepath, args.retries, args.batchsize, disabletqdm=args.disabletqdm
-    )
+    addedrows, countfail = fetch_shortest_genbank(cachepath, args.retries, args.batchsize, disabletqdm=args.disabletqdm)
     logger.info("Fetched GenBank records for %d UIDs", len(addedrows))
     if countfail:
         logger.warning("Unable to get complete GenBank files for %d UIDs", countfail)
