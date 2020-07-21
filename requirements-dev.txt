@@ -1,6 +1,7 @@
 bandit
-pycodestyle
-pylint
+black
 flake8
 mypy
-black
+pycodestyle
+pylint
+pytest
