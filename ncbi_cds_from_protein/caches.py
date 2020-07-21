@@ -1,43 +1,43 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Functions for handling data caches
-
-(c) The James Hutton Institute 2017
-Author: Leighton Pritchard
-
-Contact: leighton.pritchard@hutton.ac.uk
-Leighton Pritchard,
-Information and Computing Sciences,
-James Hutton Institute,
-Errol Road,
-Invergowrie,
-Dundee,
-DD6 9LH,
-Scotland,
-UK
-
-The MIT License
-
-Copyright (c) 2017 The James Hutton Institute
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-"""
+# (c) The James Hutton Institute 2017-2019
+# (c) University of Strathclyde 2019-2020
+# Author: Leighton Pritchard
+#
+# Contact:
+# leighton.pritchard@strath.ac.uk
+#
+# Leighton Pritchard,
+# Strathclyde Institute for Pharmacy and Biomedical Sciences,
+# Cathedral Street,
+# Glasgow,
+# G1 1XQ
+# Scotland,
+# UK
+#
+# The MIT License
+#
+# Copyright (c) 2017-2019 The James Hutton Institute
+# Copyright (c) 2019-2020 University of Strathclyde
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+"""Functions for handling data caches"""
 
 import sqlite3
 import sys
@@ -263,7 +263,7 @@ def has_query(cachepath, accession):
     conn = sqlite3.connect(cachepath)
     with conn:
         cur = conn.cursor()
-        cur.execute(SQL_GET_SEQDATA_QUERIES, (accession, ))
+        cur.execute(SQL_GET_SEQDATA_QUERIES, (accession,))
     if cur.fetchone() == (None, None):
         return False
     return True
@@ -274,7 +274,7 @@ def has_nt_query(cachepath, accession):
     conn = sqlite3.connect(cachepath)
     with conn:
         cur = conn.cursor()
-        cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession, ))
+        cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession,))
     if cur.fetchone()[0] is None:
         return False
     return True
@@ -285,7 +285,7 @@ def has_aa_query(cachepath, accession):
     conn = sqlite3.connect(cachepath)
     with conn:
         cur = conn.cursor()
-        cur.execute(SQL_GET_SEQDATA_AAQUERY, (accession, ))
+        cur.execute(SQL_GET_SEQDATA_AAQUERY, (accession,))
     if cur.fetchone()[0] is None:
         return False
     return True
@@ -296,7 +296,7 @@ def get_nt_query(cachepath, accession):
     conn = sqlite3.connect(cachepath)
     with conn:
         cur = conn.cursor()
-        cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession, ))
+        cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession,))
     return cur.fetchone()
 
 
@@ -305,7 +305,7 @@ def has_ncbi_uid(cachepath, accession):
     conn = sqlite3.connect(cachepath)
     with conn:
         cur = conn.cursor()
-        cur.execute(SQL_GET_NT_UIDS, (accession, ))
+        cur.execute(SQL_GET_NT_UIDS, (accession,))
     if cur.fetchone() is None:
         return False
     return True
@@ -327,7 +327,7 @@ def add_ncbi_uids(cachepath, accession, uids):
                 if str(err).startswith("UNIQUE constraint failed"):
                     pass
                 else:
-                    with open(sys.stderr, 'w') as ofh:
+                    with open(sys.stderr, "w") as ofh:
                         ofh.write(last_exception())
                     raise SystemExit(1)
             cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
@@ -377,8 +377,7 @@ def add_gbheaders(cachepath, accession, length, org, taxon, date):
     conn = sqlite3.connect(cachepath)
     with conn:
         cur = conn.cursor()
-        cur.execute(SQL_ADD_GBHEADER, (accession, length, org,
-                                       taxon, date))
+        cur.execute(SQL_ADD_GBHEADER, (accession, length, org, taxon, date))
     return cur.fetchone()
 
 
@@ -438,5 +437,5 @@ def find_record_cds(cachepath, accession):
     conn = sqlite3.connect(cachepath)
     with conn:
         cur = conn.cursor()
-        cur.execute(SQL_GET_GBRECORD_BY_SEQ, (accession, ))
+        cur.execute(SQL_GET_GBRECORD_BY_SEQ, (accession,))
     return cur.fetchall()
