@@ -41,6 +41,8 @@
 import sys
 import time
 
+from pathlib import Path
+
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
@@ -50,8 +52,10 @@ def parse_cmdline(args=None):
     parser = ArgumentParser(prog="ncfp", formatter_class=ArgumentDefaultsHelpFormatter)
 
     # Add compulsory arguments
-    parser.add_argument(action="store", dest="infname", default=None, help="input sequence file")
-    parser.add_argument(action="store", dest="outdirname", default=None, help="output directory for sequence files")
+    parser.add_argument(action="store", dest="infname", default=None, help="input sequence file", type=Path)
+    parser.add_argument(
+        action="store", dest="outdirname", default=None, help="output directory for sequence files", type=Path
+    )
     parser.add_argument(action="store", dest="email", default=None, help="email address for NCBI/Entrez")
 
     # Add options
@@ -115,7 +119,9 @@ def parse_cmdline(args=None):
         default="skipped.fasta",
         help="path to file with skipped sequences",
     )
-    parser.add_argument("-l", "--logfile", dest="logfile", action="store", default=None, help="path to logfile")
+    parser.add_argument(
+        "-l", "--logfile", dest="logfile", action="store", default=None, help="path to logfile", type=Path
+    )
     parser.add_argument(
         "-v", "--verbose", dest="verbose", action="store_true", default=False, help="report verbose progress"
     )

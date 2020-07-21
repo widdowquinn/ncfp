@@ -48,7 +48,7 @@ from tqdm import tqdm
 from .caches import add_input_sequence, has_query
 
 # regexes for parsing out Uniprot
-re_uniprot_gn = re.compile("(?<=GN=)[^\s]+")
+re_uniprot_gn = re.compile(r"(?<=GN=)[^\s]+")
 
 
 # Process collection of SeqRecords into cache and skipped/kept

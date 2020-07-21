@@ -66,7 +66,7 @@ def build_logger(name, args):
     # If a logfile was specified, use it
     if args.logfile is not None:
         try:
-            args.logfile.mkdir(parents=True, exist_ok=True)
+            args.logfile.parent.mkdir(parents=True, exist_ok=True)
             logstream = args.logfile.open("w")
         except OSError:
             logger.error("Could not open %s for logging", args.logfile, exc_info=True)
