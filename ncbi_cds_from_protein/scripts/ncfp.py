@@ -39,17 +39,21 @@
 # THE SOFTWARE.
 """Implements the ncbi_cds_from_protein script for getting nt sequences"""
 
+import logging
 import os
 import re
 import sys
 import time
 
+from argparse import Namespace
 from io import StringIO
+from pathlib import Path
+from typing import List
 
 from Bio import SeqIO
 
 from .parsers import parse_cmdline
-from .logger import build_logger
+from .logger import config_logger
 from .. import __version__
 from ..ncfp_tools import last_exception, NCFPException
 from ..sequences import (
@@ -70,8 +74,13 @@ from ..entrez import (
 
 
 # Process input sequences
-def load_input_sequences(args, logger):
-    """Load input FASTA sequences."""
+def load_input_sequences(args: Namespace) -> List:
+    """Load input FASTA sequences.
+
+    :param args:  CLI arguments
+    """
+    logger = logging.getLogger(__name__)
+
     if args.infname is None or args.infname == "-":
         instream = sys.stdin
         logger.info("Reading sequences from stdin")
@@ -81,31 +90,30 @@ def load_input_sequences(args, logger):
             logger.error(msg)
             raise NCFPException(msg)
         try:
-            instream = open(args.infname, "r")
+            instream = args.infname.open("r")
         except OSError:
-            logger.error("Could not open input file %s", args.infname)
-            logger.error(last_exception())
-            sys.exit(1)
+            logger.error("Could not open input file %s", args.infname, exc_info=True)
+            raise SystemExit(1)
         logger.info("Reading sequences from %s", args.infname)
     try:
         records = list(SeqIO.parse(instream, "fasta"))
     except IOError:
-        logger.error("Could not parse sequence file %s", args.infname)
-        logger.error(last_exception())
-        sys.exit(1)
+        logger.error("Could not parse sequence file %s", args.infname, exc_info=True)
+        raise SystemExit(1)
     logger.info("%d sequence records read successfully from %s", len(records), args.infname)
     return records
 
 
 # Extract CDS sequences from cached GenBank records
-def extract_cds_features(seqrecords, cachepath, args, logger):
+def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
     """Return corresponding aa and nt sequences from cached records.
 
-    seqrecords       - collection of input sequence records
-    cachepath        - path to local cache
-    args             - passed script arguments
-    logger           - logger for this script
+    :param seqrecords:  collection of input sequence records
+    :param cachepath:  path to local cache
+    :param args:  CLI script arguments
     """
+    logger = logging.getLogger(__name__)
+
     nt_sequences = []  # Holds extracted nucleotide sequences
     for record in seqrecords:
         result = find_record_cds(cachepath, record.id)
@@ -152,13 +160,14 @@ def extract_cds_features(seqrecords, cachepath, args, logger):
 
 
 # Write paired aa and nt sequences to output directory
-def write_sequences(aa_nt_seqs, args, logger):
+def write_sequences(aa_nt_seqs, args: Namespace):
     """Write aa and nt sequences to output directory
 
-    aa_nt_seqs      - List of paired (aa, nt) SeqRecord tuples
-    args            - script arguments
-    logger          - script logger
+    :param aa_nt_seqs:  List of paired (aa, nt) SeqRecord tuples
+    :param args:  script arguments
     """
+    logger = logging.getLogger(__name__)
+
     # Write input sequences that were matched
     aafilename = os.path.join(args.outdirname, "_".join([args.filestem, "aa.fasta"]))
     logger.info("\tWriting matched input sequences to %s", aafilename)
@@ -171,7 +180,7 @@ def write_sequences(aa_nt_seqs, args, logger):
 
 
 # Main script function
-def run_main(argv=None, logger=None):
+def run_main(argv=None):
     """Run main process for ncfp script.
 
     - argv      arguments for program. If None, parse command-line; if list
@@ -194,8 +203,8 @@ def run_main(argv=None, logger=None):
 
     # Set up logging
     time0 = time.time()
-    if logger is None:
-        logger = build_logger("ncfp", args)
+    logger = logging.getLogger(__name__)
+    config_logger(args)
 
     # Set email address at Entrez
     set_entrez_email(args.email)
@@ -220,7 +229,7 @@ def run_main(argv=None, logger=None):
 
     # Get input sequences
     logger.info("Parsing sequence input...")
-    seqrecords = load_input_sequences(args, logger)
+    seqrecords = load_input_sequences(args)
 
     # Rather than subclass the Biopython SeqRecord class, we use the cache
     # database and query it to obtain relevant query terms and NCBI database
@@ -292,7 +301,7 @@ def run_main(argv=None, logger=None):
     logger.info("Extracting CDS for each input sequence...")
     if args.stockholm:
         logger.info("Expecting Stockholm format location data for each sequence")
-    nt_sequences = extract_cds_features(seqrecords, cachepath, args, logger)
+    nt_sequences = extract_cds_features(seqrecords, cachepath, args)
     logger.info("Matched %d/%d records", len(nt_sequences), len(seqrecords))
     for (record, cds) in nt_sequences:
         logger.info("\t%-40s to CDS: %s", record.id, cds.id)
@@ -301,7 +310,7 @@ def run_main(argv=None, logger=None):
     # '_aa.fasta' and '_nt.fasta'. The pairs will be in the same order,
     # so can be used for backtranslation
     logger.info("Writing paired sequence files to %s", args.outdirname)
-    write_sequences(nt_sequences, args, logger)
+    write_sequences(nt_sequences, args)
 
     # Report success
     logger.info("Completed. Time taken: %.3f", (time.time() - time0))

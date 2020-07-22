@@ -122,8 +122,9 @@ def parse_cmdline(args=None):
     parser.add_argument(
         "-l", "--logfile", dest="logfile", action="store", default=None, help="path to logfile", type=Path
     )
+    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="report verbosely")
     parser.add_argument(
-        "-v", "--verbose", dest="verbose", action="store_true", default=False, help="report verbose progress"
+        "--debug", dest="debug", action="store_true", default=False, help="report debug-level information"
     )
     parser.add_argument(
         "--disabletqdm",
