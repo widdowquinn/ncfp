@@ -41,3 +41,11 @@
 # python package version
 # should match r"^__version__ = '(?P<version>[^']+)'$" for setup.py
 __version__ = "0.1.2-alpha"
+
+
+class NCFPException(Exception):
+    """General exception for ncfp."""
+
+    def __init__(self, msg="Error in ncbi_cds_from_protein module"):
+        """Instantiate class."""
+        Exception.__init__(self, msg)

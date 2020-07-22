@@ -39,12 +39,11 @@
 # THE SOFTWARE.
 """Functions for handling data caches"""
 
+import logging
 import sqlite3
 import sys
 
 from collections import defaultdict
-
-from .ncfp_tools import last_exception
 
 # SQL QUERIES
 # ===========
@@ -313,6 +312,8 @@ def has_ncbi_uid(cachepath, accession):
 
 def add_ncbi_uids(cachepath, accession, uids):
     """Add collection of nt UIDs to cache for a record."""
+    logger = logging.getLogger(__name__)
+
     conn = sqlite3.connect(cachepath)
     results = []
     # Exclude uids that are in the database/cache
@@ -327,8 +328,7 @@ def add_ncbi_uids(cachepath, accession, uids):
                 if str(err).startswith("UNIQUE constraint failed"):
                     pass
                 else:
-                    with open(sys.stderr, "w") as ofh:
-                        ofh.write(last_exception())
+                    logger.error("Adding NCBI UID filed (exiting)", exc_info=True)
                     raise SystemExit(1)
             cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
     return results

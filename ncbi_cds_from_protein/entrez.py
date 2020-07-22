@@ -39,12 +39,15 @@
 # THE SOFTWARE.
 """Functions to interact with Entrez"""
 
+import logging
+import sys
+
 from io import StringIO
 
 from Bio import Entrez, SeqIO
 from tqdm import tqdm
 
-from .caches import (
+from ncbi_cds_from_protein.caches import (
     has_nt_query,
     get_nt_query,
     has_aa_query,
@@ -58,12 +61,10 @@ from .caches import (
     get_nogbfull_nt_acc,
     find_shortest_genbank,
 )
-from .ncfp_tools import last_exception
+
 
 # EXCEPTIONS
 # ==========
-
-
 class NCFPELinkException(Exception):
     """Exception for ELink qeries."""
 
@@ -255,6 +256,8 @@ def esearch_with_retries(query_id, dbname, maxretries):
     Returns the parsed record resulting from the ESearch,
     after trying the ESearch up to a maximum number of times.
     """
+    logger = logging.getLogger(__name__)
+
     tries = 0
     while tries < maxretries:
         try:
@@ -262,7 +265,8 @@ def esearch_with_retries(query_id, dbname, maxretries):
             return Entrez.read(handle)
         except Exception:
             tries += 1
-    raise NCFPMaxretryException("Query ID %s ESearch failed\n%s" % (query_id, last_exception()))
+            logger.warning("ESearch query (%s) failed (retry %d)", query_id, tries, exc_info=True)
+    raise NCFPMaxretryException("Query ID %s ESearch failed\n%s" % query_id)
 
 
 def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
@@ -273,6 +277,8 @@ def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
     linkdbname      - NCBI target database name for link query
     maxretries      - maximum number of attempts to make
     """
+    logger = logging.getLogger(__name__)
+
     tries = 0
     while tries < maxretries:
         try:
@@ -280,7 +286,8 @@ def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
             return matches
         except Exception:
             tries += 1
-    raise NCFPMaxretryException("Query ID %s ELink failed\n%s" % (query_id, last_exception()))
+            logger.warning("ELing query (%s) failed (retry %d)", query_id, tries, exc_info=True)
+    raise NCFPMaxretryException("Query ID %s ELink failed" % query_id)
 
 
 # Run an EFetch on a single ID
@@ -296,6 +303,8 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
     Returns a handle to a completely buffered string, after a read()
     operation, sanity check, and retokenising.
     """
+    logger = logging.getLogger(__name__)
+
     tries = 0
     while tries < maxretries:
         try:
@@ -307,7 +316,8 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
             return StringIO(data)
         except Exception:
             tries += 1
-    raise NCFPMaxretryException("Query ID %s EFetch failed\n%s" % (query_id, last_exception()))
+            logger.warning("EFetch query (%s) failed (retry %d)", query_id, tries, exc_info=True)
+    raise NCFPMaxretryException("Query ID %s EFetch failed" % query_id)
 
 
 # Batch EPost to get history for a set of query IDs

@@ -52,24 +52,24 @@ from typing import List
 
 from Bio import SeqIO
 
-from .parsers import parse_cmdline
-from .logger import config_logger
-from .. import __version__
-from ..ncfp_tools import last_exception, NCFPException
-from ..sequences import (
-    process_sequences,
-    re_uniprot_gn,
-    extract_feature_by_locus_tag,
-    extract_feature_by_protein_id,
-    extract_feature_cds,
-)
-from ..caches import initialise_dbcache, find_record_cds
-from ..entrez import (
+from ncbi_cds_from_protein import NCFPException, __version__
+from ncbi_cds_from_protein.caches import initialise_dbcache, find_record_cds
+from ncbi_cds_from_protein.entrez import (
     set_entrez_email,
     search_nt_ids,
     update_gb_accessions,
     fetch_gb_headers,
     fetch_shortest_genbank,
+)
+from ncbi_cds_from_protein.scripts.parsers import parse_cmdline
+from ncbi_cds_from_protein.scripts.logger import config_logger
+
+from ncbi_cds_from_protein.sequences import (
+    process_sequences,
+    re_uniprot_gn,
+    extract_feature_by_locus_tag,
+    extract_feature_by_protein_id,
+    extract_feature_cds,
 )
 
 
@@ -213,11 +213,9 @@ def run_main(argv=None):
     try:
         os.makedirs(args.outdirname, exist_ok=True)
     except OSError:
-        logger.error("Could not use/create output directory %s (exiting)", args.outdirname)
-        logger.error(last_exception)
+        logger.error("Could not use/create output directory %s (exiting)", args.outdirname, exc_info=True)
         raise SystemExit(1)
 
-    # Initialise cache
     cachepath = os.path.join(args.cachedir, "ncfpcache_%s.sqlite3" % args.cachestem)
     os.makedirs(args.cachedir, exist_ok=True)
     # Use the old SQLite3 database if --keepcache set
