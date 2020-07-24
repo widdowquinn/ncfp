@@ -5,3 +5,4 @@ mypy
 pycodestyle
 pylint
 pytest
+pytest-cov
