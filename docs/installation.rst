@@ -53,8 +53,8 @@ From source (most recent release)
 
 .. code-block:: bash
 
-    $ wget https://github.com/widdowquinn/ncfp/archive/v0.1.0.tar.gz
-    $ tar -zxvf v0.1.0.tar.gz
+    $ wget https://github.com/widdowquinn/ncfp/archive/v0.2.0.tar.gz
+    $ tar -zxvf v0.2.0.tar.gz
     $ cd ncfp
     $ pip install -r requirements.txt
     $ python setup.py install
@@ -75,7 +75,8 @@ To get the very latest development version of ``ncfp``, you can clone the reposi
     $ git clone git@github.com:widdowquinn/ncfp.git
     $ cd ncfp
     $ pip install -r requirements.txt
-    $ python setup.py install
+    $ pip install -e .  # for development installation
+    $ python setup.py install  # for installation as a package/script
 
 
 .. _conda: https://conda.io/

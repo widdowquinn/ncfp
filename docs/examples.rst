@@ -29,7 +29,7 @@ sequences are UniProt format, otherwise an error is thrown.
 
 .. code-block:: bash
 
-    ncfp -u tests/test_input/sequences/input_uniprot.fasta \
+    ncfp tests/test_input/sequences/input_uniprot.fasta \
         tests/test_output/uniprot dev@null.com -v
 
 
@@ -46,7 +46,7 @@ tell ``ncfp`` to parse the region locations.
 
 .. code-block:: bash
 
-    ncfp -us tests/test_input/sequences/input_uniprot_stockholm.fasta \
+    ncfp -s tests/test_input/sequences/input_uniprot_stockholm.fasta \
         tests/test_output/uniprot_stockholm dev@null.com -v
 
 
