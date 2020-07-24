@@ -27,7 +27,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+            - ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-pip.txt" }}
             - ncfp-dependencies-pip-
 
       - run:
@@ -45,7 +45,7 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+          key: ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-pip.txt" }}
 
       - run:
           name: install ncfp
