@@ -1,0 +1,77 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2.1
+
+orbs:
+  codecov: codecov/codecov@1.0.5
+
+workflows:
+  version: 2.1
+  test:
+    jobs:
+      - test-3_8
+      # - test-3_7
+      # - test-3_6
+
+jobs:
+  test-3_8: &test-template
+    docker:
+      - image: circleci/python:3.8.5
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+            - ncfp-dependencies-pip-
+
+      - run:
+          name: update apt-get
+          command: |
+            sudo apt-get update
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip setuptools virtualenv
+            pip install -r requirements.txt
+            pip install -r requirements-dev.txt
+      - save_cache:
+          paths:
+            - ./venv
+          key: pyani-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+
+      - run:
+          name: install ncfp
+          command: |
+            . venv/bin/activate
+            pip install -e .  # Install the repo as a package
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            pytest -v --cov=ncbi_cds_from_protein --cov-report xml:.coverage.xml
+      - store_artifacts:
+          path: tests/test_output
+          destination: tests/test_output
+      - store_artifacts:
+          path: .coverage.xml
+          destination: .coverage.xml
+
+      - codecov/upload:
+          file: .coverage.xml
+
+  # test-3_6:
+  #   <<: *test-template
+  #   docker:
+  #     - image: circleci/python:3.6.8
+  # test-3_8:
+  #   <<: *test-template
+  #   docker:
+  #     - image: circleci/python:3.8.0
