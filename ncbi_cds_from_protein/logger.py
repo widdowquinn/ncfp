@@ -42,7 +42,6 @@ import logging
 import logging.config
 import re
 import sys
-import time
 
 from argparse import Namespace
 from pathlib import Path
@@ -56,7 +55,11 @@ class NoColorFormatter(logging.Formatter):
 
     def format(self, record):
         """Return logger message with terminal escapes removed."""
-        return "[%s] [%s]: %s" % (record.levelname, record.name, re.sub(self.ANSI_RE, "", record.msg % record.args),)
+        return "[%s] [%s]: %s" % (
+            record.levelname,
+            record.name,
+            re.sub(self.ANSI_RE, "", record.msg % record.args),
+        )
 
 
 def config_logger(args: Namespace):
@@ -68,7 +71,7 @@ def config_logger(args: Namespace):
     """
     # Default package-level logger
     logger = logging.getLogger(__package__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.WARNING)
 
     # Create and add STDERR handler
     err_formatter = logging.Formatter("[%(levelname)s] [%(name)s]: %(message)s")
@@ -87,7 +90,9 @@ def config_logger(args: Namespace):
             if not logdir == Path.cwd():
                 logdir.mkdir(exist_ok=True, parents=True)
         except OSError:
-            logger.error("Could not create log directory %s (exiting)", logdir, exc_info=True)
+            logger.error(
+                "Could not create log directory %s (exiting)", logdir, exc_info=True
+            )
             raise SystemExit(1)
 
         # create handler
