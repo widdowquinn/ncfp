@@ -60,12 +60,13 @@ def parse_cmdline(args=None):
 
     # Add options
     parser.add_argument(
-        "-u",
-        "--uniprot",
-        dest="uniprot",
-        action="store_true",
-        default=False,
-        help="treat input sequences as UniProt FASTA",
+        "-f",
+        "--format",
+        dest="infmt",
+        action="store",
+        type=str,
+        default="ncbi",
+        help="Input sequence format [ncbi|uniprot]",
     )
     parser.add_argument(
         "-s",
@@ -76,7 +77,13 @@ def parse_cmdline(args=None):
         help="parse Stockholm format sequence regions",
     )
     parser.add_argument(
-        "-d", "--cachedir", dest="cachedir", action="store", default=".ncfp_cache", help="directory for cached data"
+        "-d",
+        "--cachedir",
+        dest="cachedir",
+        action="store",
+        default=Path(".ncfp_cache"),
+        type=Path,
+        help="directory for cached data",
     )
     parser.add_argument(
         "-c",

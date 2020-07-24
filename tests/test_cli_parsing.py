@@ -42,10 +42,12 @@ import logging
 import os
 import unittest
 
+from pathlib import Path
+
 import pytest
 
 from ncbi_cds_from_protein.scripts import ncfp
-from ncbi_cds_from_protein.ncfp_tools import NCFPException
+from ncbi_cds_from_protein import NCFPException
 
 
 class TestCLIParsing(unittest.TestCase):
@@ -53,34 +55,30 @@ class TestCLIParsing(unittest.TestCase):
 
     def setUp(self):
         """Set attributes for tests."""
-        self.indir = os.path.join("tests", "test_input", "sequences")
-        self.outdir = os.path.join("tests", "test_output", "parsertests")
+        self.indir = Path("tests/test_input/sequences")
+        self.outdir = Path("tests/test_output/parsertests")
         self.email = "ncfptest@dev.null"
         # Lists of command-line arguments for each test
         self.argsdict = {
             "validate_and_log": [
-                os.path.join(self.indir, "input_uniprot_stockholm_small.fasta"),
-                self.outdir,
+                str(self.indir / "input_uniprot_stockholm_small.fasta"),
+                str(self.outdir),
                 self.email,
-                "--uniprot",
+                "--format",
+                "uniprot",
                 "--stockholm",
                 "--disabletqdm",
                 "-l",
-                os.path.join("tests", "test_output", "parsertests", "download_logfile.log"),
+                str(self.outdir / "download_logfile.log"),
             ],
-            "bad_infile": [
-                os.path.join("tests", "test_input", "sequences", "notexist.fasta"),
-                self.outdir,
-                self.email,
-                "--disabletqdm",
-            ],
+            "bad_infile": [str(self.indir / "notexist.fasta"), str(self.outdir), self.email, "--disabletqdm",],
             "local_cache": [
-                os.path.join(self.indir, "human.fasta"),
-                self.outdir,
+                str(self.indir / "human.fasta"),
+                str(self.outdir),
                 self.email,
                 "--disabletqdm",
                 "-d",
-                os.path.join(self.outdir, "cache"),
+                str(self.outdir / "cache"),
                 "-c",
                 "humancache",
             ],
@@ -92,17 +90,17 @@ class TestCLIParsing(unittest.TestCase):
 
     def test_download_and_log(self):
         """ncfp downloads coding sequences and logs output from CLI."""
-        ncfp.run_main(self.argsdict["validate_and_log"], logger=self.logger)
+        ncfp.run_main(self.argsdict["validate_and_log"])
 
     def test_bad_infile(self):
         """ncfp stops if CLI input file does not exist."""
         with pytest.raises(NCFPException):
-            ncfp.run_main(self.argsdict["bad_infile"], logger=self.logger)
+            ncfp.run_main(self.argsdict["bad_infile"])
 
     def test_create_and_keep_cache(self):
         """ncfp creates named cache from CLI and keeps it when rerunning."""
         self.logger.info("Creating local cache")
-        ncfp.run_main(self.argsdict["local_cache"], logger=self.logger)
+        ncfp.run_main(self.argsdict["local_cache"])
 
         self.logger.info("Reusing local cache")
-        ncfp.run_main(self.argsdict["local_cache"] + ["--keepcache"], logger=self.logger)
+        ncfp.run_main(self.argsdict["local_cache"] + ["--keepcache"])

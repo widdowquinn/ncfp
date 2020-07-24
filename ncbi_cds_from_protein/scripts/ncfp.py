@@ -61,9 +61,8 @@ from ncbi_cds_from_protein.entrez import (
     fetch_gb_headers,
     fetch_shortest_genbank,
 )
+from ncbi_cds_from_protein.logger import config_logger
 from ncbi_cds_from_protein.scripts.parsers import parse_cmdline
-from ncbi_cds_from_protein.scripts.logger import config_logger
-
 from ncbi_cds_from_protein.sequences import (
     process_sequences,
     re_uniprot_gn,
@@ -80,6 +79,7 @@ def load_input_sequences(args: Namespace) -> List:
     :param args:  CLI arguments
     """
     logger = logging.getLogger(__name__)
+    logger.info("Parsing sequence input...")
 
     if args.infname is None or args.infname == "-":
         instream = sys.stdin
@@ -113,6 +113,7 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
     :param args:  CLI script arguments
     """
     logger = logging.getLogger(__name__)
+    logger.info("Extracting CDS features...")
 
     nt_sequences = []  # Holds extracted nucleotide sequences
     for record in seqrecords:
@@ -125,14 +126,13 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
         else:
             gbrecord = SeqIO.read(StringIO(result[0][-1]), "gb")
             logger.info("Sequence %s matches GenBank entry %s", record.id, gbrecord.id)
-            # For Uniprot sequences, we need to extract the gene name
-            if args.uniprot:
+            if args.infmt == "uniprot":  # For Uniprot sequences, we need to extract the gene name
                 match = re.search(re_uniprot_gn, record.description)
                 gene_name = match.group(0)
                 # Get the matching CDS
                 logger.info("Searching for CDS: %s", gene_name)
                 feature = extract_feature_by_locus_tag(gbrecord, gene_name)
-            else:
+            else:  # NCBI sequences
                 # Get the matching CDS
                 feature = extract_feature_by_protein_id(gbrecord, record.id)
             if feature is None:
@@ -159,24 +159,26 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
     return nt_sequences
 
 
-# Write paired aa and nt sequences to output directory
-def write_sequences(aa_nt_seqs, args: Namespace):
-    """Write aa and nt sequences to output directory
+def initialise_cache(args: Namespace) -> Path:
+    """Initialise the local cache and return its Path
 
-    :param aa_nt_seqs:  List of paired (aa, nt) SeqRecord tuples
-    :param args:  script arguments
+    :param args:  CLI arguments
     """
     logger = logging.getLogger(__name__)
+    logger.info("Initialising cache...")
 
-    # Write input sequences that were matched
-    aafilename = os.path.join(args.outdirname, "_".join([args.filestem, "aa.fasta"]))
-    logger.info("\tWriting matched input sequences to %s", aafilename)
-    SeqIO.write([aaseq for (aaseq, ntseq) in aa_nt_seqs], aafilename, "fasta")
+    # Get paths in order
+    cachepath = args.cachedir / f"ncfpcache_{args.cachestem}.sqlite3"
+    args.cachedir.mkdir(parents=True, exist_ok=True)
 
-    # Write coding sequences
-    ntfilename = os.path.join(args.outdirname, "_".join([args.filestem, "nt.fasta"]))
-    logger.info("\tWriting matched output sequences to %s", ntfilename)
-    SeqIO.write([ntseq for (aaseq, ntseq) in aa_nt_seqs], ntfilename, "fasta")
+    # Use the old SQLite3 database if --keepcache set
+    if args.keepcache and cachepath.is_file():
+        logger.warning("Not overwriting old cache at %s...", cachepath)
+    else:
+        logger.info("Setting up SQLite3 database cache at %s...", cachepath)
+        initialise_dbcache(cachepath)
+
+    return cachepath
 
 
 # Main script function
@@ -216,17 +218,8 @@ def run_main(argv=None):
         logger.error("Could not use/create output directory %s (exiting)", args.outdirname, exc_info=True)
         raise SystemExit(1)
 
-    cachepath = os.path.join(args.cachedir, "ncfpcache_%s.sqlite3" % args.cachestem)
-    os.makedirs(args.cachedir, exist_ok=True)
-    # Use the old SQLite3 database if --keepcache set
-    if args.keepcache and os.path.isfile(cachepath):
-        logger.info("Not overwriting old cache at %s...", cachepath)
-    else:
-        logger.info("Setting up SQLite3 database cache at %s...", cachepath)
-        initialise_dbcache(cachepath)
-
-    # Get input sequences
-    logger.info("Parsing sequence input...")
+    # Initialise local cache, get input sequences, and set format
+    cachepath = initialise_cache(args)
     seqrecords = load_input_sequences(args)
 
     # Rather than subclass the Biopython SeqRecord class, we use the cache
@@ -237,12 +230,8 @@ def run_main(argv=None):
     # These accessions are taken from the FASTA header and, if we can't
     # parse that appropriately, we can't search - so we skip those
     # sequences
-    if args.uniprot:
-        fmt = "uniprot"
-    else:
-        fmt = "ncbi"
-    logger.info("Processing input sequences as %s format", fmt)
-    qrecords, qskipped = process_sequences(seqrecords, cachepath, fmt, args.disabletqdm)
+    logger.info("Processing input sequences as %s format", args.infmt)
+    qrecords, qskipped = process_sequences(seqrecords, cachepath, args.infmt, args.disabletqdm)
     if qskipped:
         logger.warning("Skipped %d sequences (no query term found)", len(qskipped))
         skippedpath = os.path.join(args.outdirname, args.skippedfname)
@@ -313,3 +302,23 @@ def run_main(argv=None):
     # Report success
     logger.info("Completed. Time taken: %.3f", (time.time() - time0))
     return 0
+
+
+# Write paired aa and nt sequences to output directory
+def write_sequences(aa_nt_seqs, args: Namespace):
+    """Write aa and nt sequences to output directory
+
+    :param aa_nt_seqs:  List of paired (aa, nt) SeqRecord tuples
+    :param args:  script arguments
+    """
+    logger = logging.getLogger(__name__)
+
+    # Write input sequences that were matched
+    aafilename = os.path.join(args.outdirname, "_".join([args.filestem, "aa.fasta"]))
+    logger.info("\tWriting matched input sequences to %s", aafilename)
+    SeqIO.write([aaseq for (aaseq, ntseq) in aa_nt_seqs], aafilename, "fasta")
+
+    # Write coding sequences
+    ntfilename = os.path.join(args.outdirname, "_".join([args.filestem, "nt.fasta"]))
+    logger.info("\tWriting matched output sequences to %s", ntfilename)
+    SeqIO.write([ntseq for (aaseq, ntseq) in aa_nt_seqs], ntfilename, "fasta")

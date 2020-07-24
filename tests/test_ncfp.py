@@ -44,6 +44,7 @@ import time
 import unittest
 
 from argparse import Namespace
+from pathlib import Path
 
 from ncbi_cds_from_protein.scripts import ncfp
 
@@ -54,9 +55,9 @@ class TestBasicUse(unittest.TestCase):
     def setUp(self):
         """Set attributes for tests."""
         # Paths to test file directories
-        self.datadir = os.path.join("tests", "test_input", "sequences")
-        self.outdir = os.path.join("tests", "test_output")
-        self.targetdir = os.path.join("tests", "test_targets")
+        self.datadir = Path("tests/test_input/sequences")
+        self.outdir = Path("tests/test_output")
+        self.targetdir = Path("tests/test_targets")
 
         # Null logger instance
         self.logger = logging.getLogger("TestBasicUse logger")
@@ -64,12 +65,12 @@ class TestBasicUse(unittest.TestCase):
 
         # Default command-line namespace
         self.base_namespace = Namespace(
-            infname=os.path.join(self.datadir, "input_ncbi.fasta"),
-            outdirname=os.path.join(self.outdir, "basic_ncbi"),
+            infname=self.datadir / "input_ncbi.fasta",
+            outdirname=self.outdir / "basic_ncbi",
             email="ncfp@dev.null",
-            uniprot=False,
+            infmt="ncbi",
             stockholm=False,
-            cachedir=".ncfp_cache",
+            cachedir=Path(".ncfp_cache"),
             cachestem=time.strftime("%Y-%m-%d-%H-%m-%S"),
             batchsize=100,
             retries=10,
@@ -80,6 +81,7 @@ class TestBasicUse(unittest.TestCase):
             logfile=None,
             verbose=False,
             disabletqdm=True,
+            debug=False,
         )
 
     def test_basic_ncbi(self):
@@ -87,8 +89,8 @@ class TestBasicUse(unittest.TestCase):
         # Modify default arguments
         outdirname = "basic_ncbi"  # common dirname for output,target
         namespace = self.base_namespace
-        namespace.infname = os.path.join(self.datadir, "input_ncbi.fasta")
-        namespace.outdirname = os.path.join(self.outdir, outdirname)
+        namespace.infname = self.datadir / "input_ncbi.fasta"
+        namespace.outdirname = self.outdir / outdirname
 
         # Run ersatz command-line
         ncfp.run_main(namespace)
@@ -101,12 +103,12 @@ class TestBasicUse(unittest.TestCase):
         # Modify default arguments
         outdirname = "basic_uniprot"  # common dirname for output,target
         namespace = self.base_namespace
-        namespace.infname = os.path.join(self.datadir, "input_uniprot.fasta")
-        namespace.outdirname = os.path.join(self.outdir, outdirname)
-        namespace.uniprot = True
+        namespace.infname = self.datadir / "input_uniprot.fasta"
+        namespace.outdirname = self.outdir / outdirname
+        namespace.infmt = "uniprot"
 
         # Run ersatz command-line
-        ncfp.run_main(namespace, self.logger)
+        ncfp.run_main(namespace)
 
         # Compare output
         self.check_files(outdirname, ("ncfp_aa.fasta", "ncfp_nt.fasta", "skipped.fasta"))
@@ -116,9 +118,9 @@ class TestBasicUse(unittest.TestCase):
         # Modify default arguments
         outdirname = "small_stockholm"  # common dirname for output,target
         namespace = self.base_namespace
-        namespace.infname = os.path.join(self.datadir, "input_uniprot_stockholm_small.fasta")
-        namespace.outdirname = os.path.join(self.outdir, outdirname)
-        namespace.uniprot = True
+        namespace.infname = self.datadir / "input_uniprot_stockholm_small.fasta"
+        namespace.outdirname = self.outdir / outdirname
+        namespace.infmt = "uniprot"
         namespace.stockholm = True
 
         # Run ersatz command-line
@@ -130,6 +132,6 @@ class TestBasicUse(unittest.TestCase):
     def check_files(self, outdirname, fnames):
         """Test whether output and target files are identical"""
         for fname in fnames:
-            with open(os.path.join(self.outdir, outdirname, fname)) as fh1:
-                with open(os.path.join(self.targetdir, outdirname, fname)) as fh2:
+            with (self.outdir / outdirname / fname).open() as fh1:
+                with (self.targetdir / outdirname / fname).open() as fh2:
                     assert fh1.read() == fh2.read()

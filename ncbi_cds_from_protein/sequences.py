@@ -39,10 +39,14 @@
 # THE SOFTWARE.
 """Functions for handling sequence data"""
 
+import logging
 import re
 import sqlite3
 
+from pathlib import Path
+
 from Bio.SeqRecord import SeqRecord
+from bioservices import UniProt
 from tqdm import tqdm
 
 from .caches import add_input_sequence, has_query
@@ -52,34 +56,40 @@ re_uniprot_gn = re.compile(r"(?<=GN=)[^\s]+")
 
 
 # Process collection of SeqRecords into cache and skipped/kept
-def process_sequences(records, cachepath, fmt="ncbi", disabletqdm=True):
+def process_sequences(records, cachepath: Path, fmt: str = "ncbi", disabletqdm: bool = True):
     """Triage SeqRecords into those that can/cannot be used
 
     This function also caches all inputs into the SQLite cache
     at cachepath
 
-    records      - collection of SeqRecords
-    cachepath    - path to SQLite3 cache database
-    fmt          - sequence format: ncbi or uniprot
+    :param records:  collection of SeqRecords
+    :param cachepath: path to local sequence cache
+    :param fmt:  sequence header format (NCBI/UniProt)
+    :param disabletqdm:  turn off tqdm progress bar
     """
+    logger = logging.getLogger(__name__)
+    logger.info("Processing sequences...")
+
     kept, skipped = [], []
     for record in tqdm(records, desc="Process input sequences", disable=disabletqdm):
+        if record.id.startswith("UPI"):
+            logger.warning("Record %s looks like a UniRef cluster (skipping)", record.id)
+            skipped.append(record)
+            continue
         if fmt == "uniprot":
             match = re.search(re_uniprot_gn, record.description)
             if match is None:
                 qstring = None
             else:
-                qstring = match.group(0)
-            # Uniprot sequences are added to cache as
-            # (accession, NULL, nt_query)
-            try:
+                service = UniProt()
+                result = service.search(match.group(0), columns="database(EMBL)")
+                qstring = result.split("\n")[1].strip()[:-1]
+            try:  # Uniprot sequences are added to cache as (accession, NULL, nt_query)
                 add_input_sequence(cachepath, record.id, None, qstring)
             except sqlite3.IntegrityError:  # Sequence exists
                 continue
         else:
-            # NCBI sequences are added to cache as
-            # (accession, aa_query, NULL)
-            try:
+            try:  # NCBI sequences are added to cache as (accession, aa_query, NULL)
                 add_input_sequence(cachepath, record.id, record.id, None)
             except sqlite3.IntegrityError:  # Sequence exists
                 continue
