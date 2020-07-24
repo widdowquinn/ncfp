@@ -236,7 +236,8 @@ def initialise_dbcache(path):
 
     path     - path to SQLite3 database cache
     """
-    conn = sqlite3.connect(path)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(path))
     with conn:
         cur = conn.cursor()
         cur.executescript(SQL_CREATEDB)
