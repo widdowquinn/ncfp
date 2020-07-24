@@ -45,7 +45,7 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: pyani-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+          key: ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
       - run:
           name: install ncfp
