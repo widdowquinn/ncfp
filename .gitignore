@@ -16,6 +16,7 @@ venv*
 *__pycache__*
 
 # Exclude test files
+tests/examples
 tests/test_output
 skipped.fas
 .ncfp_cache
