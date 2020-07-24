@@ -1,0 +1,2 @@
+pre-commit
+sphinx-rtd-theme

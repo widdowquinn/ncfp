@@ -92,9 +92,11 @@ setuptools.setup(
     packages=["ncbi_cds_from_protein", "ncbi_cds_from_protein.scripts"],
     package_data={},
     include_package_date=True,
-    install_requires=["biopython", "tqdm"],
+    install_requires=["biopython", "bioservices", "tqdm"],
     python_requires="~=3.5",
-    entry_points={"console_scripts": ["ncfp = ncbi_cds_from_protein.scripts.ncfp:run_main"]},
+    entry_points={
+        "console_scripts": ["ncfp = ncbi_cds_from_protein.scripts.ncfp:run_main"]
+    },
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",

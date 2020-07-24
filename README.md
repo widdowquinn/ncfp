@@ -49,25 +49,25 @@ For more detailed information about `ncfp` as a program, or using the underlying
 
 Unless otherwise indicated, all code is licensed under the MIT license and subject to the following agreement:
 
-    (c) The James Hutton Institute 2017-2018
+    (c) The James Hutton Institute 2017-2019
+    (c) The University of Strathclyde 2019-2020
     Author: Leighton Pritchard
 
-    Contact: leighton.pritchard@hutton.ac.uk
+    Contact: leighton.pritchard@strath.ac.uk
 
     Address:
     Leighton Pritchard,
-    Information and Computational Sciences,
-    James Hutton Institute,
-    Errol Road,
-    Invergowrie,
-    Dundee,
-    DD2 5DA,
+    Strathclyde Institute for Pharmacy and Biomedical Sciences,
+    Cathedral Street,
+    Glasgow,
+    G4 0RE,
     Scotland,
     UK
 
 The MIT License
 
-Copyright (c) 2017-2018 The James Hutton Institute
+Copyright (c) 2017-2019 The James Hutton Institute
+Copyright (c) 2019-2020 The University of Strathclyde
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

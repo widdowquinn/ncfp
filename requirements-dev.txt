@@ -1,8 +1,10 @@
 bandit
 black
 flake8
+graphviz
 mypy
 pycodestyle
 pylint
 pytest
 pytest-cov
+sphinx

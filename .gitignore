@@ -21,8 +21,9 @@ skipped.fas
 .ncfp_cache
 test.log
 .coverage
+.coverage.*
 cover/
-example_output
+example_output/
 
 # Exclude local VS Code settings
 .vscode/
