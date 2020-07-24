@@ -43,7 +43,7 @@ at the command-line
 
 ## Documentation
 
-For more detailed information about `ncfp` as a program, or using the underlying `ncbi_cds_from_protein` Python module, please see the most recent documentation at <https://ncfp.readthedocs.io/en/latest/>
+For more detailed information about `ncfp` as a program, or using the underlying `ncbi_cds_from_protein` Python module, please see the stable version documentation at <https://ncfp.readthedocs.io/en/stable/>
 
 ## License
 
