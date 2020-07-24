@@ -20,8 +20,6 @@ tests/test_output
 skipped.fas
 .ncfp_cache
 test.log
-.coverage
-.coverage.*
 cover/
 example_output/
 
@@ -30,6 +28,11 @@ example_output/
 
 # Exclude unneeded documentation files
 docs/_build/
+htmlcov/
+.coverage
+.coverage.*
+classes_ncbi_cds_from_protein.pdf
+packages_ncbi_cds_from_protein.pdf
 
 # Exclude distribution files
 dist/
