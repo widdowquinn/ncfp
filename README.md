@@ -2,7 +2,7 @@
 
 This repository contains code for a script that identifies and writes the corresponding nucleotide sequences for each protein in an input multiple sequence file to be used, for example, in backthreading coding sequences onto protein alignments for phylogenetic analyses. `ncfp` uses the NCBI accession or UniProt gene name (as appropriate) to identify source nucleotide sequences in the NCBI databases, download them, and write them to a file.
 
-[![ncfp TravisCI build status](https://api.travis-ci.org/widdowquinn/ncfp.svg?branch=master)](https://travis-ci.org/widdowquinn/ncfp/branches)
+[![CircleCI](https://circleci.com/gh/widdowquinn/ncfp/tree/master.svg?style=shield)](https://circleci.com/gh/widdowquinn/ncfp/tree/master)
 [![ncfp codecov.io coverage](https://img.shields.io/codecov/c/github/widdowquinn/ncfp/master.svg)](https://codecov.io/github/widdowquinn/ncfp)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/99a037e5eb2c4ae48e27e44c8974a3f8)](https://www.codacy.com/app/widdowquinn/ncfp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=widdowquinn/ncfp&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/widdowquinn/ncfp/badge)](https://www.codefactor.io/repository/github/widdowquinn/ncfp)
