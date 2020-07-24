@@ -40,7 +40,6 @@
 """Functions to interact with Entrez"""
 
 import logging
-import sys
 
 from io import StringIO
 

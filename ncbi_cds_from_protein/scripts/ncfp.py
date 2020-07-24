@@ -126,8 +126,8 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
         else:
             gbrecord = SeqIO.read(StringIO(result[0][-1]), "gb")
             logger.info("Sequence %s matches GenBank entry %s", record.id, gbrecord.id)
-            if args.infmt == "uniprot":  # For Uniprot sequences, we need to extract the gene name
-                match = re.search(re_uniprot_gn, record.description)
+            match = re.search(re_uniprot_gn, record.description)
+            if match is not None:  # For Uniprot sequences, we extract the gene name
                 gene_name = match.group(0)
                 # Get the matching CDS
                 logger.info("Searching for CDS: %s", gene_name)
@@ -146,7 +146,7 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                     locdata = record.id.split("/")[-1]
                     stockholm = [int(e) for e in locdata.split("-")]
                 else:
-                    stockholm = False
+                    stockholm = []
                 ntseq, aaseq = extract_feature_cds(feature, gbrecord, stockholm)
                 if aaseq.seq == record.seq.ungap("-").upper():
                     logger.info("\t\tTranslated sequence matches input sequence")
@@ -230,8 +230,7 @@ def run_main(argv=None):
     # These accessions are taken from the FASTA header and, if we can't
     # parse that appropriately, we can't search - so we skip those
     # sequences
-    logger.info("Processing input sequences as %s format", args.infmt)
-    qrecords, qskipped = process_sequences(seqrecords, cachepath, args.infmt, args.disabletqdm)
+    qrecords, qskipped = process_sequences(seqrecords, cachepath, args.disabletqdm)
     if qskipped:
         logger.warning("Skipped %d sequences (no query term found)", len(qskipped))
         skippedpath = os.path.join(args.outdirname, args.skippedfname)

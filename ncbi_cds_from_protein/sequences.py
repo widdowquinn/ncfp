@@ -52,11 +52,41 @@ from tqdm import tqdm
 from .caches import add_input_sequence, has_query
 
 # regexes for parsing out Uniprot
+re_uniprot_head = re.compile(r".*\|.*\|.*")
 re_uniprot_gn = re.compile(r"(?<=GN=)[^\s]+")
 
 
+def guess_seqtype(record):
+    """Return best guess at SeqRecord origin on basis of header.
+
+    :param record:  SeqRecord describing sequence.
+
+    Guesses at the most likely sequence origin on the basis of sequence ID/header,
+    as follows.
+
+    If the description has a GN=* field, we guess UniProt.
+    If the ID starts with "UPI" we guess UniParc
+    Otherwise, we guess NCBI
+    """
+    logger = logging.getLogger(__name__)
+    logger.debug("Guessing sequence type for %s...", record.id)
+
+    if record.id.startswith("UPI"):
+        logger.debug("...guessed UniParc")
+        return "UniParc"
+    else:  # Test for UniProt, see https://www.uniprot.org/help/fasta-headers
+        match = re.search(re_uniprot_head, record.description)  # test for UniProt header
+
+    if match is None:
+        logger.debug("...guessed NCBI")
+        return "NCBI"
+    else:
+        logger.debug("...guessed UniProt")
+        return "UniProt"
+
+
 # Process collection of SeqRecords into cache and skipped/kept
-def process_sequences(records, cachepath: Path, fmt: str = "ncbi", disabletqdm: bool = True):
+def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
     """Triage SeqRecords into those that can/cannot be used
 
     This function also caches all inputs into the SQLite cache
@@ -64,7 +94,6 @@ def process_sequences(records, cachepath: Path, fmt: str = "ncbi", disabletqdm: 
 
     :param records:  collection of SeqRecords
     :param cachepath: path to local sequence cache
-    :param fmt:  sequence header format (NCBI/UniProt)
     :param disabletqdm:  turn off tqdm progress bar
     """
     logger = logging.getLogger(__name__)
@@ -72,23 +101,25 @@ def process_sequences(records, cachepath: Path, fmt: str = "ncbi", disabletqdm: 
 
     kept, skipped = [], []
     for record in tqdm(records, desc="Process input sequences", disable=disabletqdm):
-        if record.id.startswith("UPI"):
-            logger.warning("Record %s looks like a UniRef cluster (skipping)", record.id)
+        seqtype = guess_seqtype(record)
+        if seqtype == "UniParc":
+            logger.warning("Record %s looks like a UniParc cluster (skipping)", record.id)
             skipped.append(record)
             continue
-        if fmt == "uniprot":
+        elif seqtype == "UniProt":
             match = re.search(re_uniprot_gn, record.description)
-            if match is None:
-                qstring = None
-            else:
-                service = UniProt()
-                result = service.search(match.group(0), columns="database(EMBL)")
-                qstring = result.split("\n")[1].strip()[:-1]
+            if match is None:  #  No GN field
+                logger.warning("Uniprot record %s has no GN field (skipping)", record.id)
+                skipped.append(record)
+                continue
+            service = UniProt()
+            result = service.search(match.group(0), columns="database(EMBL)")  # type: ignore
+            qstring = result.split("\n")[1].strip()[:-1]
             try:  # Uniprot sequences are added to cache as (accession, NULL, nt_query)
                 add_input_sequence(cachepath, record.id, None, qstring)
             except sqlite3.IntegrityError:  # Sequence exists
                 continue
-        else:
+        elif seqtype == "NCBI":
             try:  # NCBI sequences are added to cache as (accession, aa_query, NULL)
                 add_input_sequence(cachepath, record.id, record.id, None)
             except sqlite3.IntegrityError:  # Sequence exists
@@ -141,7 +172,7 @@ def extract_feature_cds(feature, record, stockholm):
 
     feature      - SeqFeature object
     record       - SeqRecord object
-    stockholm    - If not False, expects (start, end) aa positions
+    stockholm    - List of (start, end) aa positions
     """
     # Extract nucleotide coding sequence
     ntseq = feature.extract(record.seq)
@@ -154,7 +185,7 @@ def extract_feature_cds(feature, record, stockholm):
     ntseq = ntseq[startpos:]
 
     # If Stockholm (start, end) headers were provided, trime sequences
-    if stockholm:
+    if len(stockholm) != 0:
         start, end = stockholm[0], stockholm[1]
         ntseq = ntseq[(start - 1) * 3 : (end * 3)]
 

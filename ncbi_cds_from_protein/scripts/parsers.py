@@ -60,15 +60,6 @@ def parse_cmdline(args=None):
 
     # Add options
     parser.add_argument(
-        "-f",
-        "--format",
-        dest="infmt",
-        action="store",
-        type=str,
-        default="ncbi",
-        help="Input sequence format [ncbi|uniprot]",
-    )
-    parser.add_argument(
         "-s",
         "--stockholm",
         dest="stockholm",

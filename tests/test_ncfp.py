@@ -39,7 +39,6 @@
 """Test commandline entry for the ncfp program."""
 
 import logging
-import os
 import time
 import unittest
 
@@ -68,7 +67,6 @@ class TestBasicUse(unittest.TestCase):
             infname=self.datadir / "input_ncbi.fasta",
             outdirname=self.outdir / "basic_ncbi",
             email="ncfp@dev.null",
-            infmt="ncbi",
             stockholm=False,
             cachedir=Path(".ncfp_cache"),
             cachestem=time.strftime("%Y-%m-%d-%H-%m-%S"),
@@ -105,7 +103,6 @@ class TestBasicUse(unittest.TestCase):
         namespace = self.base_namespace
         namespace.infname = self.datadir / "input_uniprot.fasta"
         namespace.outdirname = self.outdir / outdirname
-        namespace.infmt = "uniprot"
 
         # Run ersatz command-line
         ncfp.run_main(namespace)
@@ -120,7 +117,6 @@ class TestBasicUse(unittest.TestCase):
         namespace = self.base_namespace
         namespace.infname = self.datadir / "input_uniprot_stockholm_small.fasta"
         namespace.outdirname = self.outdir / outdirname
-        namespace.infmt = "uniprot"
         namespace.stockholm = True
 
         # Run ersatz command-line

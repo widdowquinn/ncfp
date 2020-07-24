@@ -39,7 +39,6 @@
 """Test command-line parsing for ncfp program"""
 
 import logging
-import os
 import unittest
 
 from pathlib import Path
@@ -64,8 +63,6 @@ class TestCLIParsing(unittest.TestCase):
                 str(self.indir / "input_uniprot_stockholm_small.fasta"),
                 str(self.outdir),
                 self.email,
-                "--format",
-                "uniprot",
                 "--stockholm",
                 "--disabletqdm",
                 "-l",
