@@ -251,7 +251,8 @@ def add_input_sequence(cachepath, accession, aa_query, nt_query):
                    protein_nuccore
     nt_query     - query term for searching nucleotide
     """
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_ADDSEQ, (accession, aa_query, nt_query))
@@ -260,7 +261,8 @@ def add_input_sequence(cachepath, accession, aa_query, nt_query):
 
 def has_query(cachepath, accession):
     """Returns True if a seqdata row has any query."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_SEQDATA_QUERIES, (accession,))
@@ -271,7 +273,8 @@ def has_query(cachepath, accession):
 
 def has_nt_query(cachepath, accession):
     """Returns True if a seqdata row has an nt query."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession,))
@@ -282,7 +285,8 @@ def has_nt_query(cachepath, accession):
 
 def has_aa_query(cachepath, accession):
     """Returns True if a seqdata row has an aa query."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_SEQDATA_AAQUERY, (accession,))
@@ -293,7 +297,8 @@ def has_aa_query(cachepath, accession):
 
 def get_nt_query(cachepath, accession):
     """Returns nt query for a seqdata row."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_SEQDATA_NTQUERY, (accession,))
@@ -302,7 +307,8 @@ def get_nt_query(cachepath, accession):
 
 def has_ncbi_uid(cachepath, accession):
     """Returns True if seq accession has at least one nt UID."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_NT_UIDS, (accession,))
@@ -315,7 +321,8 @@ def add_ncbi_uids(cachepath, accession, uids):
     """Add collection of nt UIDs to cache for a record."""
     logger = logging.getLogger(__name__)
 
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     results = []
     # Exclude uids that are in the database/cache
     with conn:
@@ -337,7 +344,8 @@ def add_ncbi_uids(cachepath, accession, uids):
 
 def get_nt_uids(cachepath):
     """Return list of nt UIDs."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_UIDS)
@@ -346,7 +354,8 @@ def get_nt_uids(cachepath):
 
 def get_nogbhead_nt_uids(cachepath):
     """Return list of nt UIDs with no cached GenBank header."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_NOGBHEAD_UIDS)
@@ -355,7 +364,8 @@ def get_nogbhead_nt_uids(cachepath):
 
 def get_nt_noacc_uids(cachepath):
     """Return list of nt UIDs having no GenBank accession."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_NOACC_UIDS)
@@ -364,7 +374,8 @@ def get_nt_noacc_uids(cachepath):
 
 def update_nt_uid_acc(cachepath, uid, accession):
     """Update nt UID GenBank accession."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     results = []
     with conn:
         cur = conn.cursor()
@@ -375,7 +386,8 @@ def update_nt_uid_acc(cachepath, uid, accession):
 
 def add_gbheaders(cachepath, accession, length, org, taxon, date):
     """Add a new GenBank header to the cache."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_ADD_GBHEADER, (accession, length, org, taxon, date))
@@ -384,7 +396,8 @@ def add_gbheaders(cachepath, accession, length, org, taxon, date):
 
 def get_gbheader_lengths(cachepath):
     """Returns GenBank accessions and lengths for each sequence."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_GBHEADER_LENGTHS)
@@ -408,7 +421,8 @@ def find_shortest_genbank(cachepath):
 
 def add_gbfull(cachepath, accession, record):
     """Add a new full GenBank record to the cache."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_ADD_GBFULL, (accession, record))
@@ -417,7 +431,8 @@ def add_gbfull(cachepath, accession, record):
 
 def get_nogbfull_nt_uids(cachepath):
     """Return list of nt UIDs with no cached full GenBank record."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_NOGBFULL_UIDS)
@@ -426,7 +441,8 @@ def get_nogbfull_nt_uids(cachepath):
 
 def get_nogbfull_nt_acc(cachepath):
     """Return list of nt accessions with no cached full GenBank record."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_NOGBFULL_ACC)
@@ -435,7 +451,8 @@ def get_nogbfull_nt_acc(cachepath):
 
 def find_record_cds(cachepath, accession):
     """Return CDS sequence for passed input accession."""
-    conn = sqlite3.connect(cachepath)
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
         cur.execute(SQL_GET_GBRECORD_BY_SEQ, (accession,))
