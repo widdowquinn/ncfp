@@ -7,20 +7,26 @@
 Welcome to ncfp's documentation!
 ================================
 
-.. image:: https://img.shields.io/travis/widdowquinn/ncfp.svg?style=flat-square
-   :target: https://travis-ci.org/widdowquinn/ncfp
-.. image:: https://img.shields.io/codecov/c/github/widdowquinn/ncfp.svg?style=flat-square
+.. image:: https://circleci.com/gh/widdowquinn/ncfp.svg?style=shield
+   :target: https://circleci.com/gh/widdowquinn/ncfp/tree/master
+.. image:: https://img.shields.io/codecov/c/github/widdowquinn/ncfp/master.svg
    :target: https://codecov.org/widdowquinn/ncfp
-.. image:: https://api.codacy.com/project/badge/Grade/99a037e5eb2c4ae48e27e44c8974a3f8
+.. image:: https://app.codacy.com/project/badge/Grade/99a037e5eb2c4ae48e27e44c8974a3f8
    :target: https://www.codacy.com/app/widdowquinn/ncfp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=widdowquinn/ncfp&amp;utm_campaign=Badge_Grade
 .. image:: https://readthedocs.org/projects/ncfp/badge/?version=latest
    :target: https://ncfp.readthedocs.io/en/latest/?badge=latest
 
 |
 
-.. image:: https://img.shields.io/pypi/v/ncfp.svg?style=flat-square
+.. image:: https://img.shields.io/pypi/v/ncfp
    :target: https://pypi.python.org/pypi/ncfp
-.. image:: https://img.shields.io/pypi/l/ncfp.svg?style=flat-square
+.. image:: https://img.shields.io/pypi/l/ncfp
+   :target: https://pypi.python.org/pypi/ncfp/blob/master/LICENSE
+.. image:: https://img.shields.io/pypi/format/ncfp
+   :target: https://pypi.python.org/pypi/ncfp
+.. image:: https://img.shields.io/pypi/v/ncfp
+   :target: https://img.shields.io/pypi/pyversions/ncfp
+.. image:: https://img.shields.io/pypi/dm/ncfp
    :target: https://pypi.python.org/pypi/ncfp
 
 | 

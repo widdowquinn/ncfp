@@ -14,7 +14,6 @@ This repository contains code for a script that identifies and writes the corres
 [![ncfp PyPi version](https://img.shields.io/pypi/pyversions/ncfp "Python versions")](https://pypi.python.org/pypi/ncfp)
 [![ncfp PyPi version](https://img.shields.io/pypi/dm/ncfp "PyPI downloads")](https://pypi.python.org/pypi/ncfp)
 
-
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/version.svg)](https://anaconda.org/bioconda/ncfp)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/latest_release_date.svg)](https://anaconda.org/bioconda/ncfp)
 
