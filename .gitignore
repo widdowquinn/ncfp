@@ -16,19 +16,24 @@ venv*
 *__pycache__*
 
 # Exclude test files
+tests/examples
 tests/test_output
 skipped.fas
 .ncfp_cache
 test.log
-.coverage
 cover/
-example_output
+example_output/
 
 # Exclude local VS Code settings
 .vscode/
 
 # Exclude unneeded documentation files
 docs/_build/
+htmlcov/
+.coverage
+.coverage.*
+classes_ncbi_cds_from_protein.pdf
+packages_ncbi_cds_from_protein.pdf
 
 # Exclude distribution files
 dist/

@@ -29,25 +29,22 @@ to the file ``<OUTPUT>/skipped.fas``
 Input sequence formats
 ----------------------
 
-Input protein sequences must be provided in FASTA format, and ``ncfp`` expects input sequence headers to take one of
-two forms: "NCBI" or "UniProt". By default, ``ncfp`` expects sequences to be in NCBI format:
+Input protein sequences must be provided in FASTA format.
+
+``ncfp`` expects input sequence headers to take one of two forms: "NCBI" or "UniProt". ``ncfp`` will guess at sequence format/origin on the basis of the ID and description fields. By default, sequences will be assumed to be in NCBI format unless:
+
+* the sequence ID conforms to a UniProt UID
+* the sequence ID conforms to a UniParc UID (these sequences will be skipped as we should not expect a unique coding sequence)
 
 .. code-block:: bash
 
     ncfp <INPUT>.fasta <OUTPUT> <EMAIL>
 
-For sequence input in UniProt format, one of the ``-u`` or ``--uniprot`` options must be used, e.g.
-
-.. code-block:: bash
-
-    $ ncfp -u <INPUT>.fasta <OUTPUT> <EMAIL>
-    $ ncfp --uniprot <INPUT>.fasta <OUTPUT> <EMAIL>
-
 ^^^^^^^^^^^^^^^^^^
 NCBI header format
 ^^^^^^^^^^^^^^^^^^
 
-In NCBI header format, the sequence identifier is expected to correspond to a valid NCBI protein sequence
+In the NCBI header format, the sequence identifier is expected to correspond to a valid NCBI protein sequence
 accession, e.g.
 
 .. code-block:: bash
@@ -72,7 +69,7 @@ accession as a sequence identifier, e.g.
 UniProt header format
 ^^^^^^^^^^^^^^^^^^^^^
 
-In UniProt header format, the sequence description string is expected to correspond to a UniProt download
+In the UniProt header format, the sequence description string is expected to correspond to a UniProt download
 and contain the ``GN`` gene identifier key:value pair, e.g.
 
 .. code-block:: bash
@@ -83,7 +80,7 @@ and contain the ``GN`` gene identifier key:value pair, e.g.
     SQQSKINLINLEQEKIVNSIPVDGKFILAVAYSPDGKHLACGTFEGIVAIYDVETGKQVQ
     KYQDRAKPVRSISYSPDGSFLLAASDDMHVNIYDVLHSSLVGSVSGHISWILSVACSPDG
 
-If a coding sequence is identified successfully, the output nucleotide sequence header will have the gene
+If a coding sequence is identified successfully, the output nucleotide sequence header should have the gene
 accession as its sequence identifier, e.g.
 
 .. code-block:: bash
@@ -116,8 +113,8 @@ option, e.g.
 
 .. code-block:: bash
 
-    $ ncfp -u -s <INPUT>.fasta <OUTPUT> <EMAIL>
-    $ ncfp --uniprot --stockholm <INPUT>.fasta <OUTPUT> <EMAIL>
+    $ ncfp -s <INPUT>.fasta <OUTPUT> <EMAIL>
+    $ ncfp --stockholm <INPUT>.fasta <OUTPUT> <EMAIL>
 
 The output nucleotide sequence does not preserve the Stockholm format location information in the output, nor
 does it preserve sequence gap symbols:

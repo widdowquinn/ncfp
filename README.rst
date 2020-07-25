@@ -13,8 +13,8 @@ source nucleotide sequences in the NCBI databases, download them, and write them
    :target: https://pypi.python.org/pypi/ncfp
 .. image:: https://img.shields.io/pypi/l/ncfp.svg?style=flat-square
    :target: https://pypi.python.org/pypi/ncfp
-.. image:: https://img.shields.io/travis/widdowquinn/ncfp.svg?style=flat-square
-   :target: https://travis-ci.org/widdowquinn/ncfp
+.. image:: https://circleci.com/gh/widdowquinn/ncfp/tree/master.svg?style=flat-square
+   :target: https://circleci.com/gh/widdowquinn/ncfp/tree/master
 .. image:: https://img.shields.io/codecov/c/github/widdowquinn/ncfp.svg?style=flat-square
    :target: https://codecov.org/widdowquinn/ncfp
 .. image:: https://readthedocs.org/projects/ncfp/badge/?version=latest
@@ -54,7 +54,7 @@ Documentation
 -------------
 
 For more detailed information about ``ncfp`` as a program, or using the underlying ``ncbi_cds_from_protein``
-Python module, please see the most recent documentation at <https://ncfp.readthedocs.io/en/latest/>
+Python module, please see the current stable documentation at <https://ncfp.readthedocs.io/en/stable/>
 
 -------
 License
@@ -62,25 +62,25 @@ License
 
 Unless otherwise indicated, all code is licensed under the MIT license and subject to the following agreement:
 
-    (c) The James Hutton Institute 2017-2018
+    (c) The James Hutton Institute 2017-2019
+    (c) The University of Strathclyde 2019-2020
     Author: Leighton Pritchard
 
-    Contact: leighton.pritchard@hutton.ac.uk
+    Contact: leighton.pritchard@strath.ac.uk
 
     Address:
     Leighton Pritchard,
-    Information and Computational Sciences,
-    James Hutton Institute,
-    Errol Road,
-    Invergowrie,
-    Dundee,
-    DD6 9LH,
+    Strathclyde Institute for Pharmacy and Biomedical Sciences,
+    Cathedral Street,
+    Glasgow,
+    G4 0RE,
     Scotland,
     UK
 
 The MIT License
 
-Copyright (c) 2017-2018 The James Hutton Institute
+Copyright (c) 2017-2019 The James Hutton Institute
+Copyright (c) 2019-2020 The University of Strathclyde
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

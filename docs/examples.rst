@@ -15,7 +15,7 @@ The command below [#f1]_ identifies coding sequences from NCBI format
 .. code-block:: bash
 
     ncfp tests/test_input/sequences/input_ncbi.fasta \
-        tests/test_output/ncbi dev@null.com -v
+        tests/examples/ncbi dev@null.com -v
 
 
 -------------------------------------------
@@ -29,8 +29,8 @@ sequences are UniProt format, otherwise an error is thrown.
 
 .. code-block:: bash
 
-    ncfp -u tests/test_input/sequences/input_uniprot.fasta \
-        tests/test_output/uniprot dev@null.com -v
+    ncfp tests/test_input/sequences/input_uniprot.fasta \
+        tests/examples/uniprot dev@null.com -v
 
 
 ----------------------------------------------
@@ -46,8 +46,8 @@ tell ``ncfp`` to parse the region locations.
 
 .. code-block:: bash
 
-    ncfp -us tests/test_input/sequences/input_uniprot_stockholm.fasta \
-        tests/test_output/uniprot_stockholm dev@null.com -v
+    ncfp -s tests/test_input/sequences/input_uniprot_stockholm.fasta \
+        tests/examples/uniprot_stockholm dev@null.com -v
 
 
 ----------------------------------------------------
@@ -62,7 +62,7 @@ including three isoforms of the same protein from the same locus
 .. code-block:: bash
 
     ncfp tests/test_input/sequences/human.fasta \
-        tests/test_output/human dev@null.com -v
+        tests/examples/human dev@null.com -v
 
 -------
 Logging
@@ -75,8 +75,8 @@ the logfile should be written. An example is given in the command below.
 .. code-block:: bash
 
     ncfp tests/test_input/sequences/human.fasta \
-        tests/test_output/logging dev@null.com \
-        -l tests/test_output/logging/human.log
+        tests/examples/logging dev@null.com \
+        -l tests/examples/logging/human.log
 
 
 -----------------------------
@@ -93,8 +93,8 @@ naming convention can be overridden with the ``-d``/``--cachedir`` and
 .. code-block:: bash
 
     ncfp tests/test_input/sequences/human.fasta \
-        tests/test_output/caches dev@null.com \
-        -d tests/test_output/caches \
+        tests/examples/caches dev@null.com \
+        -d tests/examples/caches \
         -c ncfp_cache
 
 -------------------------
@@ -110,8 +110,8 @@ does not contain a cache database, one is created. For example:
 .. code-block:: bash
 
     ncfp tests/test_input/sequences/human.fasta \
-        tests/test_output/caches dev@null.com \
-        -d tests/test_output/caches \
+        tests/examples/caches1 dev@null.com \
+        -d tests/examples/caches \
         -c ncfp_cache
 
 will create a cache at ``tests/test_output/caches/ncfp_cache.sqlite3``,
@@ -120,8 +120,8 @@ and
 .. code-block:: bash
 
     ncfp tests/test_input/sequences/human.fasta \
-        tests/test_output/caches dev@null.com \
-        -d tests/test_output/caches \
+        tests/examples/caches2 dev@null.com \
+        -d tests/examples/caches \
         -c ncfp_cache \
         --filestem cached \
         --keepcache

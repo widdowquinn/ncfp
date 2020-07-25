@@ -12,8 +12,8 @@ workflows:
   test:
     jobs:
       - test-3_8
-      # - test-3_7
-      # - test-3_6
+      - test-3_7
+      - test-3_6
 
 jobs:
   test-3_8: &test-template
@@ -27,7 +27,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+            - ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-pip.txt" }}
             - ncfp-dependencies-pip-
 
       - run:
@@ -45,7 +45,7 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+          key: ncfp-dependencies-pip-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-pip.txt" }}
 
       - run:
           name: install ncfp
@@ -67,11 +67,11 @@ jobs:
       - codecov/upload:
           file: .coverage.xml
 
-  # test-3_6:
-  #   <<: *test-template
-  #   docker:
-  #     - image: circleci/python:3.6.8
-  # test-3_8:
-  #   <<: *test-template
-  #   docker:
-  #     - image: circleci/python:3.8.0
+  test-3_6:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.6.8
+  test-3_7:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.7.8
