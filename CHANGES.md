@@ -1,12 +1,15 @@
 # CHANGES.md - `ncfp`
 
-## v0.1.2-alpha
+## v0.2.0-a1
 
 - Update copyright notices
 - Convert parsers to use `pathlib`
 - Add requirements file for development tools
-- Convert tests to use `pytest`
+- Convert tests to use `pytest`, not `nose`
 - Revise logging usage
+- Change continuous integration from TravisCI to CircleCI
+- Guess sequence origin rather than asking user to provide at CLI (allows mixed origin files)
+- Update CLI parser and docs to reflect new sequence origin guessing
 
 ## v0.1.1
 
