@@ -1,5 +1,13 @@
 # CHANGES.md - `ncfp`
 
+## v0.2.1a1
+
+- fix badges (Zenodo/PyPI) in `README.md`
+
+## v0.2.0
+
+- bump version and add tag for release
+
 ## v0.2.0-a1
 
 - Update copyright notices
