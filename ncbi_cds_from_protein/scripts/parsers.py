@@ -52,11 +52,27 @@ def parse_cmdline(args=None):
     parser = ArgumentParser(prog="ncfp", formatter_class=ArgumentDefaultsHelpFormatter)
 
     # Add compulsory arguments
-    parser.add_argument(action="store", dest="infname", default=None, help="input sequence file", type=Path)
     parser.add_argument(
-        action="store", dest="outdirname", default=None, help="output directory for sequence files", type=Path
+        action="store",
+        dest="infname",
+        default=None,
+        help="input sequence file",
+        type=Path,
     )
-    parser.add_argument(action="store", dest="email", default=None, help="email address for NCBI/Entrez")
+    parser.add_argument(
+        action="store",
+        dest="outdirname",
+        default=Path("ncfp_output"),
+        help="output directory for sequence files",
+        type=Path,
+    )
+    parser.add_argument(
+        action="store",
+        dest="email",
+        default=None,
+        help="email address for NCBI/Entrez",
+        type=str,
+    )
 
     # Add options
     parser.add_argument(
@@ -82,6 +98,7 @@ def parse_cmdline(args=None):
         dest="cachestem",
         action="store",
         default=time.strftime("%Y-%m-%d-%H-%m-%S"),
+        type=str,
         help="suffix for cache filestems",
     )
     parser.add_argument(
@@ -94,7 +111,13 @@ def parse_cmdline(args=None):
         help="batch size for EPost submissions",
     )
     parser.add_argument(
-        "-r", "--retries", dest="retries", action="store", default=10, type=int, help="maximum number of Entrez retries"
+        "-r",
+        "--retries",
+        dest="retries",
+        action="store",
+        default=10,
+        type=int,
+        help="maximum number of Entrez retries",
     )
     parser.add_argument(
         "--limit",
@@ -105,24 +128,51 @@ def parse_cmdline(args=None):
         help="maximum number of sequences to process " + "(for testing)",
     )
     parser.add_argument(
-        "--filestem", dest="filestem", action="store", default="ncfp", help="stem for output sequence files"
+        "--filestem",
+        dest="filestem",
+        action="store",
+        default="ncfp",
+        type=str,
+        help="stem for output sequence files",
     )
     parser.add_argument(
-        "--keepcache", dest="keepcache", action="store_true", default=False, help="keep download cache (for testing)"
+        "--keepcache",
+        dest="keepcache",
+        action="store_true",
+        default=False,
+        help="keep download cache (for testing)",
     )
     parser.add_argument(
         "--skippedfile",
         dest="skippedfname",
         action="store",
         default="skipped.fasta",
-        help="path to file with skipped sequences",
+        type=str,
+        help="filename for skipped sequences",
     )
     parser.add_argument(
-        "-l", "--logfile", dest="logfile", action="store", default=None, help="path to logfile", type=Path
+        "-l",
+        "--logfile",
+        dest="logfile",
+        action="store",
+        default=None,
+        type=Path,
+        help="path to logfile",
     )
-    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="report verbosely")
     parser.add_argument(
-        "--debug", dest="debug", action="store_true", default=False, help="report debug-level information"
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        default=False,
+        help="report verbosely",
+    )
+    parser.add_argument(
+        "--debug",
+        dest="debug",
+        action="store_true",
+        default=False,
+        help="report debug-level information",
     )
     parser.add_argument(
         "--disabletqdm",
@@ -135,4 +185,6 @@ def parse_cmdline(args=None):
     # Parse arguments
     if args is None:
         args = sys.argv[1:]
+    else:
+        args = map(str, args)  # Ensure that args look like what we get from CLI
     return parser.parse_args(args)

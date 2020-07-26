@@ -38,10 +38,6 @@
 # THE SOFTWARE.
 """Test command-line parsing for ncfp program"""
 
-import logging
-import unittest
-
-from pathlib import Path
 
 import pytest
 
@@ -49,55 +45,70 @@ from ncbi_cds_from_protein.scripts import ncfp
 from ncbi_cds_from_protein import NCFPException
 
 
-class TestCLIParsing(unittest.TestCase):
-    """Class defining tests of ncfp CLI parsing."""
+@pytest.fixture
+def args_bad_infile(email_address, path_notexist, tmp_path):
+    """Cmd-line arguments for passing a nonexistent input file."""
+    return [path_notexist, tmp_path, email_address, "--disabletqdm"]
 
-    def setUp(self):
-        """Set attributes for tests."""
-        self.indir = Path("tests/test_input/sequences")
-        self.outdir = Path("tests/test_output/parsertests")
-        self.email = "ncfptest@dev.null"
-        # Lists of command-line arguments for each test
-        self.argsdict = {
-            "validate_and_log": [
-                str(self.indir / "input_uniprot_stockholm_small.fasta"),
-                str(self.outdir),
-                self.email,
-                "--stockholm",
-                "--disabletqdm",
-                "-l",
-                str(self.outdir / "download_logfile.log"),
-            ],
-            "bad_infile": [str(self.indir / "notexist.fasta"), str(self.outdir), self.email, "--disabletqdm",],
-            "local_cache": [
-                str(self.indir / "human.fasta"),
-                str(self.outdir),
-                self.email,
-                "--disabletqdm",
-                "-d",
-                str(self.outdir / "cache"),
-                "-c",
-                "humancache",
-            ],
-        }
 
-        # Null logger for testing
-        self.logger = logging.getLogger("TestCLIParsing logger")
-        self.logger.addHandler(logging.NullHandler())
+@pytest.fixture
+def args_create_reuse_cache(email_address, path_human, tmp_path):
+    """Cmd-line arguments for creating and reusing a local cache."""
+    return [
+        path_human,
+        tmp_path,
+        email_address,
+        "--disabletqdm",
+        "-d",
+        tmp_path / "cache",
+        "-c",
+        "humancache",
+    ]
 
-    def test_download_and_log(self):
-        """ncfp downloads coding sequences and logs output from CLI."""
-        ncfp.run_main(self.argsdict["validate_and_log"])
 
-    def test_bad_infile(self):
-        """ncfp stops if CLI input file does not exist."""
-        with pytest.raises(NCFPException):
-            ncfp.run_main(self.argsdict["bad_infile"])
+@pytest.fixture
+def args_validate_and_log(
+    email_address, path_uniprot_stockholm_small, tmp_path,
+):
+    """Cmd-line arguments for downloading sequences and logging output.
 
-    def test_create_and_keep_cache(self):
-        """ncfp creates named cache from CLI and keeps it when rerunning."""
-        self.logger.info("Creating local cache")
-        ncfp.run_main(self.argsdict["local_cache"])
+    Validates that ncfp runs without error, does not check output
+    """
+    return [
+        path_uniprot_stockholm_small,
+        tmp_path,
+        email_address,
+        "--stockholm",
+        "--disabletqdm",
+        "-l",
+        tmp_path / "validate_and_log.log",
+    ]
 
-        self.logger.info("Reusing local cache")
-        ncfp.run_main(self.argsdict["local_cache"] + ["--keepcache"])
+
+def test_bad_infile(args_bad_infile):
+    """ncfp stops if CLI input file does not exist.
+
+    Validates that ncfp throws correct error, does not check output
+    """
+    with pytest.raises(NCFPException):
+        ncfp.run_main(args_bad_infile)
+
+
+def test_create_and_keep_cache(args_create_reuse_cache):
+    """ncfp creates named cache from CLI and keeps it when rerunning.
+
+    This calls ncfp twice and expects both calls run without error. Output
+    is not checked.
+    """
+    # Create local cache
+    ncfp.run_main(args_create_reuse_cache)
+    # Reuse created cache
+    ncfp.run_main(args_create_reuse_cache + ["--keepcache"])
+
+
+def test_download_and_log(args_validate_and_log):
+    """ncfp downloads coding sequences and logs output from CLI.
+
+    Validates that ncfp runs without error, does not check output
+    """
+    ncfp.run_main(args_validate_and_log)
