@@ -47,7 +47,7 @@ from pathlib import Path
 
 from Bio.SeqRecord import SeqRecord
 from bioservices import UniProt
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from .caches import add_input_sequence, has_query
 
@@ -75,7 +75,9 @@ def guess_seqtype(record):
         logger.debug("...guessed UniParc")
         return "UniParc"
     else:  # Test for UniProt, see https://www.uniprot.org/help/fasta-headers
-        match = re.search(re_uniprot_head, record.description)  # test for UniProt header
+        match = re.search(
+            re_uniprot_head, record.description
+        )  # test for UniProt header
 
     if match is None:
         logger.debug("...guessed NCBI")
@@ -100,25 +102,44 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
     logger.info("Processing sequences...")
 
     kept, skipped = [], []
+
+    u_service = UniProt()
+
     for record in tqdm(records, desc="Process input sequences", disable=disabletqdm):
         seqtype = guess_seqtype(record)
         if seqtype == "UniParc":
-            logger.warning("Record %s looks like a UniParc cluster (skipping)", record.id)
+            logger.warning(
+                "Record %s looks like a UniParc cluster (skipping)", record.id
+            )
             skipped.append(record)
             continue
         elif seqtype == "UniProt":
             match = re.search(re_uniprot_gn, record.description)
             if match is None:  #  No GN field
-                logger.warning("Uniprot record %s has no GN field (skipping)", record.id)
+                logger.warning(
+                    "Uniprot record %s has no GN field (skipping)", record.id
+                )
                 skipped.append(record)
                 continue
-            service = UniProt()
-            result = service.search(match.group(0), columns="database(EMBL)")  # type: ignore
+            logger.debug("Uniprot record has GN field: %s", match.group(0))
+            result = u_service.search(match.group(0), columns="database(EMBL)")  # type: ignore
             qstring = result.split("\n")[1].strip()[:-1]
-            try:  # Uniprot sequences are added to cache as (accession, NULL, nt_query)
-                add_input_sequence(cachepath, record.id, None, qstring)
-            except sqlite3.IntegrityError:  # Sequence exists
-                continue
+            logger.debug("Recovered EMBL database record: %s", qstring)
+            # UniProt can return multiple UIDs separated by semicolons. Sometimes the same
+            # UID is repeated. However, the current cache schema uses the accession as primary
+            # key in the same table as the query IDs.
+            # TODO: Update schema to allow multiple queries per record
+            for qid in set(qstring.split(";")):
+                logger.debug("Adding record %s to cache with query %s", record.id, qid)
+                try:  # Uniprot sequences are added to cache as (accession, NULL, nt_query)
+                    add_input_sequence(cachepath, record.id, None, qid)
+                except sqlite3.IntegrityError:  # Sequence exists
+                    logger.warning(
+                        "Additional query terms found for %s: %s (not used)",
+                        record.id,
+                        qid,
+                    )
+                    continue
         elif seqtype == "NCBI":
             try:  # NCBI sequences are added to cache as (accession, aa_query, NULL)
                 add_input_sequence(cachepath, record.id, record.id, None)
@@ -129,6 +150,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             kept.append(record)
         else:
             skipped.append(record)
+
     return kept, skipped
 
 
@@ -196,10 +218,26 @@ def extract_feature_cds(feature, record, stockholm):
 
     # Create SeqRecords of CDS and conceptual translation
     if "locus_tag" in feature.qualifiers:
-        ntrecord = SeqRecord(seq=ntseq, description="coding sequence", id=feature.qualifiers["locus_tag"][0])
-        aarecord = SeqRecord(seq=aaseq, description="conceptual translation", id=feature.qualifiers["locus_tag"][0])
+        ntrecord = SeqRecord(
+            seq=ntseq,
+            description="coding sequence",
+            id=feature.qualifiers["locus_tag"][0],
+        )
+        aarecord = SeqRecord(
+            seq=aaseq,
+            description="conceptual translation",
+            id=feature.qualifiers["locus_tag"][0],
+        )
     else:
-        ntrecord = SeqRecord(seq=ntseq, description="coding sequence", id=feature.qualifiers["protein_id"][0])
-        aarecord = SeqRecord(seq=aaseq, description="conceptual translation", id=feature.qualifiers["protein_id"][0])
+        ntrecord = SeqRecord(
+            seq=ntseq,
+            description="coding sequence",
+            id=feature.qualifiers["protein_id"][0],
+        )
+        aarecord = SeqRecord(
+            seq=aaseq,
+            description="conceptual translation",
+            id=feature.qualifiers["protein_id"][0],
+        )
 
     return ntrecord, aarecord

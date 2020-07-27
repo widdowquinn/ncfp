@@ -48,13 +48,13 @@ from ncbi_cds_from_protein import NCFPException
 @pytest.fixture
 def args_bad_infile(email_address, path_notexist, tmp_path):
     """Cmd-line arguments for passing a nonexistent input file."""
-    return [path_notexist, tmp_path, email_address, "--disabletqdm"]
+    yield [path_notexist, tmp_path, email_address, "--disabletqdm"]
 
 
 @pytest.fixture
 def args_create_reuse_cache(email_address, path_human, tmp_path):
     """Cmd-line arguments for creating and reusing a local cache."""
-    return [
+    yield [
         path_human,
         tmp_path,
         email_address,
@@ -74,7 +74,7 @@ def args_validate_and_log(
 
     Validates that ncfp runs without error, does not check output
     """
-    return [
+    yield [
         path_uniprot_stockholm_small,
         tmp_path,
         email_address,

@@ -76,15 +76,15 @@ def config_logger(args: Namespace):
     # Create and add STDERR handler
     err_formatter = logging.Formatter("[%(levelname)s] [%(name)s]: %(message)s")
     err_handler = logging.StreamHandler(sys.stderr)
-    if args is not None and args.verbose:
-        err_handler.setLevel(logging.INFO)
-    elif args is not None and args.debug:
-        err_handler.setLevel(logging.DEBUG)
+    if args is not None and args.debug:
+        logger.setLevel(logging.DEBUG)
+    elif args is not None and args.verbose:
+        logger.setLevel(logging.INFO)
     err_handler.setFormatter(err_formatter)
     logger.addHandler(err_handler)
 
     # If args.logfile is provided, add a FileHandler for it
-    if args.logfile is not None:
+    if args is not None and args.logfile is not None:
         logdir = args.logfile.parents[0]
         try:
             if not logdir == Path.cwd():

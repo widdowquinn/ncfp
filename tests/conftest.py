@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # (c) The University of Strathclude 2019-2020
 # Author: Leighton Pritchard
@@ -48,6 +47,7 @@ import pytest
 # module. The fixture data should be in a subdirectory named fixtures
 TESTSPATH = Path(__file__).parents[0]
 FIXTUREPATH = TESTSPATH / "fixtures"
+TARGETPATH = TESTSPATH / "targets"
 
 
 @pytest.fixture
@@ -69,12 +69,54 @@ def path_human(dir_sequences):
 
 
 @pytest.fixture
+def path_ncbi(dir_sequences):
+    """Path to NCBI sequences."""
+    yield dir_sequences / "input_ncbi.fasta"
+
+
+@pytest.fixture
+def path_ncbi_targets():
+    """Path to NCBI target outputs."""
+    yield TARGETPATH / "basic_ncbi"
+
+
+@pytest.fixture
 def path_notexist(dir_sequences):
     """Path to nonexistent FASTA file."""
     yield dir_sequences / "notexist.fasta"
 
 
 @pytest.fixture
+def path_stockholm(dir_sequences):
+    """Path to Stockholm sequences."""
+    yield dir_sequences / "input_uniprot_stockholm.fasta"
+
+
+@pytest.fixture
+def path_stockholm_targets():
+    """Path to Stockholm target outputs."""
+    yield TARGETPATH / "basic_stockholm"
+
+
+@pytest.fixture
+def path_uniprot(dir_sequences):
+    """Path to UniProt sequences."""
+    yield dir_sequences / "input_uniprot.fasta"
+
+
+@pytest.fixture
 def path_uniprot_stockholm_small(dir_sequences):
     """Path to small FASTA file of UniProt sequences with Stockholm format."""
     yield dir_sequences / "input_uniprot_stockholm_small.fasta"
+
+
+@pytest.fixture
+def path_uniprot_targets():
+    """Path to UniProt target outputs."""
+    yield TARGETPATH / "basic_uniprot"
+
+
+@pytest.fixture
+def path_uniprot_stockholm_small_targets(dir_sequences):
+    """Path to targets for small FASTA file of UniProt sequences with Stockholm format."""
+    yield TARGETPATH / "small_stockholm"
