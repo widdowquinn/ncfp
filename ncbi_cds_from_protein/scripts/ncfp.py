@@ -100,7 +100,9 @@ def load_input_sequences(args: Namespace) -> List:
     except IOError:
         logger.error("Could not parse sequence file %s", args.infname, exc_info=True)
         raise SystemExit(1)
-    logger.info("%d sequence records read successfully from %s", len(records), args.infname)
+    logger.info(
+        "%d sequence records read successfully from %s", len(records), args.infname
+    )
     return records
 
 
@@ -139,7 +141,9 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 logger.info("Could not identify CDS feature for %s", record.id)
             else:
                 logger.info(
-                    "\tSequence %s matches CDS feature %s", record.id, feature.qualifiers["protein_id"][0],
+                    "\tSequence %s matches CDS feature %s",
+                    record.id,
+                    feature.qualifiers["protein_id"][0],
                 )
                 logger.info("\tExtracting coding sequence...")
                 if args.stockholm:
@@ -152,7 +156,9 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                     logger.info("\t\tTranslated sequence matches input sequence")
                     nt_sequences.append((record, ntseq))
                 else:
-                    logger.warning("\t\tTranslated sequence does not match " + "input sequence!")
+                    logger.warning(
+                        "\t\tTranslated sequence does not match " + "input sequence!"
+                    )
                     logger.warning("\t\t%s", aaseq.seq)
                     logger.warning("\t\t%s", record.seq.ungap("-").upper())
 
@@ -200,7 +206,9 @@ def run_main(argv=None):
 
     # Catch execution with no arguments
     if len(sys.argv) == 1:
-        sys.stderr.write("ncbi_cds_from_protein " + "version: {0}\n".format(__version__))
+        sys.stderr.write(
+            "ncbi_cds_from_protein " + "version: {0}\n".format(__version__)
+        )
         return 0
 
     # Set up logging
@@ -215,7 +223,11 @@ def run_main(argv=None):
     try:
         os.makedirs(args.outdirname, exist_ok=True)
     except OSError:
-        logger.error("Could not use/create output directory %s (exiting)", args.outdirname, exc_info=True)
+        logger.error(
+            "Could not use/create output directory %s (exiting)",
+            args.outdirname,
+            exc_info=True,
+        )
         raise SystemExit(1)
 
     # Initialise local cache, get input sequences, and set format
@@ -243,10 +255,14 @@ def run_main(argv=None):
     # Identify nucleotide accessions corresponding to the input sequences,
     # and cache them.
     logger.info("Identifying nucleotide accessions...")
-    addedrows, countfail = search_nt_ids(qrecords, cachepath, args.retries, disabletqdm=args.disabletqdm)
+    addedrows, countfail = search_nt_ids(
+        qrecords, cachepath, args.retries, disabletqdm=args.disabletqdm
+    )
     logger.info("Added %d new UIDs to cache", len(addedrows))
     if countfail:
-        logger.warning("NCBI nucleotide accession search failed for " + "%d records", countfail)
+        logger.warning(
+            "NCBI nucleotide accession search failed for " + "%d records", countfail
+        )
     if not addedrows and countfail == 0:
         logger.warning("No nucleotide accession downloads were required! (in cache?)")
 
@@ -255,7 +271,9 @@ def run_main(argv=None):
     # First, we associate GenBank accessions with a UID. This can be done
     # without reference to the records, using only the cache.
     logger.info("Collecting GenBank accessions...")
-    updatedrows, countfail = update_gb_accessions(cachepath, args.retries, disabletqdm=args.disabletqdm)
+    updatedrows, countfail = update_gb_accessions(
+        cachepath, args.retries, disabletqdm=args.disabletqdm
+    )
     logger.info("Updated GenBank accessions for %d UIDs", len(updatedrows))
     if countfail:
         logger.warning("Unable to update GenBank accessions for %d UIDs", countfail)
@@ -265,7 +283,9 @@ def run_main(argv=None):
     # Next we recover GenBank headers and extract useful information -
     # sequence length, taxonomy, and so on.
     logger.info("Fetching GenBank headers...")
-    addedrows, countfail = fetch_gb_headers(cachepath, args.retries, args.batchsize, disabletqdm=args.disabletqdm)
+    addedrows, countfail = fetch_gb_headers(
+        cachepath, args.retries, args.batchsize, disabletqdm=args.disabletqdm
+    )
     logger.info("Fetched GenBank headers for %d UIDs", len(addedrows))
     if countfail:
         logger.warning("Unable to update GenBank headers for %d UIDs", countfail)
@@ -275,7 +295,9 @@ def run_main(argv=None):
     # Next we recover the shortest complete GenBank record for each input
     # sequence
     logger.info("Fetching shortest complete GenBank records...")
-    addedrows, countfail = fetch_shortest_genbank(cachepath, args.retries, args.batchsize, disabletqdm=args.disabletqdm)
+    addedrows, countfail = fetch_shortest_genbank(
+        cachepath, args.retries, args.batchsize, disabletqdm=args.disabletqdm
+    )
     logger.info("Fetched GenBank records for %d UIDs", len(addedrows))
     if countfail:
         logger.warning("Unable to get complete GenBank files for %d UIDs", countfail)
@@ -314,10 +336,14 @@ def write_sequences(aa_nt_seqs, args: Namespace):
 
     # Write input sequences that were matched
     aafilename = os.path.join(args.outdirname, "_".join([args.filestem, "aa.fasta"]))
-    logger.info("\tWriting matched input sequences to %s", aafilename)
+    logger.info(
+        "\tWriting %d matched input sequences to %s", len(aa_nt_seqs), aafilename
+    )
     SeqIO.write([aaseq for (aaseq, ntseq) in aa_nt_seqs], aafilename, "fasta")
 
     # Write coding sequences
     ntfilename = os.path.join(args.outdirname, "_".join([args.filestem, "nt.fasta"]))
-    logger.info("\tWriting matched output sequences to %s", ntfilename)
+    logger.info(
+        "\tWriting %d matched output sequences to %s", len(aa_nt_seqs), ntfilename
+    )
     SeqIO.write([ntseq for (aaseq, ntseq) in aa_nt_seqs], ntfilename, "fasta")

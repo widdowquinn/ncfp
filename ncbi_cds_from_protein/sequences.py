@@ -129,7 +129,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             # UID is repeated. However, the current cache schema uses the accession as primary
             # key in the same table as the query IDs.
             # TODO: Update schema to allow multiple queries per record
-            for qid in set(qstring.split(";")):
+            for qid in qstring.split(";"):
                 logger.debug("Adding record %s to cache with query %s", record.id, qid)
                 try:  # Uniprot sequences are added to cache as (accession, NULL, nt_query)
                     add_input_sequence(cachepath, record.id, None, qid)
@@ -162,9 +162,12 @@ def extract_feature_by_locus_tag(record, tag, ftype="CDS"):
     tag         - locus tag to search for
     ftype       - feature types to search
     """
+    logger = logging.getLogger(__name__)
+
     for feature in [ftr for ftr in record.features if ftr.type == ftype]:
         try:
             if tag in feature.qualifiers["locus_tag"]:
+                logger.debug("Found %s in locus_tag", tag)
                 return feature
         except KeyError:
             continue
@@ -179,9 +182,12 @@ def extract_feature_by_protein_id(record, tag, ftype="CDS"):
     tag         - locus tag to search for
     ftype       - feature types to search
     """
+    logger = logging.getLogger(__name__)
+
     for feature in [ftr for ftr in record.features if ftr.type == ftype]:
         try:
             if tag in feature.qualifiers["protein_id"]:
+                logger.debug("Found %s in protein_id", tag)
                 return feature
         except KeyError:
             continue

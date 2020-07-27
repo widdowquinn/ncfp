@@ -47,13 +47,8 @@ import pytest
 # module. The fixture data should be in a subdirectory named fixtures
 TESTSPATH = Path(__file__).parents[0]
 FIXTUREPATH = TESTSPATH / "fixtures"
+SEQUENCEPATH = FIXTUREPATH / "sequences"
 TARGETPATH = FIXTUREPATH / "targets"
-
-
-@pytest.fixture
-def dir_sequences():
-    """Path to directory containing sequence file fixtures."""
-    yield FIXTUREPATH / "sequences"
 
 
 @pytest.fixture
@@ -63,15 +58,15 @@ def email_address():
 
 
 @pytest.fixture
-def path_human(dir_sequences):
+def path_human():
     """Path to FASTA file of human sequences."""
-    yield dir_sequences / "human.fasta"
+    yield SEQUENCEPATH / "human.fasta"
 
 
 @pytest.fixture
-def path_ncbi(dir_sequences):
+def path_ncbi():
     """Path to NCBI sequences."""
-    yield dir_sequences / "input_ncbi.fasta"
+    yield SEQUENCEPATH / "input_ncbi.fasta"
 
 
 @pytest.fixture
@@ -81,15 +76,15 @@ def path_ncbi_targets():
 
 
 @pytest.fixture
-def path_notexist(dir_sequences):
+def path_notexist():
     """Path to nonexistent FASTA file."""
-    yield dir_sequences / "notexist.fasta"
+    yield SEQUENCEPATH / "notexist.fasta"
 
 
 @pytest.fixture
-def path_stockholm(dir_sequences):
+def path_stockholm():
     """Path to Stockholm sequences."""
-    yield dir_sequences / "input_uniprot_stockholm.fasta"
+    yield SEQUENCEPATH / "input_uniprot_stockholm.fasta"
 
 
 @pytest.fixture
@@ -99,15 +94,15 @@ def path_stockholm_targets():
 
 
 @pytest.fixture
-def path_uniprot(dir_sequences):
+def path_uniprot():
     """Path to UniProt sequences."""
-    yield dir_sequences / "input_uniprot.fasta"
+    yield SEQUENCEPATH / "input_uniprot.fasta"
 
 
 @pytest.fixture
-def path_uniprot_stockholm_small(dir_sequences):
+def path_uniprot_stockholm_small():
     """Path to small FASTA file of UniProt sequences with Stockholm format."""
-    yield dir_sequences / "input_uniprot_stockholm_small.fasta"
+    yield SEQUENCEPATH / "input_uniprot_stockholm_small.fasta"
 
 
 @pytest.fixture
@@ -117,6 +112,6 @@ def path_uniprot_targets():
 
 
 @pytest.fixture
-def path_uniprot_stockholm_small_targets(dir_sequences):
+def path_uniprot_stockholm_small_targets():
     """Path to targets for small FASTA file of UniProt sequences with Stockholm format."""
     yield TARGETPATH / "small_stockholm"
