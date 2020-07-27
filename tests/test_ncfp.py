@@ -109,7 +109,7 @@ def test_basic_stockholm(
     """ncfp collects correct coding sequences for basic UniProt/Stockholm input."""
     # Modify default arguments
     infile = path_stockholm
-    outdir = tmp_path / "small_stockholm"
+    outdir = tmp_path / "basic_stockholm"
     args = modify_namespace(
         namespace_base, infname=infile, outdirname=outdir, stockholm=True
     )
@@ -117,11 +117,9 @@ def test_basic_stockholm(
     # Run ersatz command-line
     ncfp.run_main(args)
 
-    # Compare output
+    # Compare output (should be no skipped files)
     check_files(
-        outdir,
-        path_stockholm_targets,
-        ("ncfp_aa.fasta", "ncfp_nt.fasta", "skipped.fasta"),
+        outdir, path_stockholm_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta"),
     )
 
 
@@ -142,7 +140,7 @@ def test_small_stockholm(
     # Run ersatz command-line
     ncfp.run_main(args)
 
-    # Compare output
+    # Compare output (should be no skipped files)
     check_files(
         outdir, path_uniprot_stockholm_small_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta")
     )

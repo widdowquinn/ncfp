@@ -47,7 +47,7 @@ import pytest
 # module. The fixture data should be in a subdirectory named fixtures
 TESTSPATH = Path(__file__).parents[0]
 FIXTUREPATH = TESTSPATH / "fixtures"
-TARGETPATH = TESTSPATH / "targets"
+TARGETPATH = FIXTUREPATH / "targets"
 
 
 @pytest.fixture
