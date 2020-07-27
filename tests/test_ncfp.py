@@ -38,96 +38,112 @@
 # THE SOFTWARE.
 """Test commandline entry for the ncfp program."""
 
-import logging
 import time
-import unittest
 
 from argparse import Namespace
-from pathlib import Path
+
+import pytest
 
 from ncbi_cds_from_protein.scripts import ncfp
+from utils import check_files, modify_namespace
 
 
-class TestBasicUse(unittest.TestCase):
-    """Class defining tests of basic ncfp usage."""
+@pytest.fixture
+def namespace_base(email_address, path_ncbi, tmp_path):
+    """Cmd-line arguments for passing a nonexistent input file."""
+    yield Namespace(
+        infname=path_ncbi,
+        outdirname=tmp_path,
+        email=email_address,
+        stockholm=False,
+        cachedir=tmp_path / ".ncfp_cache",
+        cachestem=time.strftime("%Y-%m-%d-%H-%m-%S"),
+        batchsize=100,
+        retries=10,
+        limit=None,
+        filestem="ncfp",
+        keepcache=False,
+        skippedfname="skipped.fasta",
+        logfile=None,
+        verbose=False,
+        disabletqdm=True,
+        debug=False,
+    )
 
-    def setUp(self):
-        """Set attributes for tests."""
-        # Paths to test file directories
-        self.datadir = Path("tests/test_input/sequences")
-        self.outdir = Path("tests/test_output")
-        self.targetdir = Path("tests/test_targets")
 
-        # Null logger instance
-        self.logger = logging.getLogger("TestBasicUse logger")
-        self.logger.addHandler(logging.NullHandler())
+def test_basic_ncbi(namespace_base, path_ncbi, path_ncbi_targets, tmp_path):
+    """ncfp collects correct coding sequences for basic NCBI input."""
+    # Modify default arguments
+    infile = path_ncbi
+    outdir = tmp_path / "basic_ncbi"
+    args = modify_namespace(namespace_base, infname=infile, outdirname=outdir)
 
-        # Default command-line namespace
-        self.base_namespace = Namespace(
-            infname=self.datadir / "input_ncbi.fasta",
-            outdirname=self.outdir / "basic_ncbi",
-            email="ncfp@dev.null",
-            stockholm=False,
-            cachedir=Path(".ncfp_cache"),
-            cachestem=time.strftime("%Y-%m-%d-%H-%m-%S"),
-            batchsize=100,
-            retries=10,
-            limit=None,
-            filestem="ncfp",
-            keepcache=False,
-            skippedfname="skipped.fasta",
-            logfile=None,
-            verbose=False,
-            disabletqdm=True,
-            debug=False,
-        )
+    # Run ersatz command-line
+    ncfp.run_main(args)
 
-    def test_basic_ncbi(self):
-        """ncfp collects correct coding sequences for basic NCBI input."""
-        # Modify default arguments
-        outdirname = "basic_ncbi"  # common dirname for output,target
-        namespace = self.base_namespace
-        namespace.infname = self.datadir / "input_ncbi.fasta"
-        namespace.outdirname = self.outdir / outdirname
+    # Compare output
+    check_files(outdir, path_ncbi_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
 
-        # Run ersatz command-line
-        ncfp.run_main(namespace)
 
-        # Compare output
-        self.check_files(outdirname, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
+def test_basic_uniprot(namespace_base, path_uniprot, path_uniprot_targets, tmp_path):
+    """ncfp collects correct coding sequences for basic UniProt input."""
+    # Modify default arguments
+    infile = path_uniprot
+    outdir = tmp_path / "basic_uniprot"
+    args = modify_namespace(namespace_base, infname=infile, outdirname=outdir)
 
-    def test_basic_uniprot(self):
-        """ncfp collects correct coding sequences for basic UniProt input."""
-        # Modify default arguments
-        outdirname = "basic_uniprot"  # common dirname for output,target
-        namespace = self.base_namespace
-        namespace.infname = self.datadir / "input_uniprot.fasta"
-        namespace.outdirname = self.outdir / outdirname
+    # Run ersatz command-line
+    ncfp.run_main(args)
 
-        # Run ersatz command-line
-        ncfp.run_main(namespace)
+    # Compare output
+    check_files(
+        outdir,
+        path_uniprot_targets,
+        ("ncfp_aa.fasta", "ncfp_nt.fasta", "skipped.fasta"),
+    )
 
-        # Compare output
-        self.check_files(outdirname, ("ncfp_aa.fasta", "ncfp_nt.fasta", "skipped.fasta"))
 
-    def test_basic_stockholm(self):
-        """ncfp collects correct coding sequences for basic UniProt/Stockholm input."""
-        # Modify default arguments
-        outdirname = "small_stockholm"  # common dirname for output,target
-        namespace = self.base_namespace
-        namespace.infname = self.datadir / "input_uniprot_stockholm_small.fasta"
-        namespace.outdirname = self.outdir / outdirname
-        namespace.stockholm = True
+@pytest.mark.skip(
+    reason="Database caching needs to be rewritten to account for multiple cross-references to EMBL"
+)
+def test_basic_stockholm(
+    namespace_base, path_stockholm, path_stockholm_targets, tmp_path
+):
+    """ncfp collects correct coding sequences for basic UniProt/Stockholm input."""
+    # Modify default arguments
+    infile = path_stockholm
+    outdir = tmp_path / "basic_stockholm"
+    args = modify_namespace(
+        namespace_base, infname=infile, outdirname=outdir, stockholm=True
+    )
 
-        # Run ersatz command-line
-        ncfp.run_main(namespace)
+    # Run ersatz command-line
+    ncfp.run_main(args)
 
-        # Compare output
-        self.check_files(outdirname, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
+    # Compare output (should be no skipped files)
+    check_files(
+        outdir, path_stockholm_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta"),
+    )
 
-    def check_files(self, outdirname, fnames):
-        """Test whether output and target files are identical"""
-        for fname in fnames:
-            with (self.outdir / outdirname / fname).open() as fh1:
-                with (self.targetdir / outdirname / fname).open() as fh2:
-                    assert fh1.read() == fh2.read()
+
+def test_small_stockholm(
+    namespace_base,
+    path_uniprot_stockholm_small,
+    path_uniprot_stockholm_small_targets,
+    tmp_path,
+):
+    """ncfp collects correct coding sequences for small UniProt/Stockholm input."""
+    # Modify default arguments
+    infile = path_uniprot_stockholm_small
+    outdir = tmp_path / "small_stockholm"
+    args = modify_namespace(
+        namespace_base, infname=infile, outdirname=outdir, stockholm=True
+    )
+
+    # Run ersatz command-line
+    ncfp.run_main(args)
+
+    # Compare output (should be no skipped files)
+    check_files(
+        outdir, path_uniprot_stockholm_small_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta")
+    )
