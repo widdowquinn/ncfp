@@ -41,6 +41,8 @@
 
 import pytest
 
+from bioservices import UniProt
+
 from ncbi_cds_from_protein.scripts import ncfp
 from ncbi_cds_from_protein import NCFPException
 
@@ -85,6 +87,26 @@ def args_validate_and_log(
     ]
 
 
+@pytest.fixture
+def mock_uniprot_download_and_log(monkeypatch):
+    """Mock remote service call to UniProt for download_and_log test.
+
+    Returns the result expected from l125 of sequences.py, for each query of
+    the path_uniprot_stockholm_small dataset
+
+    u_service.search(match.group(0), columns="database(EMBL)")  # type: ignore
+    """
+
+    def mock_search(*args, **kwargs):
+        """Mock call to UniProt.search() method.
+
+        This output specific to the download_and_log() test
+        """
+        return "Cross-reference (EMBL)\nCM000618;\n"
+
+    monkeypatch.setattr(UniProt, "search", mock_search)
+
+
 def test_bad_infile(args_bad_infile):
     """ncfp stops if CLI input file does not exist.
 
@@ -106,9 +128,10 @@ def test_create_and_keep_cache(args_create_reuse_cache):
     ncfp.run_main(args_create_reuse_cache + ["--keepcache"])
 
 
-def test_download_and_log(args_validate_and_log):
+def test_download_and_log(args_validate_and_log, mock_uniprot_download_and_log):
     """ncfp downloads coding sequences and logs output from CLI.
 
-    Validates that ncfp runs without error, does not check output
+    Validates that ncfp runs without error, does not check output. Calls to UniProt
+    are mocked for use with cloud CI.
     """
     ncfp.run_main(args_validate_and_log)
