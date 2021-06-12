@@ -45,7 +45,6 @@ import pytest
 from unittest.mock import Mock
 
 from Bio import Entrez
-from Bio.Entrez import Parser
 from bioservices import UniProt
 
 from ncbi_cds_from_protein.scripts import ncfp
@@ -127,10 +126,50 @@ def mock_entrez_create_and_keep_cache(monkeypatch):
     responses.side_effect = [
         io.BytesIO(_)
         for _ in (
-            b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD elink 20101123//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  <LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>10835069</Id>\n    </IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      <LinkName>protein_nuccore</LinkName>\n      \n        <Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n        <Link>\n\t\t\t\t<Id>197116381</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n',
-            b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD elink 20101123//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  <LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>283135214</Id>\n    </IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      <LinkName>protein_nuccore</LinkName>\n      \n        <Link>\n\t\t\t\t<Id>1677498684</Id>\n\t\t\t</Link>\n        <Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n',
-            b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD elink 20101123//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  <LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>530397002</Id>\n    </IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      <LinkName>protein_nuccore</LinkName>\n      \n        <Link>\n\t\t\t\t<Id>767968522</Id>\n\t\t\t</Link>\n        <Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n',
-            b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD elink 20101123//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  <LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>283135242</Id>\n    </IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      <LinkName>protein_nuccore</LinkName>\n      \n        <Link>\n\t\t\t\t<Id>1677500256</Id>\n\t\t\t</Link>\n        <Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n',
+            (
+                b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult '
+                b'PUBLIC "-//NLM//DTD elink 20101123//EN" '
+                b'"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  '
+                b"<LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>10835069</Id>\n    "
+                b"</IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      "
+                b"<LinkName>protein_nuccore</LinkName>\n      \n        "
+                b"<Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n        "
+                b"<Link>\n\t\t\t\t<Id>197116381</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  "
+                b"</LinkSet>\n</eLinkResult>\n"
+            ),
+            (
+                b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult '
+                b'PUBLIC "-//NLM//DTD elink 20101123//EN" '
+                b'"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  '
+                b"<LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>283135214</Id>\n    "
+                b"</IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      "
+                b"<LinkName>protein_nuccore</LinkName>\n      \n        "
+                b"<Link>\n\t\t\t\t<Id>1677498684</Id>\n\t\t\t</Link>\n        "
+                b"<Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  "
+                b"</LinkSet>\n</eLinkResult>\n"
+            ),
+            (
+                b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult '
+                b'PUBLIC "-//NLM//DTD elink 20101123//EN" '
+                b'"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  '
+                b"<LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>530397002</Id>\n    "
+                b"</IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      "
+                b"<LinkName>protein_nuccore</LinkName>\n      \n        "
+                b"<Link>\n\t\t\t\t<Id>767968522</Id>\n\t\t\t</Link>\n        "
+                b"<Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  "
+                b"</LinkSet>\n</eLinkResult>\n"
+            ),
+            (
+                b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult '
+                b'PUBLIC "-//NLM//DTD elink 20101123//EN" '
+                b'"https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  '
+                b"<LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>283135242</Id>\n    "
+                b"</IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      "
+                b"<LinkName>protein_nuccore</LinkName>\n      \n        "
+                b"<Link>\n\t\t\t\t<Id>1677500256</Id>\n\t\t\t</Link>\n        "
+                b"<Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    "
+                b"</LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n"
+            ),
         )
     ]
 
