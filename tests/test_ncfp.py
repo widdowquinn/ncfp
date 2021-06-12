@@ -44,8 +44,63 @@ from argparse import Namespace
 
 import pytest
 
+from bioservices import UniProt
+
 from ncbi_cds_from_protein.scripts import ncfp
 from utils import check_files, modify_namespace
+
+
+@pytest.fixture
+def mock_uniprot_download_and_log(monkeypatch):
+    """Mock remote service call to UniProt for download_and_log test.
+
+    Returns the result expected from l125 of sequences.py, for each query of
+    the path_uniprot_stockholm_small dataset
+
+    u_service.search(match.group(0), columns="database(EMBL)")  # type: ignore
+    """
+
+    def mock_search(*args, **kwargs):
+        """Mock call to UniProt.search() method.
+
+        This output specific to the download_and_log() test
+        """
+        return "Cross-reference (EMBL)\nCM000618;\n"
+
+    monkeypatch.setattr(UniProt, "search", mock_search)
+
+
+@pytest.fixture
+def mock_basic_uniprot(monkeypatch):
+    """Mock remote service call to UniProt for test_basic_uniprot test.
+
+    Returns the result expected from l125 of sequences.py, for each query of
+    the path_uniprot_stockholm_small dataset
+
+    u_service.search(match.group(0), columns="database(EMBL)")  # type: ignore
+    """
+    results = iter(
+        [
+            "Cross-reference (EMBL)\nJNBS01004944;\n",
+            "Cross-reference (EMBL)\nJNBS01000225;\n",
+            "Cross-reference (EMBL)\nAZIL01000691;\n",
+            "Cross-reference (EMBL)\nGL833138;\n",
+            "Cross-reference (EMBL)\nJNBR01001477;\n",
+            "Cross-reference (EMBL)\nJNBS01001796;\n",
+            "Cross-reference (EMBL)\nJNBS01000295;\n",
+            "Cross-reference (EMBL)\nKI913977;\n",
+            "Cross-reference (EMBL)\nFN648069;\n",
+        ]
+    )
+
+    def mock_search(*args, **kwargs):
+        """Mock call to UniProt.search() method.
+
+        This output specific to the test_basic_uniprot() test
+        """
+        return next(results)
+
+    monkeypatch.setattr(UniProt, "search", mock_search)
 
 
 @pytest.fixture
@@ -85,7 +140,9 @@ def test_basic_ncbi(namespace_base, path_ncbi, path_ncbi_targets, tmp_path):
     check_files(outdir, path_ncbi_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
 
 
-def test_basic_uniprot(namespace_base, path_uniprot, path_uniprot_targets, tmp_path):
+def test_basic_uniprot(
+    namespace_base, path_uniprot, path_uniprot_targets, tmp_path, mock_basic_uniprot
+):
     """ncfp collects correct coding sequences for basic UniProt input."""
     # Modify default arguments
     infile = path_uniprot
