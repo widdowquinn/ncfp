@@ -314,6 +314,8 @@ def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
     linkdbname      - NCBI target database name for link query
     maxretries      - maximum number of attempts to make
     """
+    import json
+
     logger = logging.getLogger(__name__)
     logger.debug("ELink query: %s", query_id)
 
@@ -327,7 +329,7 @@ def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
         except Exception:
             tries += 1
             logger.warning(
-                "ELing query (%s) failed (retry %d)", query_id, tries, exc_info=True
+                "ELink query (%s) failed (retry %d)", query_id, tries, exc_info=True
             )
     raise NCFPMaxretryException("Query ID %s ELink failed" % query_id)
 

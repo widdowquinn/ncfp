@@ -38,9 +38,14 @@
 # THE SOFTWARE.
 """Test command-line parsing for ncfp program"""
 
+import io
 
 import pytest
 
+from unittest.mock import Mock
+
+from Bio import Entrez
+from Bio.Entrez import Parser
 from bioservices import UniProt
 
 from ncbi_cds_from_protein.scripts import ncfp
@@ -65,12 +70,15 @@ def args_create_reuse_cache(email_address, path_human, tmp_path):
         tmp_path / "cache",
         "-c",
         "humancache",
+        "--debug",
     ]
 
 
 @pytest.fixture
 def args_validate_and_log(
-    email_address, path_uniprot_stockholm_small, tmp_path,
+    email_address,
+    path_uniprot_stockholm_small,
+    tmp_path,
 ):
     """Cmd-line arguments for downloading sequences and logging output.
 
@@ -107,6 +115,28 @@ def mock_uniprot_download_and_log(monkeypatch):
     monkeypatch.setattr(UniProt, "search", mock_search)
 
 
+@pytest.fixture
+def mock_entrez_create_and_keep_cache(monkeypatch):
+    """Mock remote service call to NCBI/Entrez for create_and_keep_cache test.
+
+    Returns the result expected from NCBI with a call for each of the proteins
+    in fixtures/sequences/human.fasta
+    """
+
+    responses = Mock()
+    responses.side_effect = [
+        io.BytesIO(_)
+        for _ in (
+            b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD elink 20101123//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  <LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>10835069</Id>\n    </IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      <LinkName>protein_nuccore</LinkName>\n      \n        <Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n        <Link>\n\t\t\t\t<Id>197116381</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n',
+            b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD elink 20101123//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  <LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>283135214</Id>\n    </IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      <LinkName>protein_nuccore</LinkName>\n      \n        <Link>\n\t\t\t\t<Id>1677498684</Id>\n\t\t\t</Link>\n        <Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n',
+            b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD elink 20101123//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  <LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>530397002</Id>\n    </IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      <LinkName>protein_nuccore</LinkName>\n      \n        <Link>\n\t\t\t\t<Id>767968522</Id>\n\t\t\t</Link>\n        <Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n',
+            b'<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD elink 20101123//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20101123/elink.dtd">\n<eLinkResult>\n\n  <LinkSet>\n    <DbFrom>protein</DbFrom>\n    <IdList>\n      <Id>283135242</Id>\n    </IdList>\n    <LinkSetDb>\n      <DbTo>nuccore</DbTo>\n      <LinkName>protein_nuccore</LinkName>\n      \n        <Link>\n\t\t\t\t<Id>1677500256</Id>\n\t\t\t</Link>\n        <Link>\n\t\t\t\t<Id>568815587</Id>\n\t\t\t</Link>\n      \n    </LinkSetDb>\n  </LinkSet>\n</eLinkResult>\n',
+        )
+    ]
+
+    monkeypatch.setattr(Entrez, "elink", responses)
+
+
 def test_bad_infile(args_bad_infile):
     """ncfp stops if CLI input file does not exist.
 
@@ -116,7 +146,9 @@ def test_bad_infile(args_bad_infile):
         ncfp.run_main(args_bad_infile)
 
 
-def test_create_and_keep_cache(args_create_reuse_cache):
+def test_create_and_keep_cache(
+    args_create_reuse_cache, mock_entrez_create_and_keep_cache
+):
     """ncfp creates named cache from CLI and keeps it when rerunning.
 
     This calls ncfp twice and expects both calls run without error. Output
