@@ -198,18 +198,18 @@ def run_main(argv=None):
     """
     # Parse command-line if no namespace provided
     if argv is None:
-        args = parse_cmdline()
+        # Catch execution with no arguments
+        if len(sys.argv) == 1:
+            sys.stderr.write(
+                "ncbi_cds_from_protein " + "version: {0}\n".format(__version__)
+            )
+            return 0
+        else:
+            args = parse_cmdline()
     elif isinstance(argv, list):
         args = parse_cmdline(argv)
     else:
         args = argv
-
-    # Catch execution with no arguments
-    if len(sys.argv) == 1:
-        sys.stderr.write(
-            "ncbi_cds_from_protein " + "version: {0}\n".format(__version__)
-        )
-        return 0
 
     # Set up logging
     time0 = time.time()

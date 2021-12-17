@@ -114,27 +114,45 @@ def fetch_gb_headers(cachepath, retries, batchsize, disabletqdm=True):
     Gets list of UIDs with no existing cached GenBank headers, and
     batch EFetches the GenBank headers.
     """
+    logger = logging.getLogger(__name__)
+
     addedrows = []
     failcount = 0
     # Create batches and get EPost keys for each batch
     epost_histories = []
     nogbhead_uids = get_nogbhead_nt_uids(cachepath)
-    for batch in [
-        nogbhead_uids[idx : idx + batchsize]
-        for idx in range(0, len(nogbhead_uids), batchsize)
-    ]:
+    logger.debug("Checking EPost histories, batch size is %d", batchsize)
+
+    if len(nogbhead_uids) > batchsize:
+        batches = [
+            nogbhead_uids[idx : idx + batchsize]
+            for idx in range(0, len(nogbhead_uids), batchsize)
+        ]
+    else:
+        batches = [nogbhead_uids]
+
+    logger.debug("Found %d UIDs with no GenBank headers", len(nogbhead_uids))
+
+    for batch in [_ for _ in batches if len(_)]:
         epost_histories.append(epost_history_with_retries(batch, "nucleotide", retries))
+    logger.debug("Found %d EPost histories, fetching headers", len(epost_histories))
+
     for history in tqdm(
         epost_histories, desc="Fetching GenBank headers", disable=disabletqdm
     ):
+        logger.debug("Working with history: %s", history)
         try:
-            records = SeqIO.parse(
-                efetch_history_with_retries(
-                    history, "nucleotide", "gb", "text", retries
-                ),
-                "gb",
+            records = list(
+                SeqIO.parse(
+                    efetch_history_with_retries(
+                        history, "nucleotide", "gb", "text", retries
+                    ),
+                    "gb",
+                )
             )
+            logger.debug("Parsed %d GenBank records", len(list(records)))
             for record in records:
+                logger.debug("Record ID: %s", record.id)
                 taxonomy = " ".join(record.annotations["taxonomy"])
                 addedrows.append(
                     add_gbheaders(
@@ -147,6 +165,7 @@ def fetch_gb_headers(cachepath, retries, batchsize, disabletqdm=True):
                     )
                 )
         except NCFPMaxretryException:
+            logger.debug("Maximum retries exceeded, skipping batch")
             failcount += 1
 
     return addedrows, (failcount * batchsize)
@@ -226,7 +245,7 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
         if not has_ncbi_uid(cachepath, record.id) and has_nt_query(
             cachepath, record.id
         ):  # direct ESearch
-            logger.debug("Entry has nt query, using direct ESearch")
+            logger.debug("Entry has nt query, using direct ESearch with %s", record.id)
             result = esearch_with_retries(
                 get_nt_query(cachepath, record.id), "nucleotide", retries
             )
@@ -317,6 +336,11 @@ def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
     logger = logging.getLogger(__name__)
     logger.debug("ELink query: %s", query_id)
 
+    # # ISSUE_20
+    # print(query_id, dbname, linkdbname)
+    # sys.exit(0)
+    # # ISSUE_20
+
     tries = 0
     while tries < maxretries:
         try:
@@ -378,6 +402,10 @@ def epost_history_with_retries(qids, dbname, maxretries):
 
     Returns the generated history, as parsed by Entrez.read()
     """
+    logger = logging.getLogger(__name__)
+
+    logger.debug("Querying epost db %s with qids %s", dbname, qids)
+
     tries = 0
     while tries < maxretries:
         try:
@@ -401,7 +429,10 @@ def efetch_history_with_retries(history, dbname, rettype, retmode, maxretries):
     """
     tries = 0
     while tries < maxretries:
+        logging.debug("Tries %d", tries)
         try:
+            logging.debug("EFetch history: %s", history["WebEnv"])
+            logging.debug("QueryKey: %s", history["QueryKey"])
             data = Entrez.efetch(
                 db=dbname,
                 rettype=rettype,
