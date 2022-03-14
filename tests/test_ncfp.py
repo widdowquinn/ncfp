@@ -119,6 +119,7 @@ def namespace_base(email_address, path_ncbi, tmp_path):
         filestem="ncfp",
         keepcache=False,
         skippedfname="skipped.fasta",
+        use_protein_ids=False,
         logfile=None,
         verbose=False,
         disabletqdm=True,
