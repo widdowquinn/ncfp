@@ -151,7 +151,7 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                     stockholm = [int(e) for e in locdata.split("-")]
                 else:
                     stockholm = []
-                ntseq, aaseq = extract_feature_cds(feature, gbrecord, stockholm)
+                ntseq, aaseq = extract_feature_cds(feature, gbrecord, stockholm, args)
                 if aaseq.seq == record.seq.ungap("-").upper():
                     logger.info("\t\tTranslated sequence matches input sequence")
                     nt_sequences.append((record, ntseq))
