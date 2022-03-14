@@ -195,12 +195,13 @@ def extract_feature_by_protein_id(record, tag, ftype="CDS"):
 
 
 # Extract the coding sequence from a feature
-def extract_feature_cds(feature, record, stockholm):
+def extract_feature_cds(feature, record, stockholm, args):
     """Returns SeqRecord with CDS and translation of GenBank record feature.
 
-    feature      - SeqFeature object
-    record       - SeqRecord object
-    stockholm    - List of (start, end) aa positions
+    :param feature:  SeqFeature object
+    :param record:  SeqRecord object
+    :param stockholm:  List of (start, end) aa positions
+    :param args:  CLI script arguments
     """
     # Extract nucleotide coding sequence
     ntseq = feature.extract(record.seq)
@@ -223,27 +224,27 @@ def extract_feature_cds(feature, record, stockholm):
         aaseq = aaseq[:-1]
 
     # Create SeqRecords of CDS and conceptual translation
-    if "locus_tag" in feature.qualifiers:
+    if (args.use_protein_ids) or ("locus_tag" not in feature.qualifiers):
         ntrecord = SeqRecord(
             seq=ntseq,
             description="coding sequence",
-            id=feature.qualifiers["locus_tag"][0],
+            id=feature.qualifiers["protein_id"][0],
         )
         aarecord = SeqRecord(
             seq=aaseq,
             description="conceptual translation",
-            id=feature.qualifiers["locus_tag"][0],
+            id=feature.qualifiers["protein_id"][0],
         )
     else:
         ntrecord = SeqRecord(
             seq=ntseq,
             description="coding sequence",
-            id=feature.qualifiers["protein_id"][0],
+            id=feature.qualifiers["locus_tag"][0],
         )
         aarecord = SeqRecord(
             seq=aaseq,
             description="conceptual translation",
-            id=feature.qualifiers["protein_id"][0],
+            id=feature.qualifiers["locus_tag"][0],
         )
 
     return ntrecord, aarecord
