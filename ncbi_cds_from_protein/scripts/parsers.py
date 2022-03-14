@@ -151,6 +151,16 @@ def parse_cmdline(args=None):
         help="filename for skipped sequences",
     )
     parser.add_argument(
+        "--use_protein_ids",
+        dest="use_protein_ids",
+        action="store_true",
+        default=False,
+        help=(
+            "Use protein IDs not nucleotide IDs in the nucleotide sequence output\n"
+            "(e.g. for use in backthreading)"
+        ),
+    )
+    parser.add_argument(
         "-l",
         "--logfile",
         dest="logfile",
