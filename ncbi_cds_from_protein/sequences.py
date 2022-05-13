@@ -247,3 +247,10 @@ def extract_feature_cds(feature, record, stockholm):
         )
 
     return ntrecord, aarecord
+
+def strip_stockholm_from_seqid(seqid):
+    """Strip Stockholm header from seqid.
+
+    seqid        - seqid to strip
+    """
+    return seqid.split("/")[0]
