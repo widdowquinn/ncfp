@@ -1,3 +1,4 @@
 biopython
 bioservices
+requests-cache >= 0.6
 tqdm
