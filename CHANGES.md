@@ -3,6 +3,8 @@
 ## v0.2.1a1
 
 - fix badges (Zenodo/PyPI) in `README.md`
+- make Stockholm domains work with NCBI sequence inputs (#27)
+- update requirements to avoid deprecated `requests-cache` (#26)
 
 ## v0.2.0
 

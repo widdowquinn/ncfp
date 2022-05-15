@@ -69,6 +69,7 @@ from ncbi_cds_from_protein.sequences import (
     extract_feature_by_locus_tag,
     extract_feature_by_protein_id,
     extract_feature_cds,
+    strip_stockholm_from_seqid
 )
 
 
@@ -135,8 +136,9 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 logger.info("Searching for CDS: %s", gene_name)
                 feature = extract_feature_by_locus_tag(gbrecord, gene_name)
             else:  # NCBI sequences
-                # Get the matching CDS
-                feature = extract_feature_by_protein_id(gbrecord, record.id)
+                # Get the matching CDS - note we have to remove the Stockholm
+                # domain info, if that is present
+                feature = extract_feature_by_protein_id(gbrecord, strip_stockholm_from_seqid(record.id))
             if feature is None:
                 logger.info("Could not identify CDS feature for %s", record.id)
             else:
