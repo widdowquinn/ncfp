@@ -115,3 +115,9 @@ def path_uniprot_targets():
 def path_uniprot_stockholm_small_targets():
     """Path to targets for small FASTA file of UniProt sequences with Stockholm format."""
     yield TARGETPATH / "small_stockholm"
+
+
+@pytest.fixture
+def path_uniprot_stockholm_small_unified_targets():
+    """Path to targets for small FASTA file of UniProt sequences with Stockholm format."""
+    yield TARGETPATH / "small_stockholm"

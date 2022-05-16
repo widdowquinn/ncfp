@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2020
+# (c) University of Strathclyde 2019-2022
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +18,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2020 University of Strathclyde
+# Copyright (c) 2019-2022 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -200,25 +200,25 @@ def extract_feature_cds(feature, record, stockholm, args):
 
     :param feature:  SeqFeature object
     :param record:  SeqRecord object
-    :param stockholm:  List of (start, end) aa positions
+    :param stockholm:  Tuple with (start, end) aa positions
     :param args:  CLI script arguments
     """
-    # Extract nucleotide coding sequence
+    # Extract nucleotide coding sequence from GenBank record
     ntseq = feature.extract(record.seq)
 
-    # Account for offset start codon
+    # Account for offset start codon, if necessary (not usually an issue)
     if "codon_start" in feature.qualifiers:
         startpos = int(feature.qualifiers["codon_start"][0]) - 1
     else:
         startpos = 0
     ntseq = ntseq[startpos:]
 
-    # If Stockholm (start, end) headers were provided, trime sequences
+    # If Stockholm (start, end) headers were provided, unpack tuple and trim sequences
     if len(stockholm) != 0:
-        start, end = stockholm[0], stockholm[1]
+        start, end = stockholm
         ntseq = ntseq[(start - 1) * 3 : (end * 3)]
 
-    # Generate conceptual translation
+    # Generate conceptual translation from extracted nucleotide sequence
     aaseq = ntseq.translate()
     if aaseq[-1] == "*":
         aaseq = aaseq[:-1]
@@ -248,6 +248,7 @@ def extract_feature_cds(feature, record, stockholm, args):
         )
 
     return ntrecord, aarecord
+
 
 def strip_stockholm_from_seqid(seqid):
     """Strip Stockholm header from seqid.

@@ -155,7 +155,14 @@ def parse_cmdline(args=None):
         dest="use_protein_ids",
         action="store_true",
         default=False,
-        help=("Use protein seqIDs in both protein and nucleotide sequence output"),
+        help=("Use protein_id field when recovering matched sequence information"),
+    )
+    parser.add_argument(
+        "--unify_seqid",
+        dest="unify_seqid",
+        action="store_true",
+        default=False,
+        help=("Use the input sequence seqID for the recovered sequence"),
     )
     parser.add_argument(
         "-l",

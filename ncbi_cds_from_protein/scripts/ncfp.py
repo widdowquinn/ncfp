@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2020
+# (c) University of Strathclyde 2019-2022
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +18,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2020 University of Strathclyde
+# Copyright (c) 2019-2022 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -69,7 +69,7 @@ from ncbi_cds_from_protein.sequences import (
     extract_feature_by_locus_tag,
     extract_feature_by_protein_id,
     extract_feature_cds,
-    strip_stockholm_from_seqid
+    strip_stockholm_from_seqid,
 )
 
 
@@ -138,7 +138,9 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
             else:  # NCBI sequences
                 # Get the matching CDS - note we have to remove the Stockholm
                 # domain info, if that is present
-                feature = extract_feature_by_protein_id(gbrecord, strip_stockholm_from_seqid(record.id))
+                feature = extract_feature_by_protein_id(
+                    gbrecord, strip_stockholm_from_seqid(record.id)
+                )
             if feature is None:
                 logger.info("Could not identify CDS feature for %s", record.id)
             else:
@@ -153,7 +155,16 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                     stockholm = [int(e) for e in locdata.split("-")]
                 else:
                     stockholm = []
-                ntseq, aaseq = extract_feature_cds(feature, gbrecord, stockholm, args)
+                ntseq, aaseq = extract_feature_cds(
+                    feature, gbrecord, tuple(stockholm), args
+                )
+                if args.unify_seqid:
+                    # Make recovered sequence ID the same as the query sequence ID
+                    # Move the complete recovered sequence description to the new sequence
+                    # description
+                    tmp_description = ntseq.description
+                    ntseq.id = record.id
+                    ntseq.description = tmp_description
                 if aaseq.seq == record.seq.ungap("-").upper():
                     logger.info("\t\tTranslated sequence matches input sequence")
                     nt_sequences.append((record, ntseq))
