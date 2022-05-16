@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2020
+# (c) University of Strathclyde 2019-2022
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -17,7 +17,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2020 University of Strathclyde
+# Copyright (c) 2019-2022 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -155,10 +155,7 @@ def parse_cmdline(args=None):
         dest="use_protein_ids",
         action="store_true",
         default=False,
-        help=(
-            "Use protein IDs not nucleotide IDs in the nucleotide sequence output\n"
-            "(e.g. for use in backthreading)"
-        ),
+        help=("Use protein seqIDs in both protein and nucleotide sequence output"),
     )
     parser.add_argument(
         "-l",
