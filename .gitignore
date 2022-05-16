@@ -15,6 +15,10 @@ venv*
 *.pyc
 *__pycache__*
 
+# Exclude Biopython DTD downloads
+elink.dtd
+epost.dtd
+
 # Exclude test files
 tests/examples
 tests/test_output
