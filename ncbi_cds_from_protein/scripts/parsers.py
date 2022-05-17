@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2020
+# (c) University of Strathclyde 2019-2022
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -17,7 +17,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2020 University of Strathclyde
+# Copyright (c) 2019-2022 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -149,6 +149,20 @@ def parse_cmdline(args=None):
         default="skipped.fasta",
         type=str,
         help="filename for skipped sequences",
+    )
+    parser.add_argument(
+        "--use_protein_ids",
+        dest="use_protein_ids",
+        action="store_true",
+        default=False,
+        help=("Use protein_id field when recovering matched sequence information"),
+    )
+    parser.add_argument(
+        "--unify_seqid",
+        dest="unify_seqid",
+        action="store_true",
+        default=False,
+        help=("Use the input sequence seqID for the recovered sequence"),
     )
     parser.add_argument(
         "-l",

@@ -5,6 +5,7 @@
 - fix badges (Zenodo/PyPI) in `README.md`
 - make Stockholm domains work with NCBI sequence inputs (#27)
 - update requirements to avoid deprecated `requests-cache` (#26)
+- add `--use-protein-ids` option to use the same protein sequence seqID for the protein and the downloaded nucleotide sequence (#21, Emma Hobbs' first contribution)
 
 ## v0.2.0
 

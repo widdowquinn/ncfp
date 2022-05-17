@@ -30,43 +30,53 @@ clean_docs:
 	rm -rf classes_ncbi_cds_From_protein.pdf && \
 	rm -rf packages_ncbi_cds_From_protein.pdf
 
-clean_examples:
-	@rm -rf tests/test_output/*
-
-clean_tests:
-	@rm -rf tests/test_output/*
-
 # Run examples from documentation
 examples:
 	# NCBI no introns
-	@ncfp tests/test_input/sequences/input_ncbi.fasta \
-        tests/examples/ncbi dev@null.com -v
+	@ncfp tests/fixtures/sequences/input_ncbi.fasta \
+        tests/fixtures/targets/ncbi dev@null.com -v
+
 	# UniProt no introns
-	@ncfp tests/test_input/sequences/input_uniprot.fasta \
-        tests/examples/uniprot dev@null.com -v
+	@ncfp tests/fixtures/sequences/input_uniprot.fasta \
+        tests/fixtures/targets/uniprot dev@null.com -v
+
 	# UniProt/Stockholm no introns
-	@ncfp -s tests/test_input/sequences/input_uniprot_stockholm.fasta \
-        tests/examples/uniprot_stockholm dev@null.com -v
+	@ncfp -s tests/fixtures/sequences/input_uniprot_stockholm.fasta \
+        tests/fixtures/targets/uniprot_stockholm dev@null.com -v
+
+	# UniProt/Stockholm small no introns, unified seqID
+	@ncfp -s --unify_seqid \
+	    tests/fixtures/sequences/input_uniprot_stockholm_small.fasta \
+	    tests/fixtures/targets/small_stockholm_unified/ dev@null.com -v
+
+	# UniProt/Stockholm small no introns, use protein_id field
+	@ncfp -s --use_protein_id \
+		tests/fixtures/sequences/input_uniprot_stockholm_small.fasta \
+		tests/fixtures/targets/small_stockholm_use_proteinid/ dev@null.com -v
+
 	# Human isoforms/intron-exon
-	@ncfp tests/test_input/sequences/human.fasta \
-        tests/examples/human dev@null.com -v
+	@ncfp tests/fixtures/sequences/human.fasta \
+        tests/fixtures/targets/human dev@null.com -v
+
 	# Logging
-	@ncfp tests/test_input/sequences/human.fasta \
-        tests/examples/logging dev@null.com \
-        -l tests/examples/logging/human.log
+	@ncfp tests/fixrtures/sequences/human.fasta \
+        tests/fixtures/targets/logging dev@null.com \
+        -l tests/fixtures/targets/logging/human.log
+
 	# Cache location
-	@ncfp tests/test_input/sequences/human.fasta \
-        tests/examples/caches dev@null.com \
-        -d tests/examples/caches \
+	@ncfp tests/fixtures/sequences/human.fasta \
+        tests/fixtures/targets/caches dev@null.com \
+        -d tests/fixtures/targets/caches \
         -c ncfp_cache
+
 	# Cache reuse
-	@ncfp tests/test_input/sequences/human.fasta \
-        tests/examples/caches1 dev@null.com \
-        -d tests/examples/caches \
+	@ncfp tests/fixtures/sequences/human.fasta \
+        tests/fixtures/targets/caches1 dev@null.com \
+        -d tests/fixtures/targets/caches \
         -c ncfp_cache
-	@ncfp tests/test_input/sequences/human.fasta \
-        tests/examples/caches2 dev@null.com \
-        -d tests/examples/caches \
+	@ncfp tests/fixtures/sequences/human.fasta \
+        tests/fixtures/targets/caches2 dev@null.com \
+        -d tests/fixtures/targets/caches \
         -c ncfp_cache \
         --filestem cached \
         --keepcache

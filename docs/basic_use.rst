@@ -128,4 +128,22 @@ does it preserve sequence gap symbols:
     GCTTTAGCACCTGGAGCTGAGGTAGTGCAA
 
 
+-----------------------------
+Use Protein IDs in the Output
+-----------------------------
+
+By default `ncfp` lists the nucleotide id retrieved from the nucleotide record in the final FASTA file 
+of nucleotide sequences (if the nucleotide id could not be retrieved the protein ID is used instead). 
+However, some applications require the protein sequence and associated CDS sequence to be identifiable 
+by sharing the same ID, for example when backthreading nucletide sequences onto alignmened protein 
+sequnces using `t-coffee`.
+
+To use the protein IDs for the IDs of the nucleotide sequences use 
+the `--use_protein_ids` flag.
+
+.. code-block:: bash
+
+    ncfp <INPUT>.fasta <OUTPUT> <EMAIL> --use_protein_ids
+
+
 .. [#f1] The user's email address is passed to NCBI to enable them to monitor use of their service and provide support
