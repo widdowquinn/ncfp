@@ -119,5 +119,11 @@ def path_uniprot_stockholm_small_targets():
 
 @pytest.fixture
 def path_uniprot_stockholm_small_unified_targets():
-    """Path to targets for small FASTA file of UniProt sequences with Stockholm format."""
-    yield TARGETPATH / "small_stockholm"
+    """Path to targets for small UniProt Stockholm sequences - forcing unified seqIDs."""
+    yield TARGETPATH / "small_stockholm_unified"
+
+
+@pytest.fixture
+def path_uniprot_stockholm_small_use_proteinid_targets():
+    """Path to targets for small UniProt Stockholm sequences - forcing use of protein_id field."""
+    yield TARGETPATH / "small_stockholm_use_proteinid"

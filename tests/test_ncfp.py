@@ -221,7 +221,11 @@ def test_small_stockholm_unified(
     infile = path_uniprot_stockholm_small
     outdir = tmp_path / "small_stockholm_unified"
     args = modify_namespace(
-        namespace_base, infname=infile, outdirname=outdir, stockholm=True
+        namespace_base,
+        infname=infile,
+        outdirname=outdir,
+        stockholm=True,
+        unify_seqid=True,
     )
 
     # Run ersatz command-line
@@ -231,5 +235,34 @@ def test_small_stockholm_unified(
     check_files(
         outdir,
         path_uniprot_stockholm_small_unified_targets,
+        ("ncfp_aa.fasta", "ncfp_nt.fasta"),
+    )
+
+
+def test_small_stockholm_use_protein_id(
+    namespace_base,
+    path_uniprot_stockholm_small,
+    path_uniprot_stockholm_small_use_proteinid_targets,
+    tmp_path,
+):
+    """ncfp collects correct coding sequences for small UniProt/Stockholm input."""
+    # Modify default arguments
+    infile = path_uniprot_stockholm_small
+    outdir = tmp_path / "small_stockholm_use_proteinid"
+    args = modify_namespace(
+        namespace_base,
+        infname=infile,
+        outdirname=outdir,
+        stockholm=True,
+        use_protein_ids=True,
+    )
+
+    # Run ersatz command-line
+    ncfp.run_main(args)
+
+    # Compare output (should be no skipped files)
+    check_files(
+        outdir,
+        path_uniprot_stockholm_small_use_proteinid_targets,
         ("ncfp_aa.fasta", "ncfp_nt.fasta"),
     )

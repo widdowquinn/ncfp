@@ -45,9 +45,14 @@ examples:
         tests/fixtures/targets/uniprot_stockholm dev@null.com -v
 
 	# UniProt/Stockholm small no introns, unified seqID
-	@ncfp -s --unify_seqid \ 
+	@ncfp -s --unify_seqid \
+	    tests/fixtures/sequences/input_uniprot_stockholm_small.fasta \
+	    tests/fixtures/targets/small_stockholm_unified/ dev@null.com -v
+
+	# UniProt/Stockholm small no introns, use protein_id field
+	@ncfp -s --use_protein_id \
 		tests/fixtures/sequences/input_uniprot_stockholm_small.fasta \
-		tests/fixtures/targets/small_stockholm_unified/ dev@null.com -v
+		tests/fixtures/targets/small_stockholm_use_proteinid/ dev@null.com -v
 
 	# Human isoforms/intron-exon
 	@ncfp tests/fixtures/sequences/human.fasta \
