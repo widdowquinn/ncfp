@@ -6,6 +6,8 @@
 - make Stockholm domains work with NCBI sequence inputs (#27)
 - update requirements to avoid deprecated `requests-cache` (#26)
 - add `--use-protein-ids` option to use the same protein sequence seqID for the protein and the downloaded nucleotide sequence (#21, Emma Hobbs' first contribution)
+- updated code to use `pathlib` internally instead of `os.path` operations
+- fixed loglevel bug with logging to file (#25)
 
 ## v0.2.0
 
