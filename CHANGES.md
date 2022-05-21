@@ -8,6 +8,7 @@
 - add `--use-protein-ids` option to use the same protein sequence seqID for the protein and the downloaded nucleotide sequence (#21, Emma Hobbs' first contribution)
 - updated code to use `pathlib` internally instead of `os.path` operations
 - fixed loglevel bug with logging to file (#25)
+- update progress bar labels with step numbering (#24)
 
 ## v0.2.0
 
