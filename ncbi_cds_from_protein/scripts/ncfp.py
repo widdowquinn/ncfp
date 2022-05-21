@@ -86,7 +86,7 @@ def load_input_sequences(args: Namespace) -> List:
         instream = sys.stdin
         logger.info("Reading sequences from stdin")
     else:
-        if not os.path.isfile(args.infname):
+        if not args.infname.is_file():
             msg = "Input sequence file %s does not exist" % args.infname
             logger.error(msg)
             raise NCFPException(msg)
@@ -258,7 +258,7 @@ def run_main(argv=None):
     qrecords, qskipped = process_sequences(seqrecords, cachepath, args.disabletqdm)
     if qskipped:
         logger.warning("Skipped %d sequences (no query term found)", len(qskipped))
-        skippedpath = os.path.join(args.outdirname, args.skippedfname)
+        skippedpath = args.outdirname / args.skippedfname
         SeqIO.write(qskipped, skippedpath, "fasta")
         logger.warning("Skipped sequences were written to %s", skippedpath)
     logger.info("%d sequences taken forward with query", len(qrecords))
@@ -348,14 +348,14 @@ def write_sequences(aa_nt_seqs, args: Namespace):
     logger = logging.getLogger(__name__)
 
     # Write input sequences that were matched
-    aafilename = os.path.join(args.outdirname, "_".join([args.filestem, "aa.fasta"]))
+    aafilename = args.outdirname / Path(args.filestem + "_aa.fasta")
     logger.info(
         "\tWriting %d matched input sequences to %s", len(aa_nt_seqs), aafilename
     )
     SeqIO.write([aaseq for (aaseq, ntseq) in aa_nt_seqs], aafilename, "fasta")
 
     # Write coding sequences
-    ntfilename = os.path.join(args.outdirname, "_".join([args.filestem, "nt.fasta"]))
+    ntfilename = args.outdirname / Path(args.filestem + "_nt.fasta")
     logger.info(
         "\tWriting %d matched output sequences to %s", len(aa_nt_seqs), ntfilename
     )
