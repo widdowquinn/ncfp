@@ -105,7 +105,9 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
 
     u_service = UniProt()
 
-    for record in tqdm(records, desc="Process input sequences", disable=disabletqdm):
+    for record in tqdm(
+        records, desc="1/5 Process input sequences", disable=disabletqdm
+    ):
         seqtype = guess_seqtype(record)
         if seqtype == "UniParc":
             logger.warning(

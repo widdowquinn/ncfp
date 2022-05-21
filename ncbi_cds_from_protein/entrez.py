@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2020
+# (c) University of Strathclyde 2019-2022
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +18,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2020 University of Strathclyde
+# Copyright (c) 2019-2022 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -125,7 +125,7 @@ def fetch_gb_headers(cachepath, retries, batchsize, disabletqdm=True):
     ]:
         epost_histories.append(epost_history_with_retries(batch, "nucleotide", retries))
     for history in tqdm(
-        epost_histories, desc="Fetching GenBank headers", disable=disabletqdm
+        epost_histories, desc="4/5 Fetching GenBank headers", disable=disabletqdm
     ):
         try:
             records = SeqIO.parse(
@@ -180,7 +180,7 @@ def fetch_shortest_genbank(cachepath, retries, batchsize, disabletqdm=True):
     ]:
         epost_histories.append(epost_history_with_retries(batch, "nucleotide", retries))
     for history in tqdm(
-        epost_histories, desc="Fetching full GenBank records", disable=disabletqdm
+        epost_histories, desc="5/5 Fetching full GenBank records", disable=disabletqdm
     ):
         try:
             records = SeqIO.parse(
@@ -222,7 +222,7 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
 
     addedrows = []  # Holds list of added rows in nt_uid_acc
     noresult = 0  # Count of records with no result
-    for record in tqdm(records, desc="Search NT IDs", disable=disabletqdm):
+    for record in tqdm(records, desc="2/5 Search NT IDs", disable=disabletqdm):
         if not has_ncbi_uid(cachepath, record.id) and has_nt_query(
             cachepath, record.id
         ):  # direct ESearch
@@ -265,7 +265,9 @@ def update_gb_accessions(cachepath, retries, disabletqdm=True):
     updatedrows = []
     noupdate = 0
     for uid in tqdm(
-        get_nt_noacc_uids(cachepath), desc="Fetch UID accessions", disable=disabletqdm
+        get_nt_noacc_uids(cachepath),
+        desc="3/5 Fetch UID accessions",
+        disable=disabletqdm,
     ):
         result = (
             efetch_with_retries(uid, "nucleotide", "acc", "text", retries)
