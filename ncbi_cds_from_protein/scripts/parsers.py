@@ -81,7 +81,7 @@ def parse_cmdline(args=None):
         dest="stockholm",
         action="store_true",
         default=False,
-        help="parse Stockholm format sequence regions",
+        help="parse Stockholm format domain regions",
     )
     parser.add_argument(
         "-d",

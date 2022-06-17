@@ -266,3 +266,31 @@ def test_small_stockholm_use_protein_id(
         path_uniprot_stockholm_small_use_proteinid_targets,
         ("ncfp_aa.fasta", "ncfp_nt.fasta"),
     )
+
+
+def test_ncbi_stockholm(
+    namespace_base,
+    path_ncbi_stockholm,
+    path_ncbi_stockholm_targets,
+    tmp_path,
+):
+    """ncfp collects correct coding sequences for NCBI/Stockholm input.
+
+    This test was added as a check for the fix in issue 31.
+    """
+    # Modify default arguments
+    infile = path_ncbi_stockholm
+    outdir = tmp_path / "ncbi_stockholm"
+    args = modify_namespace(
+        namespace_base, infname=infile, outdirname=outdir, stockholm=True
+    )
+
+    # Run ersatz command-line
+    ncfp.run_main(args)
+
+    # Compare output (should be no skipped files)
+    check_files(
+        outdir,
+        path_ncbi_stockholm_targets,
+        ("ncfp_aa.fasta", "ncfp_nt.fasta"),
+    )

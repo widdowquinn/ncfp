@@ -61,6 +61,8 @@ from ncbi_cds_from_protein.caches import (
     find_shortest_genbank,
 )
 
+from .sequences import strip_stockholm_from_seqid
+
 
 # EXCEPTIONS
 # ==========
@@ -226,7 +228,7 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
         if not has_ncbi_uid(cachepath, record.id) and has_nt_query(
             cachepath, record.id
         ):  # direct ESearch
-            logger.debug("Entry has nt query, using direct ESearch")
+            logger.debug("Entry has nt query, using direct ESearch: %s", record.id)
             result = esearch_with_retries(
                 get_nt_query(cachepath, record.id), "nucleotide", retries
             )
@@ -237,16 +239,24 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
         elif not has_ncbi_uid(cachepath, record.id) and has_aa_query(
             cachepath, record.id
         ):  # ELink search
-            logger.debug("Entry has aa query, using ELink")
+            logger.debug(
+                "Entry has aa query, using ELink: %s",
+                strip_stockholm_from_seqid(record.id),
+            )
             result = elink_fetch_with_retries(
-                record.id, "protein", "protein_nuccore", retries
+                strip_stockholm_from_seqid(record.id),
+                "protein",
+                "protein_nuccore",
+                retries,
             )
             try:
                 idlist = [lid["Id"] for lid in result[0]["LinkSetDb"][0]["Link"]]
+                logger.debug("result: %s, idlist: %s", result, idlist)
             except IndexError:  # No result returned - possible deleted record
                 raise NCFPEFetchException("No link/record returned for %s" % record.id)
             if idlist:
                 addedrows.extend(add_ncbi_uids(cachepath, record.id, idlist))
+                logger.debug("record.id: %s, idlist: %s", record.id, idlist)
             else:
                 noresult += 1
     return addedrows, noresult
@@ -322,9 +332,13 @@ def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
     tries = 0
     while tries < maxretries:
         try:
+            logger.debug(
+                "dbname: %s linkdbname: %s query_id: %s", dbname, linkdbname, query_id
+            )
             matches = Entrez.read(
                 Entrez.elink(dbfrom=dbname, linkname=linkdbname, id=query_id)
             )
+            logger.debug("matches: %s", matches)
             return matches
         except Exception:
             tries += 1

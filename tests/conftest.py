@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# (c) The University of Strathclude 2019-2020
+# (c) The University of Strathclude 2019-2022
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -16,7 +16,7 @@
 #
 # The MIT License
 #
-# (c) The University of Strathclude 2019-2020
+# (c) The University of Strathclude 2019-2022
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -67,6 +67,18 @@ def path_human():
 def path_ncbi():
     """Path to NCBI sequences."""
     yield SEQUENCEPATH / "input_ncbi.fasta"
+
+
+@pytest.fixture
+def path_ncbi_stockholm():
+    """Path to NCBI sequence with Stockholm domain"""
+    yield SEQUENCEPATH / "input_ncbi_stockholm.fasta"
+
+
+@pytest.fixture
+def path_ncbi_stockholm_targets():
+    """Path to NCBI target output with Stockholm domain"""
+    yield TARGETPATH / "ncbi_stockholm"
 
 
 @pytest.fixture
