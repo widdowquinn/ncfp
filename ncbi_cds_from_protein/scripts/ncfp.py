@@ -131,13 +131,23 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
             logger.info("Sequence %s matches GenBank entry %s", record.id, gbrecord.id)
             match = re.search(re_uniprot_gn, record.description)
             if match is not None:  # For Uniprot sequences, we extract the gene name
+                logger.debug("Matched %s to %s", record.id, match.group())
                 gene_name = match.group(0)
                 # Get the matching CDS
                 logger.info("Searching for CDS: %s", gene_name)
                 feature = extract_feature_by_locus_tag(gbrecord, gene_name)
+                if feature is None:
+                    logger.info(
+                        "Could not find feature with locus tag, trying protein ID"
+                    )
+                    feature = extract_feature_by_protein_id(gbrecord, gene_name)
             else:  # NCBI sequences
                 # Get the matching CDS - note we have to remove the Stockholm
                 # domain info, if that is present
+                logger.debug(
+                    "Extracting NCBI sequence by protein id: %s",
+                    strip_stockholm_from_seqid(record.id),
+                )
                 feature = extract_feature_by_protein_id(
                     gbrecord, strip_stockholm_from_seqid(record.id)
                 )
@@ -206,8 +216,6 @@ def run_main(argv=None):
 
     - argv      arguments for program. If None, parse command-line; if list
                 pass the list to the parser; if a Namespace, use it directly
-    - logger    logger for the script. If one is passed, use it; if not then
-                create one.
     """
     # Parse command-line if no namespace provided
     if argv is None:
@@ -255,6 +263,7 @@ def run_main(argv=None):
     # These accessions are taken from the FASTA header and, if we can't
     # parse that appropriately, we can't search - so we skip those
     # sequences
+    logger.debug("seqrecords: %s", seqrecords)
     qrecords, qskipped = process_sequences(seqrecords, cachepath, args.disabletqdm)
     if qskipped:
         logger.warning("Skipped %d sequences (no query term found)", len(qskipped))

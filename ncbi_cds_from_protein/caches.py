@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2020
+# (c) University of Strathclyde 2019-2022
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +18,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2020 University of Strathclyde
+# Copyright (c) 2019-2022 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -250,7 +250,10 @@ def add_input_sequence(cachepath, accession, aa_query, nt_query):
                    protein_nuccore
     nt_query     - query term for searching nucleotide
     """
+    logger = logging.getLogger(__name__)
+
     # Path must be string, not PosixPath, in Py3.6
+    logger.debug("aa_query: %s nt_query: %s", aa_query, nt_query)
     conn = sqlite3.connect(str(cachepath))
     with conn:
         cur = conn.cursor()
