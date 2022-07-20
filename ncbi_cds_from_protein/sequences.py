@@ -124,7 +124,9 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 skipped.append(record)
                 continue
             logger.debug("Uniprot record has GN field: %s", match.group(0))
-            result = u_service.search(match.group(0), columns="database(EMBL)")  # type: ignore
+            # The UniProt API was updated in June 2022, requiring a change
+            # to the returned field for the cross-reference to EMBL
+            result = u_service.search(match.group(0), columns="xref_embl")  # type: ignore
             qstring = result.split("\n")[1].strip()[:-1]
             logger.debug("Recovered EMBL database record: %s", qstring)
             # UniProt can return multiple UIDs separated by semicolons. Sometimes the same

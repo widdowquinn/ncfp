@@ -9,6 +9,7 @@
 - updated code to use `pathlib` internally instead of `os.path` operations
 - fixed loglevel bug with logging to file (#25)
 - update progress bar labels with step numbering (#24)
+- update UniProt queries to use the new API (#35)
 
 ## v0.2.0
 

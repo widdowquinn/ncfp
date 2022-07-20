@@ -64,8 +64,10 @@ def mock_uniprot_download_and_log(monkeypatch):
         """Mock call to UniProt.search() method.
 
         This output specific to the download_and_log() test
+
+        This mock updated to reflect UniProt API changes in June 2022
         """
-        return "Cross-reference (EMBL)\nCM000618;\n"
+        return "EMBL\nCM000618;\n"
 
     monkeypatch.setattr(UniProt, "search", mock_search)
 
@@ -74,22 +76,24 @@ def mock_uniprot_download_and_log(monkeypatch):
 def mock_basic_uniprot(monkeypatch):
     """Mock remote service call to UniProt for test_basic_uniprot test.
 
-    Returns the result expected from l125 of sequences.py, for each query of
+    Returns the result expected from l.129 of sequences.py, for each query of
     the path_uniprot_stockholm_small dataset
 
-    u_service.search(match.group(0), columns="database(EMBL)")  # type: ignore
+    u_service.search(match.group(0), columns="xref_embl")  # type: ignore
+
+    This mock updated to reflect UniProt API changes in June 2022
     """
     results = iter(
         [
-            "Cross-reference (EMBL)\nJNBS01004944;\n",
-            "Cross-reference (EMBL)\nJNBS01000225;\n",
-            "Cross-reference (EMBL)\nAZIL01000691;\n",
-            "Cross-reference (EMBL)\nGL833138;\n",
-            "Cross-reference (EMBL)\nJNBR01001477;\n",
-            "Cross-reference (EMBL)\nJNBS01001796;\n",
-            "Cross-reference (EMBL)\nJNBS01000295;\n",
-            "Cross-reference (EMBL)\nKI913977;\n",
-            "Cross-reference (EMBL)\nFN648069;\n",
+            "EMBL\nJNBS01004944;\n",
+            "EMBL\nJNBS01000225;\n",
+            "EMBL\nAZIL01000691;\n",
+            "EMBL\nGL833138;\n",
+            "EMBL\nJNBR01001477;\n",
+            "EMBL\nJNBS01001796;\n",
+            "EMBL\nJNBS01000295;\n",
+            "EMBL\nKI913977;\n",
+            "EMBL\nFN648069;\n",
         ]
     )
 
