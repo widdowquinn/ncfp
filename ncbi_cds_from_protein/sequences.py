@@ -128,6 +128,12 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             # to the returned field for the cross-reference to EMBL
             result = u_service.search(match.group(0), columns="xref_embl")  # type: ignore
             qstring = result.split("\n")[1].strip()[:-1]
+            if qstring == "":
+                logger.warning(
+                    "Uniprot record %s has no EMBL cross-reference (skipping)",
+                    record.id,
+                )
+                continue
             logger.debug("Recovered EMBL database record: %s", qstring)
             # UniProt can return multiple UIDs separated by semicolons. Sometimes the same
             # UID is repeated. However, the current cache schema uses the accession as primary
