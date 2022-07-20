@@ -253,7 +253,12 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
                 idlist = [lid["Id"] for lid in result[0]["LinkSetDb"][0]["Link"]]
                 logger.debug("result: %s, idlist: %s", result, idlist)
             except IndexError:  # No result returned - possible deleted record
-                raise NCFPEFetchException("No link/record returned for %s" % record.id)
+                logger.warning(
+                    "No result returned for %s: possible deleted record - please check",
+                    record.id,
+                )
+                # raise NCFPEFetchException("No link/record returned for %s" % record.id)
+                idlist = None
             if idlist:
                 addedrows.extend(add_ncbi_uids(cachepath, record.id, idlist))
                 logger.debug("record.id: %s, idlist: %s", record.id, idlist)
