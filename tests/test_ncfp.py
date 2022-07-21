@@ -125,11 +125,29 @@ def namespace_base(email_address, path_ncbi, tmp_path):
         skippedfname="skipped.fasta",
         use_protein_ids=False,
         unify_seqid=False,
+        alternative_start_codon=False,
         logfile=None,
         verbose=False,
         disabletqdm=True,
         debug=False,
     )
+
+
+def test_alternative_start(
+    namespace_base, path_altstart, path_altstart_targets, tmp_path
+):
+    """ncfp collects correct coding sequences for NCBI input with alternative start codon."""
+    infile = path_altstart
+    outdir = tmp_path / "alternative_start"
+    args = modify_namespace(
+        namespace_base, infname=infile, outdirname=outdir, alternative_start_codon=True
+    )
+
+    # Run ersatz command-line
+    ncfp.run_main(args)
+
+    # Compare output
+    check_files(outdir, path_altstart_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
 
 
 def test_basic_ncbi(namespace_base, path_ncbi, path_ncbi_targets, tmp_path):
