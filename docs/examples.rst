@@ -18,6 +18,20 @@ The command below [#f1]_ identifies coding sequences from NCBI format
         tests/examples/ncbi dev@null.com -v
 
 
+----------------------------------------
+NCBI format input sequences - no introns
+----------------------------------------
+
+The command below [#f1]_ identifies coding sequences from NCBI format
+[#f2]_ input for two proteins, one of which has an alternative start
+site. 
+
+.. code-block:: bash
+
+    ncfp --allow_alternative_start_codon \
+		tests/test_input/sequences/input_alternative_start.fasta \
+		tests/examples/alternative_start dev@null.com -v
+
 -------------------------------------------
 UniProt format input sequences - no introns
 -------------------------------------------

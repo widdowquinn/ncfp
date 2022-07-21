@@ -7,7 +7,7 @@ Licensing
 Unless otherwise indicated, all code is subject to the following agreement:
 
   (c) The James Hutton Institute 2017-2019
-  (c) The University of Strathclyde 2019-2020
+  (c) The University of Strathclyde 2019-2022
   Author: Leighton Pritchard
 
   Contact: leighton.pritchard@hutton.ac.uk
@@ -26,7 +26,7 @@ The MIT License
 ---------------
 
 Copyright (c) 2017-2019 The James Hutton Institute
-Copyright (c) 2019-2020 The University of Strathclyde
+Copyright (c) 2019-2022 The University of Strathclyde
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in the

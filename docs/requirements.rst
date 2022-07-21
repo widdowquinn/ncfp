@@ -13,7 +13,7 @@ Python
     - Python version 3.5 or higher
 
 Python Packages
-    - `biopython`_
+    - `biopython`_ (must be v1.10 or higher due to UniProt API changes)
     - `bioservices`_
     - `tqdm`_
 
