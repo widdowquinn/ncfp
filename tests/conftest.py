@@ -58,6 +58,18 @@ def email_address():
 
 
 @pytest.fixture
+def path_altstart():
+    """Path to NCBI sequences with alternative start sites."""
+    yield SEQUENCEPATH / "input_alternative_start.fasta"
+
+
+@pytest.fixture
+def path_altstart_targets():
+    """Path to target output with alternative start sites."""
+    yield TARGETPATH / "alternative_start"
+
+
+@pytest.fixture
 def path_human():
     """Path to FASTA file of human sequences."""
     yield SEQUENCEPATH / "human.fasta"

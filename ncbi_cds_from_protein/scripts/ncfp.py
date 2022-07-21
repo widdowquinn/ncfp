@@ -122,10 +122,23 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
     for record in seqrecords:
         result = find_record_cds(cachepath, record.id)
         if not result:
-            logger.warning("No record found for sequence input %s", record.id)
+            logger.warning(
+                "No record found for sequence input %s - please check this sequence manually",
+                record.id,
+            )
+            logger.warning(
+                "\tThis record may have been removed from the NCBI database, or suppressed by NCBI"
+            )
         elif len(result) > 1:
-            logger.error("More than one record returned for %s (exiting)", record.id)
-            raise SystemExit(1)
+            logger.warning(
+                "More than one record returned for %s - please check this sequence manually (skipping)",
+                record.id,
+            )
+            if record.id.startswith("WP_"):
+                logger.warning(
+                    "\tThis record looks like it may be an Identical Protein Group (IPG)"
+                )
+            # raise SystemExit(1)
         else:
             gbrecord = SeqIO.read(StringIO(result[0][-1]), "gb")
             logger.info("Sequence %s matches GenBank entry %s", record.id, gbrecord.id)
@@ -177,6 +190,16 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                     ntseq.description = tmp_description
                 if aaseq.seq == record.seq.ungap("-").upper():
                     logger.info("\t\tTranslated sequence matches input sequence")
+                    nt_sequences.append((record, ntseq))
+                elif (
+                    args.alternative_start_codon
+                    and aaseq.seq[1:] == record.seq.ungap("-").upper()[1:]
+                ):
+                    logger.info(
+                        "\t\tTranslated sequence matches input sequence with alternative start codon %s -> %s",
+                        aaseq.seq[0],
+                        record.seq.ungap("-").upper()[0],
+                    )
                     nt_sequences.append((record, ntseq))
                 else:
                     logger.warning(

@@ -36,6 +36,11 @@ examples:
 	@ncfp tests/fixtures/sequences/input_ncbi.fasta \
         tests/fixtures/targets/ncbi dev@null.com -v
 
+	# NCBI alternative starts
+	@ncfp --allow_alternative_start_codon \
+		tests/fixtures/sequences/input_alternative_start.fasta \
+		tests/fixtures/targets/alternative_start dev@null.com -v
+
 	# UniProt no introns
 	@ncfp tests/fixtures/sequences/input_uniprot.fasta \
         tests/fixtures/targets/uniprot dev@null.com -v
