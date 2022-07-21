@@ -165,6 +165,13 @@ def parse_cmdline(args=None):
         help=("Use the input sequence seqID for the recovered sequence"),
     )
     parser.add_argument(
+        "--allow_alternative_start_codon",
+        dest="alternative_start_codon",
+        action="store_true",
+        default=False,
+        help=("Allow for an alternative start codon in the first sequence position"),
+    )
+    parser.add_argument(
         "-l",
         "--logfile",
         dest="logfile",
