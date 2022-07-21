@@ -10,6 +10,9 @@
 - fixed loglevel bug with logging to file (#25)
 - update progress bar labels with step numbering (#24)
 - update UniProt queries to use the new API (#35)
+- add `--allow_alternative_start_codon` option (#34)
+- warn, rather than halt, when a suspected IPG input sequence is found (#34)
+- add extra information when any other than one coding sequence is found for an input protein (#34)
 
 ## v0.2.0
 
