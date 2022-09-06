@@ -13,6 +13,7 @@
 - add `--allow_alternative_start_codon` option (#34)
 - warn, rather than halt, when a suspected IPG input sequence is found (#34)
 - add extra information when any other than one coding sequence is found for an input protein (#34)
+- add last ditch attempt to identify proteins in an NCBI nucleotide file using the gene name
 
 ## v0.2.0
 
