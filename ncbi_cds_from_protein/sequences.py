@@ -203,6 +203,25 @@ def extract_feature_by_protein_id(record, tag, ftype="CDS"):
             continue
     return None
 
+# Extract a gene feature by gene_id
+def extract_feature_by_gene_id(record, tag, ftype="CDS"):
+    """Returns the gene feature with passed tag from passed seqrecord.
+
+    record      - Biopython SeqRecord
+    tag         - gene ID to search for
+    ftype       - feature types to search
+    """
+    logger = logging.getLogger(__name__)
+
+    for feature in [ftr for ftr in record.features if ftr.type == ftype]:
+        try:
+            if tag in feature.qualifiers["gene"]:
+                logger.debug("Found %s in gene", tag)
+                return feature
+        except KeyError:
+            continue
+    return None
+
 
 # Extract the coding sequence from a feature
 def extract_feature_cds(feature, record, stockholm, args):

@@ -1,3 +1,4 @@
+autopep8
 bandit
 black
 blacken-docs
@@ -5,6 +6,7 @@ flake8
 graphviz
 mypy
 pycodestyle
+pydocstyle
 pylint
 pytest
 pytest-cov
