@@ -123,10 +123,19 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 )
                 skipped.append(record)
                 continue
-            logger.debug("Uniprot record has GN field: %s", match.group(0))
+            logger.debug(
+                "Uniprot record %s has GN field: %s", record.id, match.group(0)
+            )
             # The UniProt API was updated in June 2022, requiring a change
             # to the returned field for the cross-reference to EMBL
-            result = u_service.search(match.group(0), columns="xref_embl")  # type: ignore
+            # Get the UniProt ID from the accession and use this to query the API
+            query_acc = record.id.split("|")[1]
+            logger.debug(
+                "Querying UniProt with %s to match xref_embl",
+                query_acc,
+            )
+            # Use the UniProt record ID as the query to the EMBL ID
+            result = u_service.search(query_acc, columns="xref_embl")  # type: ignore
             qstring = result.split("\n")[1].strip()[:-1]
             if qstring == "":
                 logger.warning(
@@ -202,6 +211,7 @@ def extract_feature_by_protein_id(record, tag, ftype="CDS"):
         except KeyError:
             continue
     return None
+
 
 # Extract a gene feature by gene_id
 def extract_feature_by_gene_id(record, tag, ftype="CDS"):
