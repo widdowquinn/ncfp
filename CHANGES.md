@@ -14,6 +14,8 @@
 - warn, rather than halt, when a suspected IPG input sequence is found (#34)
 - add extra information when any other than one coding sequence is found for an input protein (#34)
 - add last ditch attempt to identify proteins in an NCBI nucleotide file using the gene name
+- use the UniProt accession number if the GN field is not specific enough
+- when UniProt records point to NCBI gene records, obtain the nucleotide accession from the gene record, and protein ID from the RefSeq cross-reference
 
 ## v0.2.0
 
