@@ -49,7 +49,10 @@ from Bio.SeqRecord import SeqRecord
 from bioservices import UniProt
 from tqdm.auto import tqdm
 
+import ncbi_cds_from_protein
+
 from .caches import add_input_sequence, has_query
+
 
 # regexes for parsing out Uniprot
 re_uniprot_head = re.compile(r".*\|.*\|.*")
@@ -117,6 +120,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             continue
         elif seqtype == "UniProt":
             match = re.search(re_uniprot_gn, record.description)
+            pstring = None  # None if we don't need to look up GeneID
             if match is None:  #  No GN field
                 logger.warning(
                     "Uniprot record %s has no GN field (skipping)", record.id
@@ -139,11 +143,51 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             qstring = result.split("\n")[1].strip()[:-1]
             if qstring == "":
                 logger.warning(
-                    "Uniprot record %s has no EMBL cross-reference (skipping)",
+                    "Uniprot record %s has no EMBL cross-reference",
                     record.id,
                 )
-                continue
-            logger.debug("Recovered EMBL database record: %s", qstring)
+                # If there is no EMBL cross-reference, we can try the GeneID as
+                # a fallback. This refers to a gene database record at NCBI, which
+                # then must be queried to get the nucleotide cross-reference.
+                logger.debug("Trying xref_geneid as last resort")
+                gresult = u_service.search(query_acc, columns="xref_geneid")  # type: ignore
+                gstring = gresult.split("\n")[1].strip()[:-1]
+                if gstring == "":
+                    logger.warning(
+                        "Uniprot record %s has no GeneID cross-reference (skipping)",
+                        record.id,
+                    )
+                    continue
+                # Fetch the GeneID entry and extract nucleotide information from it.
+                logger.debug("Finding nucleotide entry from GeneID %s", gstring)
+                handle = ncbi_cds_from_protein.entrez.efetch_with_retries(
+                    gstring, "gene", "acc", "text", 10
+                )  # NOTE: hard-coded retry count
+                acc = [
+                    _.strip().split()[1]
+                    for _ in handle.readlines()
+                    if _.strip().startswith("Annotation")
+                ]
+                if len(acc) == 0:
+                    logger.warning(
+                        "No nucleotide entry found for %s (skipping)", gstring
+                    )
+                    continue
+                qstring = acc[0]  # This is our new query string
+                logger.debug("Found nucleotide entry %s", qstring)
+                # We also need the xref_refseq entry to get a protein ID for
+                # the query.
+                logger.debug("Finding protein entry from GeneID %s", gstring)
+                presult = u_service.search(gstring, columns="xref_refseq")  # type: ignore
+                pstring = presult.split("\n")[1].strip()[:-1]
+                if pstring == "":
+                    logger.warning(
+                        "Could not identify RefSeq protein ID for %s (skipping)",
+                        gstring,
+                    )
+                    continue
+                logger.debug("Found RefSeq protein IDs %s", pstring)
+            logger.debug("Recovered NCBI database accession: %s", qstring)
             # UniProt can return multiple UIDs separated by semicolons. Sometimes the same
             # UID is repeated. However, the current cache schema uses the accession as primary
             # key in the same table as the query IDs.
@@ -151,7 +195,8 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             for qid in qstring.split(";"):
                 logger.debug("Adding record %s to cache with query %s", record.id, qid)
                 try:  # Uniprot sequences are added to cache as (accession, NULL, nt_query)
-                    add_input_sequence(cachepath, record.id, None, qid)
+                    logger.debug("Adding %s as nt ID (protein ID: %s)", qid, pstring)
+                    add_input_sequence(cachepath, record.id, pstring, qid)
                 except sqlite3.IntegrityError:  # Sequence exists
                     logger.warning(
                         "Additional query terms found for %s: %s (not used)",

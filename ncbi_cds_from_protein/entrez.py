@@ -277,6 +277,8 @@ def update_gb_accessions(cachepath, retries, disabletqdm=True):
     For each UID in nt_uid_acc where there is no GenBank accession,
     obtain the GenBank accession and update the row.
     """
+    logger = logging.getLogger(__name__)
+
     updatedrows = []
     noupdate = 0
     for uid in tqdm(
@@ -290,8 +292,10 @@ def update_gb_accessions(cachepath, retries, disabletqdm=True):
             .strip()
         )
         if result is None:
+            logger.debug("Could not update GenBank for %s", uid)
             noupdate += 1
         else:
+            logger.debug("Updating GenBank for %s as %s", uid, result)
             updatedrows.extend(update_nt_uid_acc(cachepath, uid, result))
     return updatedrows, noupdate
 
@@ -308,7 +312,7 @@ def esearch_with_retries(query_id, dbname, maxretries):
     after trying the ESearch up to a maximum number of times.
     """
     logger = logging.getLogger(__name__)
-    logger.debug("ESearch query: %s", query_id)
+    logger.debug("ESearch query: %s (db: %s)", query_id, dbname)
 
     tries = 0
     while tries < maxretries:
