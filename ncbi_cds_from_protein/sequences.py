@@ -315,6 +315,16 @@ def extract_feature_cds(feature, record, stockholm, args):
             "Trimming CDS to Stockholm coordinates: %d..%d", start, end)
         ntseq = ntseq[(start - 1) * 3: (end * 3)]
 
+    # Has a region been requested that is outside the CDS?
+    # NOTE: This can happen if a Stockholm region is provided, but
+    # the 'wrong' CDS is selected. A route out of this may be to
+    # iterate over all matching CDS and choose one (the first?)
+    # that provides the correct conceptual translation.
+    if not len(ntseq):
+        logger.warning(
+            "Requested region %d..%d is outside CDS, skipping", start, end)
+        return None, None
+
     # Generate conceptual translation from extracted nucleotide sequence
     aaseq = ntseq.translate()
     if aaseq[-1] == "*":

@@ -192,6 +192,12 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 ntseq, aaseq = extract_feature_cds(
                     feature, gbrecord, tuple(stockholm), args
                 )
+                # Could not extract feature for some reason, skip
+                if (ntseq, aaseq) == (None, None):
+                    logger.warning(
+                        "Could not extract CDS for %s (skipping)", record.id)
+                    continue
+
                 if args.unify_seqid:
                     # Make recovered sequence ID the same as the query sequence ID
                     # Move the complete recovered sequence description to the new sequence
