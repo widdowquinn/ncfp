@@ -138,10 +138,15 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 "Querying UniProt with %s to match xref_embl",
                 query_acc,
             )
-            # Use the UniProt record ID as the query to the EMBL ID
+            # Use the UniProt record ID as the query to the EMBL ID, retrieving
+            # the EMBL record accession, and the ORF gene name
             result = u_service.search(
                 query_acc, columns="xref_embl")  # type: ignore
             qstring = result.split("\n")[1].strip()[:-1]
+            result = u_service.search(
+                query_acc, columns="gene_orf")  # type: ignore
+            pstring = result.split("\n")[1].strip()
+            print(qstring, pstring)
             if qstring == "":
                 logger.warning(
                     "Uniprot record %s has no EMBL cross-reference",
@@ -192,6 +197,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                     continue
                 logger.debug("Found RefSeq protein IDs %s", pstring)
             logger.debug("Recovered NCBI database accession: %s", qstring)
+            logger.debug("Accession has ORF gene name: %s", pstring)
             # UniProt can return multiple UIDs separated by semicolons. Sometimes the same
             # UID is repeated. However, the current cache schema uses the accession as primary
             # key in the same table as the query IDs.
@@ -331,17 +337,18 @@ def extract_feature_cds(feature, record, stockholm, args):
         aaseq = aaseq[:-1]
 
     # Create SeqRecords of CDS and conceptual translation
-    field = "locus_tag" if (
-        "locus_tag" in feature.qualifiers or args.use_protein_ids) else "protein_id"
+    field = "protein_id" if (
+        "locus_tag" not in feature.qualifiers or args.use_protein_ids) else "locus_tag"
+    logger.debug("Using %s as ID", feature.qualifiers[field][0])
     ntrecord = SeqRecord(
         seq=ntseq,
         description="coding sequence",
-        id=feature.qualifiers["protein_id"][0],
+        id=feature.qualifiers[field][0],
     )
     aarecord = SeqRecord(
         seq=aaseq,
         description="conceptual translation",
-        id=feature.qualifiers["protein_id"][0],
+        id=feature.qualifiers[field][0],
     )
     # if (args.use_protein_ids) or ("locus_tag" not in feature.qualifiers):
     #     ntrecord = SeqRecord(

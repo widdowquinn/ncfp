@@ -307,6 +307,16 @@ def get_nt_query(cachepath, accession):
     return cur.fetchone()
 
 
+def get_aa_query(cachepath, accession):
+    """Returns aa query for a seqdata row."""
+    # Path must be string, not PosixPath, in Py3.6
+    conn = sqlite3.connect(str(cachepath))
+    with conn:
+        cur = conn.cursor()
+        cur.execute(SQL_GET_SEQDATA_AAQUERY, (accession,))
+    return cur.fetchone()
+
+
 def has_ncbi_uid(cachepath, accession):
     """Returns True if seq accession has at least one nt UID."""
     # Path must be string, not PosixPath, in Py3.6
@@ -338,7 +348,8 @@ def add_ncbi_uids(cachepath, accession, uids):
                 if str(err).startswith("UNIQUE constraint failed"):
                     pass
                 else:
-                    logger.error("Adding NCBI UID filed (exiting)", exc_info=True)
+                    logger.error(
+                        "Adding NCBI UID filed (exiting)", exc_info=True)
                     raise SystemExit(1)
             cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
     return results

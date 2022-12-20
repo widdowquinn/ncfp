@@ -83,7 +83,7 @@ def mock_basic_uniprot(monkeypatch):
 
     This mock updated to reflect UniProt API changes in June 2022
     """
-    results = iter(
+    qstring_results = iter(
         [
             "EMBL\nJNBS01004944;\n",
             "EMBL\nJNBS01000225;\n",
@@ -102,7 +102,10 @@ def mock_basic_uniprot(monkeypatch):
 
         This output specific to the test_basic_uniprot() test
         """
-        return next(results)
+        if kwargs["columns"] == "xref_embl":
+            return next(qstring_results)
+        else:
+            return "\n"
 
     monkeypatch.setattr(UniProt, "search", mock_search)
 
@@ -136,7 +139,13 @@ def namespace_base(email_address, path_ncbi, tmp_path):
 def test_alternative_start(
     namespace_base, path_altstart, path_altstart_targets, tmp_path
 ):
-    """ncfp collects correct coding sequences for NCBI input with alternative start codon."""
+    """ncfp collects correct coding sequences for NCBI input with alternative start codon.
+
+    Makefile target:
+        ncfp --allow_alternative_start_codon \
+        tests/fixtures/sequences/input_alternative_start.fasta \
+        tests/fixtures/targets/alternative_start dev@null.com -v
+    """
     infile = path_altstart
     outdir = tmp_path / "alternative_start"
     args = modify_namespace(
@@ -147,11 +156,39 @@ def test_alternative_start(
     ncfp.run_main(args)
 
     # Compare output
-    check_files(outdir, path_altstart_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
+    check_files(outdir, path_altstart_targets,
+                ("ncfp_aa.fasta", "ncfp_nt.fasta"))
+
+
+def test_ambiguous(
+    namespace_base, path_ambiguous, path_ambiguous_targets, tmp_path
+):
+    """ncfp collects correct coding sequences for ambiguous UniProt GN field.
+
+    Makefile target:
+        ncfp -s tests/fixtures/sequences/input_ambiguous.fasta \
+        tests/fixtures/targets/ambiguous dev@null.com -v
+    """
+    infile = path_ambiguous
+    outdir = tmp_path / "ambiguous"
+    args = modify_namespace(namespace_base, infname=infile,
+                            outdirname=outdir, stockholm=True)
+
+    # Run ersatz command-line
+    ncfp.run_main(args)
+
+    # Compare output
+    check_files(outdir, path_ambiguous_targets,
+                ("ncfp_aa.fasta", "ncfp_nt.fasta"))
 
 
 def test_basic_ncbi(namespace_base, path_ncbi, path_ncbi_targets, tmp_path):
-    """ncfp collects correct coding sequences for basic NCBI input."""
+    """ncfp collects correct coding sequences for basic NCBI input.
+
+    Makefile target:
+        ncfp tests/fixtures/sequences/input_ncbi.fasta \
+        tests/fixtures/targets/ncbi dev@null.com -v
+    """
     # Modify default arguments
     infile = path_ncbi
     outdir = tmp_path / "basic_ncbi"
@@ -167,7 +204,12 @@ def test_basic_ncbi(namespace_base, path_ncbi, path_ncbi_targets, tmp_path):
 def test_basic_uniprot(
     namespace_base, path_uniprot, path_uniprot_targets, tmp_path, mock_basic_uniprot
 ):
-    """ncfp collects correct coding sequences for basic UniProt input."""
+    """ncfp collects correct coding sequences for basic UniProt input.
+
+    Makefie target:    
+        ncfp tests/fixtures/sequences/input_uniprot.fasta \
+        tests/fixtures/targets/basic_uniprot dev@null.com -v
+    """
     # Modify default arguments
     infile = path_uniprot
     outdir = tmp_path / "basic_uniprot"
@@ -215,7 +257,12 @@ def test_small_stockholm(
     path_uniprot_stockholm_small_targets,
     tmp_path,
 ):
-    """ncfp collects correct coding sequences for small UniProt/Stockholm input."""
+    """ncfp collects correct coding sequences for small UniProt/Stockholm input.
+
+    Makefile target:
+        ncfp -s tests/fixtures/sequences/input_uniprot_stockholm_small.fasta \
+        tests/fixtures/targets/small_stockholm dev@null.com -v
+    """
     # Modify default arguments
     infile = path_uniprot_stockholm_small
     outdir = tmp_path / "small_stockholm"
@@ -228,7 +275,8 @@ def test_small_stockholm(
 
     # Compare output (should be no skipped files)
     check_files(
-        outdir, path_uniprot_stockholm_small_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta")
+        outdir, path_uniprot_stockholm_small_targets, (
+            "ncfp_aa.fasta", "ncfp_nt.fasta")
     )
 
 
@@ -238,7 +286,13 @@ def test_small_stockholm_unified(
     path_uniprot_stockholm_small_unified_targets,
     tmp_path,
 ):
-    """ncfp collects correct coding sequences for small UniProt/Stockholm input."""
+    """ncfp collects correct coding sequences for small UniProt/Stockholm input.
+
+    Makefile target:
+        ncfp -s --unify_seqid \
+            tests/fixtures/sequences/input_uniprot_stockholm_small.fasta \
+            tests/fixtures/targets/small_stockholm_unified/ dev@null.com -v
+    """
     # Modify default arguments
     infile = path_uniprot_stockholm_small
     outdir = tmp_path / "small_stockholm_unified"
@@ -267,7 +321,13 @@ def test_small_stockholm_use_protein_id(
     path_uniprot_stockholm_small_use_proteinid_targets,
     tmp_path,
 ):
-    """ncfp collects correct coding sequences for small UniProt/Stockholm input."""
+    """ncfp collects correct coding sequences for small UniProt/Stockholm input.
+
+    Makefile target:
+        ncfp -s --use_protein_id \
+                tests/fixtures/sequences/input_uniprot_stockholm_small.fasta \
+                tests/fixtures/targets/small_stockholm_use_proteinid/ dev@null.com -v
+    """
     # Modify default arguments
     infile = path_uniprot_stockholm_small
     outdir = tmp_path / "small_stockholm_use_proteinid"
@@ -299,6 +359,11 @@ def test_ncbi_stockholm(
     """ncfp collects correct coding sequences for NCBI/Stockholm input.
 
     This test was added as a check for the fix in issue 31.
+
+    Makefile target:
+        ncfp -s \
+        tests/fixtures/sequences/input_ncbi_stockholm.fasta \
+        tests/fixtures/targets/ncbi_stockholm dev@null.com -v    
     """
     # Modify default arguments
     infile = path_ncbi_stockholm
