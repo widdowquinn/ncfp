@@ -16,6 +16,7 @@
 - add last ditch attempt to identify proteins in an NCBI nucleotide file using the gene name
 - use the UniProt accession number if the GN field is not specific enough
 - when UniProt records point to NCBI gene records, obtain the nucleotide accession from the gene record, and protein ID from the RefSeq cross-reference
+- use the UniProt ORF gene name field for identifying CDS in larger records, to avoid issues with ambiguous GN fields
 
 ## v0.2.0
 
