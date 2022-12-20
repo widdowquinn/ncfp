@@ -1,0 +1,168 @@
+>tr|B7G6L2|B7G6L2_PHATC/43-112 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_48282 PE=4 SV=1
+-----------------------------SLCV-EVAGA-SQD---DGASIFQGDCN-dG
+NKHQVFDFipaPG---TdsgFHRIRA--SHSN-KCLGVADGAL--APG-AEVVQ-
+>tr|B7G6L2|B7G6L2_PHATC/70-157 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_48282 PE=4 SV=1
+-HQVFDFipaPGTDSG-FHRIRAS-HS--NKCL-GVADG-ALA---PGAEVVQLSCV-dN
+NPSTLWK----QRDG-------ALIL--QHSG-YCLSVDVSSR-sTSG-AFMVQW
+>tr|B7G6L2|B7G6L2_PHATC/245-314 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_48282 PE=4 SV=1
+-----------------------EgLS--GLCV-DIIDG-SEM---DGAQAIQASCN--G
+GASQEYQF---LIVGEG---QFQVVA--SHSQ-KCLGVADFDV--TES-ANIIQ-
+>tr|B7G6L2|B7G6L2_PHATC/980-1047 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_48282 PE=4 SV=1
+-------------------------FS--GLCV-NIASN-SFE---NGAQATQWTCN--E
+NANQQFEF---QFVEGG---LYRIVA--FHSQ-KCLTVTQGSI--SEG-ENIVQ-
+>tr|B7G6L2|B7G6L2_PHATC/1054-1108 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_48282 PE=4 SV=1
+PHQLWTV---T-GSGS-GQELKAS-HS--NKCL-SIFES-SMA---TGARLVQLECT--E
+GPAQLWQI---DD------------------------------------------
+>tr|G4ZQT0|G4ZQT0_PHYSP/783-861 [subseq from] Uncharacterized protein OS=Phytophthora sojae (strain P6497) GN=PHYSODRAFT_250943 PE=4 SV=1
+-NQVFTY---D---AK-TRQFKSV-NK-pGLCL-DDGGS-SSS---GSAQAQLWECD--A
+NNQNQWFV-----LDEE---TMMLRN--PAKKnLCLDDG-GGT--APG-A-----
+>tr|B7GBI8|B7GBI8_PHATC/71-140 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_49706 PE=4 SV=1
+-----------------------------SLCV-EVAGA-SQD---DGASIFQGNCN-dG
+NKHQVFDFipaSGTD-N--aYHQIRA--SHSN-KCLGVADGAL--APG-ADIVQ-
+>tr|B7GBI8|B7GBI8_PHATC/98-185 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_49706 PE=4 SV=1
+-HQVFDFi-pASGTDNaYHQIRAS-HS--NKCL-GVADG-ALA---PGADIVQLSCV-dN
+DPATLWK----QRDG-------VLIL--QHSG-YCLSVD-ASSrsTSG-AFMVQW
+>tr|B7GBI8|B7GBI8_PHATC/400-474 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_49706 PE=4 SV=1
+------------------STIVSEgFS--GLCV-DILGG-SVS---DGAQAVQASCN--G
+GDSQEYQF---LIVGEG---QFQVVA--SHSQ-KCLGVADLDV--TDS-ADVIQ-
+>tr|B7GBI8|B7GBI8_PHATC/480-531 [subseq from] Predicted protein OS=Phaeodactylum tricornutum (strain CCAP 1055/1) GN=PHATRDRAFT_49706 PE=4 SV=1
+-NTLWYV---V-GGGA-YLQLRVL-HS--AKCL-SIFGA-SIA---PGTKLVQEACD--E
+GPDQLWRV-----------------------------------------------
+>tr|A0A1V9ZZF2|A0A1V9ZZF2_9STRA/1101-1169 [subseq from] HECT E3 ubiquitin ligase (Fragment) OS=Thraustotheca clavata GN=THRCLA_04323 PE=4 SV=1
+----WTV------DHG-KNTIRSE-SN--GRCL-DAWEA-RNG-----ATVHSWNCD-aS
+NANQNWRY---DA---T---TKQLRH-lKHNG-YCLDMGSDS-------------
+>tr|A0A067BVP7|A0A067BVP7_SAPPC/328-386 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_12804 PE=4 SV=1
+-----------------AQTLRNL-GA--NLCL-DAYYD-SKG----SPRVHLYTCD-gK
+NANQKWRV---VDNK-------VIHA--RFSN-LCLDAD----------------
+>tr|A0A067BVP7|A0A067BVP7_SAPPC/362-431 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_12804 PE=4 SV=1
+ANQKWRV---V----D-NKVIHAR-FS--NLCL-DADPS-DPT-----EAVQVYACV-gN
+NDNQVFRV---SDAL-Q---HVRLQS--QAFN-RALGVG----------------
+>tr|A0A067BVP7|A0A067BVP7_SAPPC/446-518 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_12804 PE=4 SV=1
+--ALWTF---D---AK-SKIVKSE-AN--GRCL-DAWEA-KND-----AVVHSWDCD-gN
+NANQKWSY------DAS---TKQLRH-aTHNG-FCLDMG---S--DNG-D-----
+>tr|W4FLB9|W4FLB9_9STRA/796-870 [subseq from] Uncharacterized protein OS=Aphanomyces astaci GN=H257_16198 PE=4 SV=1
+-AQEWSF---D---SA-TSQVVNH-GT--GRCL-DAWEP-KNG-----GAVHTWDCS-aN
+NINQYWSY---EAT------TKQLRH--KTHAdYCLDIG---T--PTG-TK----
+>tr|A0A067C6B1|A0A067C6B1_SAPPC/314-380 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_12803 PE=4 SV=1
+---KWTY---D---AN-AQTLKNE-GA--NKCL-DAYMD-GNN-----VKVHLYHCD-gN
+NSNQKWRL-------AG---GKVIHA--RFSN-VCLDAD-AN-------------
+>tr|A0A067C6B1|A0A067C6B1_SAPPC/446-523 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_12803 PE=4 SV=1
+-NALWTL-------DG-KGLLKSA-AN--GKCL-DAWEA-KNG-----GGVHSWNCD-eN
+NANQKWSY------DTN---TKQLRH-aKHSG-YCLDMG---S--ENG-DRPQLW
+>tr|A0A1V9YQ69|A0A1V9YQ69_9STRA/382-463 [subseq from] Glycoside hydrolase OS=Achlya hypogyna GN=ACHHYP_07934 PE=4 SV=1
+ANERWRY---N---LG-SNQLVSE-SS--GQCL-DAYRG-ANN----QFYVHVWPCD-aT
+NGNQKWNV----DVE-N---ERIVHM--THAN-LCLDVD--PT--KPD-ASVQVW
+>tr|A0A1V9YQ69|A0A1V9YQ69_9STRA/519-587 [subseq from] Glycoside hydrolase OS=Achlya hypogyna GN=ACHHYP_07934 PE=4 SV=1
+---TWTF---V---QS-QNMIKHE-AS--GKCL-DAYEA-KDG-----GAVHLWACD-tT
+NSNQKWTY---DAV------NLQLRH--ATHDnFCLDMA-S----D---------
+>tr|T0S0W5|T0S0W5_9STRA/375-455 [subseq from] Uncharacterized protein OS=Saprolegnia diclina VS20 GN=SDRG_06485 PE=4 SV=1
+ANERWTY---D---LG-TNQIFST-SS--GHCL-DAYYA-NSK-----YNVHVWPCD-aT
+NGNQKWTI---DIKS-----NRVVHL--KHDN-LCLDVD--PT--KAD-ASVQVW
+>tr|A0A1V9YYS2|A0A1V9YYS2_9STRA/434-502 [subseq from] Endochitinase 1 OS=Achlya hypogyna GN=ACHHYP_05316 PE=4 SV=1
+-----------------TFQLRSL-SG--NSCIdAYADG-SKA---AGYTVHTWTCD-aS
+NGNQRWKV---DAQ------NHRIVH--KTHPnLCLDVD-PSN--KAG-------
+>tr|T0RV48|T0RV48_9STRA/363-443 [subseq from] Uncharacterized protein OS=Saprolegnia diclina VS20 GN=SDRG_06486 PE=4 SV=1
+ANERWRF---N---RT-TNQIVSI-SS--GQCL-DAYFA-NAR-----FYVHVWPCD-aS
+NQNQLWTI---DATS------NTIKH-rVHNN-LCLDVD--PT--KAD-ASVQVW
+>tr|A0A1W0A5J2|A0A1W0A5J2_9STRA/438-508 [subseq from] Uncharacterized protein OS=Thraustotheca clavata GN=THRCLA_02391 PE=4 SV=1
+--------------------IRSV-SG--NSCLdAYPES-SKA---SGYSIHTWQCS-aS
+NDNQKWKV---DAQ------NHRLVH-lVHSN-LCVDVD--PN--DSS-HRVQVW
+>tr|A0A067BWY8|A0A067BWY8_SAPPC/374-454 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_15910 PE=4 SV=1
+ANERWRY---N---RA-TNQIVSI-SS--GQCL-DAYLA-NAR-----FYVHVWPCD-aS
+NRNQLWTI---DATS-------NIVKhrVHNN-LCLDVD--PT--KAD-ASVQVW
+>tr|A0A067D5E6|A0A067D5E6_SAPPC/852-922 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_19057 PE=4 SV=1
+TSQLWLF---N---HL-DYTVMNQ-GS--GQCL-DAYEA-KVG-----GAVHLYACS-pG
+NVNQLWRY---NPL------TRQLQH-mGHAG-YCLDVYG---------------
+>tr|T0S0H5|T0S0H5_9STRA/433-508 [subseq from] Uncharacterized protein OS=Saprolegnia diclina VS20 GN=SDRG_06263 PE=4 SV=1
+-------------DAT-TYLLKSL-SG--NACL-DAYPDvSKA---AGYALHTWSCD-aS
+NGNQKWKI---DAQN------HRLVH-aTHPN-LCVDVDPNDA--SHG-VQV---
+>tr|A0A024UHJ7|A0A024UHJ7_9STRA/522-594 [subseq from] Uncharacterized protein OS=Aphanomyces invadans GN=H310_04116 PE=4 SV=1
+---KWTV---L---HD-KNMIMSE-IT--NTCL-DAPQK-AN-----GARIHLWPCN-dS
+NANQKWSY----DVA-----TKQIRH-vTHTG-YCLDMG---S--YNG-NK----
+>tr|A0A024UQ40|A0A024UQ40_9STRA/802-879 [subseq from] Uncharacterized protein OS=Aphanomyces invadans GN=H310_00930 PE=4 SV=1
+TSQEWSF---D---SS-TYQIINR-GT--GRCM-DAWQP-MN-----GGGVHTWDCS-aS
+NVNQYWNY----DA--A---TKQLRH-rTHVG-YCLDVG---A--TTG-TAPH--
+>tr|A0A1V9ZGJ8|A0A1V9ZGJ8_9STRA/247-318 [subseq from] Lysosomal beta glucosidase OS=Thraustotheca clavata GN=THRCLA_07097 PE=4 SV=1
+-------------------QIQVV-GN--GKCL-DAYPN-SNA--gAGYSVHLWNCD-sT
+NGNQKWNI---NAAG------HQIKH--ATHPnLCLDAD--PT--DSQ-SRLQVW
+>tr|D0N3N2|D0N3N2_PHYIT/40-116 [subseq from] Uncharacterized protein OS=Phytophthora infestans (strain T30-4) GN=PITG_05142 PE=4 SV=1
+-HQWFRV----PIGGG-YFVYKNV-AT--GNVL-EHWDL-KEG---SGNTVAMSDDV--N
+GPKRQWFE---AKLGDI---FIGLRN--RASR-LYIDHY-GSR------------
+>tr|T0R1Y7|T0R1Y7_9STRA/25-104 [subseq from] Uncharacterized protein OS=Saprolegnia diclina VS20 GN=SDRG_16165 PE=4 SV=1
+-NEEWRY---R---TE-THQIIVS-SN--NQCL-DAYKD-SAS---GEYRVHVYPCE-dI
+NRNQYWTI---DSA------RQRIRH--LTHPnLCLDVD-P----TQN-NKVQV-
+>tr|A0A067CBQ9|A0A067CBQ9_SAPPC/789-858 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_06216 PE=4 SV=1
+-------------------QLRVK-SN--GKCL-DVYPN-SAV--aAGYTLHLWTCD-aA
+NGNQRWRI---NAAG------HQIAH-aTHNN-VCLDAD---P--TDGqSRLQ--
+>tr|T0PZC1|T0PZC1_9STRA/178-237 [subseq from] Uncharacterized protein OS=Saprolegnia diclina VS20 GN=SDRG_11398 PE=4 SV=1
+-------------------MLKSA-SN--GQCL-DAFKD-ANG----KVQVHTYACD-vK
+NSNQKWNF---NP---S---TKTLEH-aTHAG-QCLDVD-H--------------
+>tr|A0A067CTM6|A0A067CTM6_SAPPC/96-175 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_01737 PE=4 SV=1
+-NEQWNY---G---IF-SHQIISY-SN--NQCL-DAYKD-SDS---GEYRVHMYVCD-dN
+NRNQAWTI---D----T--vHHRIKH--RTHPnLCLDVD-P----TQN-NKVQV-
+>tr|A0A067BFP0|A0A067BFP0_SAPPC/49-98 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_17307 PE=4 SV=1
+---LWTF---D---HV-QNTIKSE-LT--GLCL-DAYRG-SNG-----APVHTYSCS-lS
+NGNQQWQY---DPS-----------------------------------------
+>tr|A0A067C9L7|A0A067C9L7_SAPPC/373-450 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_11439 PE=3 SV=1
+PNEQWNY---D---SR-THHIKVN-SN--HECL-DAYYD-GSA-----FKVHTYTCD-aS
+NGNQRWRI---DSA------NHRIAH--RTHPnLCLDVD-PSQ--NNK-VQ----
+>tr|T0RW84|T0RW84_9STRA/548-618 [subseq from] Uncharacterized protein OS=Saprolegnia diclina VS20 GN=SDRG_07907 PE=4 SV=1
+TSQLWLF---N---HL-DYTVMNQ-GS--GQCL-DAYEA-KVG-----GAVHLYECV-pG
+NVNQLWRY---NP---Q---TRQLQH-mGHAG-YCLDVYG---------------
+>tr|A0A067C1X2|A0A067C1X2_SAPPC/432-512 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_11965 PE=4 SV=1
+---RFEF---D---TA-TSLLKSL-SA--NACLdAYPDA-SKA---AGYALHTWSCD-aS
+NGNQKWKI---DIQN------HRLAH--ATHPnLCVDVDPNDA--SNG-VQVW--
+>tr|W4GMC4|W4GMC4_9STRA/354-414 [subseq from] Uncharacterized protein OS=Aphanomyces astaci GN=H257_07220 PE=4 SV=1
+----WFF---D---QD-LLTFRSR-ST--NQCL-DTYAD-ADG---NSQVHVYWCDG--S
+NYNQKWRF-----RGDG---TFQVVS--KANP-----------------------
+>tr|A0A081ALQ3|A0A081ALQ3_PHYPR/95-143 [subseq from] Uncharacterized protein (Fragment) OS=Phytophthora parasitica P1976 GN=F444_05568 PE=4 SV=1
+-NQKWTL---E-SSTG---KLKHVkHQ--GFCL-DTDPA-QGN------KLQLYGCS-pN
+NPNQQWSV-----------------------------------------------
+>tr|W4HCN8|W4HCN8_9STRA/837-914 [subseq from] Uncharacterized protein OS=Aphanomyces astaci GN=H257_00914 PE=4 SV=1
+--QEWSF---D---SA-TSQVVNR-GT--GRCL-DAWEP-QNG-----GAVHTWDCS-aT
+NANQYWSY---EAT------TKQLRH--KTHAsYCLDIG---T--TTG-TKPHLW
+>tr|G5AD75|G5AD75_PHYSP/36-111 [subseq from] Uncharacterized protein (Fragment) OS=Phytophthora sojae (strain P6497) GN=PHYSODRAFT_389322 PE=4 SV=1
+---QWYR---IPVGSG-YFAYKNV-AT--GKLL-DHWDA-KEG---HGNTVAISDDL--K
+DPNHHWFE---TKLDDI---FIVVRN--RASR-LFIDHGGFS-------------
+>tr|A0A1V9ZBT8|A0A1V9ZBT8_9STRA/44-98 [subseq from] Uncharacterized protein OS=Thraustotheca clavata GN=THRCLA_22151 PE=4 SV=1
+-NQKWIV---H---TD-TKQIEHAtHK--GQCL-DGDPT-YAD-----HHLQMWECV-pN
+NENQQWNA---EPYTA---------------------------------------
+>tr|A0A1V9Y7A7|A0A1V9Y7A7_9STRA/876-946 [subseq from] Lon protease homolog OS=Thraustotheca clavata GN=THRCLA_11583 PE=3 SV=1
+-SQQWLV---D---HV-HYTIINQ-YT--GQCL-DAYNA-QNG-----GVVHTYPCT-pG
+NINQMWHY---NA---T---TRQLQH-vKHQG-FCLDLW-GS-------------
+>tr|W2NPY3|W2NPY3_PHYPR/55-104 [subseq from] Uncharacterized protein OS=Phytophthora parasitica GN=L914_05338 PE=4 SV=1
+ANQKWTI---E-SETG---KLKHAtHQ--GFCL-DTDPA-QGN------KLQLYGCS-pN
+NPNQKWSV-----------------------------------------------
+>tr|W2Y0U4|W2Y0U4_PHYPR/55-104 [subseq from] Uncharacterized protein OS=Phytophthora parasitica P10297 GN=F442_22347 PE=4 SV=1
+ANQKWTI---E-SETG---KLKHAtHQ--GFCL-DTDPA-QGN------KLQLYGCS-pN
+NPNQKWSV-----------------------------------------------
+>tr|G4Z930|G4Z930_PHYSP/352-401 [subseq from] Uncharacterized protein OS=Phytophthora sojae (strain P6497) GN=PHYSODRAFT_245857 PE=3 SV=1
+PNQKWTF---E-SSTG---KLKHAaHQ--GFCL-DTDPK-QNN------KVQLYGCS-pN
+NANQKWAI-----------------------------------------------
+>tr|A0A067CJN9|A0A067CJN9_SAPPC/229-280 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_20539 PE=4 SV=1
+-NQKWNF---N---PT-TKTLEHAtHT--GQCL-DADPT-YTD-----RHAQMWACT-pN
+NANQQWSI---DT------------------------------------------
+>tr|K0S173|K0S173_THAOC/166-240 [subseq from] Uncharacterized protein OS=Thalassiosira oceanica GN=THAOC_28084 PE=4 SV=1
+--------------------IVNS-GSptARAI-DIFGG-ANAgcaASTNIDVYDQN--G
+QDWQQWKF---NADG-------TIES--VHCPgNVLNIEYGSC--TNG-ANIILY
+>tr|W4G5S9|W4G5S9_9STRA/576-625 [subseq from] Uncharacterized protein OS=Aphanomyces astaci GN=H257_11214 PE=4 SV=1
+--------------------------Q--GKCL-SVAHG-STE---NGAAVTLEACD--Q
+STAQQWHV--------G---QGVVTN--HATG-FCLTAG----------------
+>tr|T0PVB0|T0PVB0_9STRA/70-140 [subseq from] Uncharacterized protein (Fragment) OS=Saprolegnia diclina VS20 GN=SDRG_17172 PE=4 SV=1
+----WNF---N---FM-TGQIVAQ-GS--NQCL-DAYQA-QNG-----GAVHLWQCD-aT
+NGNQKWTL---DATT------GQLRH-gTFKG-FCLDVQS-----ESG-A-----
+>tr|A0A080YVT8|A0A080YVT8_PHYPR/27-76 [subseq from] Uncharacterized protein (Fragment) OS=Phytophthora parasitica P1976 GN=F444_23125 PE=4 SV=1
+ANQKWTI---E-SETG---KLKHAtHQ--GFCL-DTDPA-QGN------KLQLYGCS-pN
+NPNQKWSV-----------------------------------------------
+>tr|W2FJD4|W2FJD4_PHYPR/27-76 [subseq from] Uncharacterized protein (Fragment) OS=Phytophthora parasitica GN=L915_21806 PE=4 SV=1
+ANQKWTI---E-SETG---KLKHAtHQ--GFCL-DTDPA-QGN------KLQLYGCS-pN
+NPNQKWSV-----------------------------------------------
+>tr|W2VP05|W2VP05_PHYPR/27-76 [subseq from] Uncharacterized protein (Fragment) OS=Phytophthora parasitica CJ01A1 GN=F441_22665 PE=4 SV=1
+ANQKWTI---E-SETG---KLKHAtHQ--GFCL-DTDPA-QGN------KLQLYGCS-pN
+NPNQKWSV-----------------------------------------------
+>tr|A0A067CM85|A0A067CM85_SAPPC/554-615 [subseq from] Uncharacterized protein OS=Saprolegnia parasitica (strain CBS 223.65) GN=SPRG_03538 PE=4 SV=1
+-SNRWTF-----ADDG-SIRF-----R--GQCL-ATAHG-SLE---SGAALTLEQCV--D
+ADHQKWTF--------S---NTQLVN--KATG-LCAT------------------
+>tr|A0A0W8DJ73|A0A0W8DJ73_PHYNI/169-238 [subseq from] Uncharacterized protein OS=Phytophthora nicotianae GN=AM588_10008039 PE=4 SV=1
+-QQTWTF----EEDTN-RIRI-----D--DYCL-SLSRG-STE---NGVRITADKCEpdV
+APHQQWTF---NAED-G---TMRSKA--STSN-QCVTT-----------------
