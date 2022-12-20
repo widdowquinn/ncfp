@@ -146,7 +146,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             result = u_service.search(
                 query_acc, columns="gene_orf")  # type: ignore
             pstring = result.split("\n")[1].strip()
-            print(qstring, pstring)
+            # print(qstring, pstring)
             if qstring == "":
                 logger.warning(
                     "Uniprot record %s has no EMBL cross-reference",
