@@ -138,9 +138,15 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 "Querying UniProt with %s to match xref_embl",
                 query_acc,
             )
-            # Use the UniProt record ID as the query to the EMBL ID
-            result = u_service.search(query_acc, columns="xref_embl")  # type: ignore
+            # Use the UniProt record ID as the query to the EMBL ID, retrieving
+            # the EMBL record accession, and the ORF gene name
+            result = u_service.search(
+                query_acc, columns="xref_embl")  # type: ignore
             qstring = result.split("\n")[1].strip()[:-1]
+            result = u_service.search(
+                query_acc, columns="gene_orf")  # type: ignore
+            pstring = result.split("\n")[1].strip()
+            # print(qstring, pstring)
             if qstring == "":
                 logger.warning(
                     "Uniprot record %s has no EMBL cross-reference",
@@ -150,7 +156,8 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # a fallback. This refers to a gene database record at NCBI, which
                 # then must be queried to get the nucleotide cross-reference.
                 logger.debug("Trying xref_geneid as last resort")
-                gresult = u_service.search(query_acc, columns="xref_geneid")  # type: ignore
+                gresult = u_service.search(
+                    query_acc, columns="xref_geneid")  # type: ignore
                 gstring = gresult.split("\n")[1].strip()[:-1]
                 if gstring == "":
                     logger.warning(
@@ -159,7 +166,8 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                     )
                     continue
                 # Fetch the GeneID entry and extract nucleotide information from it.
-                logger.debug("Finding nucleotide entry from GeneID %s", gstring)
+                logger.debug(
+                    "Finding nucleotide entry from GeneID %s", gstring)
                 handle = ncbi_cds_from_protein.entrez.efetch_with_retries(
                     gstring, "gene", "acc", "text", 10
                 )  # NOTE: hard-coded retry count
@@ -178,7 +186,8 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # We also need the xref_refseq entry to get a protein ID for
                 # the query.
                 logger.debug("Finding protein entry from GeneID %s", gstring)
-                presult = u_service.search(gstring, columns="xref_refseq")  # type: ignore
+                presult = u_service.search(
+                    gstring, columns="xref_refseq")  # type: ignore
                 pstring = presult.split("\n")[1].strip()[:-1]
                 if pstring == "":
                     logger.warning(
@@ -188,14 +197,18 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                     continue
                 logger.debug("Found RefSeq protein IDs %s", pstring)
             logger.debug("Recovered NCBI database accession: %s", qstring)
+            logger.debug("Accession has ORF gene name: %s", pstring)
             # UniProt can return multiple UIDs separated by semicolons. Sometimes the same
             # UID is repeated. However, the current cache schema uses the accession as primary
             # key in the same table as the query IDs.
             # TODO: Update schema to allow multiple queries per record
             for qid in qstring.split(";"):
-                logger.debug("Adding record %s to cache with query %s", record.id, qid)
-                try:  # Uniprot sequences are added to cache as (accession, NULL, nt_query)
-                    logger.debug("Adding %s as nt ID (protein ID: %s)", qid, pstring)
+                logger.debug(
+                    "Adding record %s to cache with query %s", record.id, qid)
+                # Uniprot sequences are added to cache as (accession, NULL, nt_query)
+                try:
+                    logger.debug(
+                        "Adding %s as nt ID (protein ID: %s)", qid, pstring)
                     add_input_sequence(cachepath, record.id, pstring, qid)
                 except sqlite3.IntegrityError:  # Sequence exists
                     logger.warning(
@@ -205,7 +218,8 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                     )
                     continue
         elif seqtype == "NCBI":
-            try:  # NCBI sequences are added to cache as (accession, aa_query, NULL)
+            # NCBI sequences are added to cache as (accession, aa_query, NULL)
+            try:
                 add_input_sequence(cachepath, record.id, record.id, None)
             except sqlite3.IntegrityError:  # Sequence exists
                 continue
@@ -287,6 +301,9 @@ def extract_feature_cds(feature, record, stockholm, args):
     :param stockholm:  Tuple with (start, end) aa positions
     :param args:  CLI script arguments
     """
+    logger = logging.getLogger(__name__)
+    logger.debug("Extracting CDS from feature %s", feature)
+
     # Extract nucleotide coding sequence from GenBank record
     ntseq = feature.extract(record.seq)
 
@@ -300,7 +317,19 @@ def extract_feature_cds(feature, record, stockholm, args):
     # If Stockholm (start, end) headers were provided, unpack tuple and trim sequences
     if len(stockholm) != 0:
         start, end = stockholm
-        ntseq = ntseq[(start - 1) * 3 : (end * 3)]
+        logger.debug(
+            "Trimming CDS to Stockholm coordinates: %d..%d", start, end)
+        ntseq = ntseq[(start - 1) * 3: (end * 3)]
+
+    # Has a region been requested that is outside the CDS?
+    # NOTE: This can happen if a Stockholm region is provided, but
+    # the 'wrong' CDS is selected. A route out of this may be to
+    # iterate over all matching CDS and choose one (the first?)
+    # that provides the correct conceptual translation.
+    if not len(ntseq):
+        logger.warning(
+            "Requested region %d..%d is outside CDS, skipping", start, end)
+        return None, None
 
     # Generate conceptual translation from extracted nucleotide sequence
     aaseq = ntseq.translate()
@@ -308,28 +337,41 @@ def extract_feature_cds(feature, record, stockholm, args):
         aaseq = aaseq[:-1]
 
     # Create SeqRecords of CDS and conceptual translation
-    if (args.use_protein_ids) or ("locus_tag" not in feature.qualifiers):
-        ntrecord = SeqRecord(
-            seq=ntseq,
-            description="coding sequence",
-            id=feature.qualifiers["protein_id"][0],
-        )
-        aarecord = SeqRecord(
-            seq=aaseq,
-            description="conceptual translation",
-            id=feature.qualifiers["protein_id"][0],
-        )
-    else:
-        ntrecord = SeqRecord(
-            seq=ntseq,
-            description="coding sequence",
-            id=feature.qualifiers["locus_tag"][0],
-        )
-        aarecord = SeqRecord(
-            seq=aaseq,
-            description="conceptual translation",
-            id=feature.qualifiers["locus_tag"][0],
-        )
+    field = "protein_id" if (
+        "locus_tag" not in feature.qualifiers or args.use_protein_ids) else "locus_tag"
+    logger.debug("Using %s as ID", feature.qualifiers[field][0])
+    ntrecord = SeqRecord(
+        seq=ntseq,
+        description="coding sequence",
+        id=feature.qualifiers[field][0],
+    )
+    aarecord = SeqRecord(
+        seq=aaseq,
+        description="conceptual translation",
+        id=feature.qualifiers[field][0],
+    )
+    # if (args.use_protein_ids) or ("locus_tag" not in feature.qualifiers):
+    #     ntrecord = SeqRecord(
+    #         seq=ntseq,
+    #         description="coding sequence",
+    #         id=feature.qualifiers["protein_id"][0],
+    #     )
+    #     aarecord = SeqRecord(
+    #         seq=aaseq,
+    #         description="conceptual translation",
+    #         id=feature.qualifiers["protein_id"][0],
+    #     )
+    # else:
+    #     ntrecord = SeqRecord(
+    #         seq=ntseq,
+    #         description="coding sequence",
+    #         id=feature.qualifiers["locus_tag"][0],
+    #     )
+    #     aarecord = SeqRecord(
+    #         seq=aaseq,
+    #         description="conceptual translation",
+    #         id=feature.qualifiers["locus_tag"][0],
+    #     )
 
     return ntrecord, aarecord
 

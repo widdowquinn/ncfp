@@ -70,6 +70,17 @@ def path_altstart_targets():
 
 
 @pytest.fixture
+def path_ambiguous():
+    """Path to input with ambiguous UniProt GN field."""
+    yield SEQUENCEPATH / "input_ambiguous.fasta"
+
+
+@pytest.fixture
+def path_ambiguous_targets():
+    """Path to target output with ambiguous UniProt GN field."""
+    yield TARGETPATH / "ambiguous"
+
+@pytest.fixture
 def path_human():
     """Path to FASTA file of human sequences."""
     yield SEQUENCEPATH / "human.fasta"

@@ -33,17 +33,35 @@ clean_docs:
 # Run examples from documentation
 examples:
 	# NCBI no introns
+	# test_basic_ncbi()
 	@ncfp tests/fixtures/sequences/input_ncbi.fasta \
         tests/fixtures/targets/ncbi dev@null.com -v
 
 	# NCBI alternative starts
+	# test_alternative_start()
 	@ncfp --allow_alternative_start_codon \
 		tests/fixtures/sequences/input_alternative_start.fasta \
 		tests/fixtures/targets/alternative_start dev@null.com -v
 
+	# Sequence with ambiguous UniProt GN field
+	# test_ambiguous()
+	@ncfp -s tests/fixtures/sequences/input_ambiguous.fasta \
+		tests/fixtures/targets/ambiguous dev@null.com -v
+
+	# NCBI/Stockholm
+	# test_ncbi_stockholm()
+	@ncfp -s \
+		tests/fixtures/sequences/input_ncbi_stockholm.fasta \
+		tests/fixtures/targets/ncbi_stockholm dev@null.com -v
+
 	# UniProt no introns
+	# test_basic_uniprot
 	@ncfp tests/fixtures/sequences/input_uniprot.fasta \
-        tests/fixtures/targets/uniprot dev@null.com -v
+        tests/fixtures/targets/basic_uniprot dev@null.com -v
+
+	# test_small_stockholm()
+	@ncfp -s tests/fixtures/sequences/input_uniprot_stockholm_small.fasta \
+        tests/fixtures/targets/small_stockholm dev@null.com -v
 
 	# UniProt/Stockholm no introns
 	@ncfp -s tests/fixtures/sequences/input_uniprot_stockholm.fasta \
@@ -64,7 +82,7 @@ examples:
         tests/fixtures/targets/human dev@null.com -v
 
 	# Logging
-	@ncfp tests/fixrtures/sequences/human.fasta \
+	@ncfp tests/fixtures/sequences/human.fasta \
         tests/fixtures/targets/logging dev@null.com \
         -l tests/fixtures/targets/logging/human.log
 

@@ -53,7 +53,7 @@ from typing import List
 from Bio import SeqIO
 
 from ncbi_cds_from_protein import NCFPException, __version__
-from ncbi_cds_from_protein.caches import initialise_dbcache, find_record_cds
+from ncbi_cds_from_protein.caches import initialise_dbcache, find_record_cds, get_aa_query
 from ncbi_cds_from_protein.entrez import (
     set_entrez_email,
     search_nt_ids,
@@ -124,7 +124,11 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
 
     nt_sequences = []  # Holds extracted nucleotide sequences
     for record in seqrecords:
+        logger.debug("Processing sequence %s", record.id)
         result = find_record_cds(cachepath, record.id)
+        aaqueryid = get_aa_query(cachepath, record.id)
+        logger.debug(
+            "Found AA query ID %s for this sequence in cache", aaqueryid)
         if not result:
             logger.warning(
                 "No record found for sequence input %s - please check this sequence manually",
@@ -148,10 +152,25 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
             logger.info("Sequence %s matches GenBank entry %s",
                         record.id, gbrecord.id)
             match = re.search(re_uniprot_gn, record.description)
-            if match is not None:  # For Uniprot sequences, we extract the gene name
+            # If we have a match, we can use the UniProt gene name to extract the
+            # CDS. In some cases (e.g. A0A127QBK9) the UniProt gene name is
+            # ambiguous, and the CDS will not be extracted correctly. If we have one,
+            # we prefer to use the AA query ID to extract the CDS.
+            feature = None
+            logger.debug("AA query ID: %s", aaqueryid)
+            if aaqueryid is not None:
+                logger.info(
+                    "Extracting CDS by locus tag with AA query ID: %s", aaqueryid)
+                feature = extract_feature_by_locus_tag(
+                    gbrecord, aaqueryid[0])
+                if feature is None:
+                    logger.info(
+                        "Did not find feature with locus tag %s, trying GN field", aaqueryid)
+            # For Uniprot sequences, we extract the gene name
+            if (match is not None) and (feature is None):
                 logger.debug("Matched %s to %s", record.id, match.group())
-                gene_name = match.group(0)
                 # Get the matching CDS
+                gene_name = match.group(0)
                 logger.info("Searching for CDS: %s", gene_name)
                 feature = extract_feature_by_locus_tag(gbrecord, gene_name)
                 if feature is None:
@@ -160,7 +179,7 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                     )
                     feature = extract_feature_by_protein_id(
                         gbrecord, gene_name)
-            else:  # NCBI sequences
+            elif feature is None:  # NCBI sequences
                 # Get the matching CDS - note we have to remove the Stockholm
                 # domain info, if that is present
                 logger.debug(
@@ -184,14 +203,23 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                     feature.qualifiers["protein_id"][0],
                 )
                 logger.info("\tExtracting coding sequence...")
+                logger.debug("args.stockholm: %s", args.stockholm)
                 if args.stockholm:
                     locdata = record.id.split("/")[-1]
+                    logger.debug(
+                        "Adding Stockholm domain info %s to sequence ID", locdata)
                     stockholm = [int(e) for e in locdata.split("-")]
                 else:
                     stockholm = []
                 ntseq, aaseq = extract_feature_cds(
                     feature, gbrecord, tuple(stockholm), args
                 )
+                # Could not extract feature for some reason, skip
+                if ntseq is None and aaseq is None:
+                    logger.warning(
+                        "Could not extract CDS for %s (skipping)", record.id)
+                    continue
+
                 if args.unify_seqid:
                     # Make recovered sequence ID the same as the query sequence ID
                     # Move the complete recovered sequence description to the new sequence
@@ -199,6 +227,9 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                     tmp_description = ntseq.description
                     ntseq.id = record.id
                     ntseq.description = tmp_description
+                # Otherwise, if we have stockholm format append locations to the ntseq IDs
+                elif args.stockholm:
+                    ntseq.id = f"{ntseq.id}/{stockholm[0] * 3 - 2}-{stockholm[1] * 3}"
                 if aaseq.seq == record.seq.ungap("-").upper():
                     logger.info(
                         "\t\tTranslated sequence matches input sequence")
