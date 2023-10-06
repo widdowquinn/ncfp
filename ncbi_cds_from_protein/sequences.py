@@ -145,7 +145,12 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             qstring = result.split("\n")[1].strip()[:-1]
             result = u_service.search(
                 query_acc, columns="gene_orf")  # type: ignore
-            pstring = result.split("\n")[1].strip()
+            # bioservices 1.12 now returns a string without trailing \n if there is
+            # no match, so we need to account for this
+            if "\n" in result:
+                pstring = result.split("\n")[1].strip()
+            else:
+                pstring = ""
             # print(qstring, pstring)
             if qstring == "":
                 logger.warning(
