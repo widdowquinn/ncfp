@@ -63,7 +63,7 @@ License
 Unless otherwise indicated, all code is licensed under the MIT license and subject to the following agreement:
 
     (c) The James Hutton Institute 2017-2019
-    (c) The University of Strathclyde 2019-2020
+    (c) The University of Strathclyde 2019-2023
     Author: Leighton Pritchard
 
     Contact: leighton.pritchard@strath.ac.uk
