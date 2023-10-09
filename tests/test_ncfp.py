@@ -156,13 +156,10 @@ def test_alternative_start(
     ncfp.run_main(args)
 
     # Compare output
-    check_files(outdir, path_altstart_targets,
-                ("ncfp_aa.fasta", "ncfp_nt.fasta"))
+    check_files(outdir, path_altstart_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
 
 
-def test_ambiguous(
-    namespace_base, path_ambiguous, path_ambiguous_targets, tmp_path
-):
+def test_ambiguous(namespace_base, path_ambiguous, path_ambiguous_targets, tmp_path):
     """ncfp collects correct coding sequences for ambiguous UniProt GN field.
 
     Makefile target:
@@ -171,15 +168,15 @@ def test_ambiguous(
     """
     infile = path_ambiguous
     outdir = tmp_path / "ambiguous"
-    args = modify_namespace(namespace_base, infname=infile,
-                            outdirname=outdir, stockholm=True)
+    args = modify_namespace(
+        namespace_base, infname=infile, outdirname=outdir, stockholm=True
+    )
 
     # Run ersatz command-line
     ncfp.run_main(args)
 
     # Compare output
-    check_files(outdir, path_ambiguous_targets,
-                ("ncfp_aa.fasta", "ncfp_nt.fasta"))
+    check_files(outdir, path_ambiguous_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta"))
 
 
 def test_basic_ncbi(namespace_base, path_ncbi, path_ncbi_targets, tmp_path):
@@ -206,7 +203,7 @@ def test_basic_uniprot(
 ):
     """ncfp collects correct coding sequences for basic UniProt input.
 
-    Makefie target:    
+    Makefie target:
         ncfp tests/fixtures/sequences/input_uniprot.fasta \
         tests/fixtures/targets/basic_uniprot dev@null.com -v
     """
@@ -275,8 +272,7 @@ def test_small_stockholm(
 
     # Compare output (should be no skipped files)
     check_files(
-        outdir, path_uniprot_stockholm_small_targets, (
-            "ncfp_aa.fasta", "ncfp_nt.fasta")
+        outdir, path_uniprot_stockholm_small_targets, ("ncfp_aa.fasta", "ncfp_nt.fasta")
     )
 
 
@@ -363,7 +359,7 @@ def test_ncbi_stockholm(
     Makefile target:
         ncfp -s \
         tests/fixtures/sequences/input_ncbi_stockholm.fasta \
-        tests/fixtures/targets/ncbi_stockholm dev@null.com -v    
+        tests/fixtures/targets/ncbi_stockholm dev@null.com -v
     """
     # Modify default arguments
     infile = path_ncbi_stockholm

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2022
+# (c) University of Strathclyde 2019-2023
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +18,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2022 University of Strathclyde
+# Copyright (c) 2019-2023 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -90,6 +90,28 @@ def guess_seqtype(record):
         return "UniProt"
 
 
+def uniprot_to_embl(query_acc, u_service):
+    """Return EMBL accession and ORF gene name for passed UniProt accession.
+
+    query_acc   - UniProt accession to query
+    u_service   - UniProt service object
+
+    Returns empty string in each case if no match found
+    """
+    result = u_service.search(query_acc, columns="xref_embl")  # type: ignore
+    if "\n" in result:
+        qstring = result.split("\n")[1].strip()[:-1]
+    else:
+        qstring = ""
+    result = u_service.search(query_acc, columns="gene_orf")  # type: ignore
+    if "\n" in result:
+        pstring = result.split("\n")[1].strip()
+    else:
+        pstring = ""
+
+    return qstring, pstring
+
+
 # Process collection of SeqRecords into cache and skipped/kept
 def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
     """Triage SeqRecords into those that can/cannot be used
@@ -121,7 +143,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
         elif seqtype == "UniProt":
             match = re.search(re_uniprot_gn, record.description)
             pstring = None  # None if we don't need to look up GeneID
-            if match is None:  #  No GN field
+            if match is None:  # No GN field
                 logger.warning(
                     "Uniprot record %s has no GN field (skipping)", record.id
                 )
@@ -140,17 +162,10 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             )
             # Use the UniProt record ID as the query to the EMBL ID, retrieving
             # the EMBL record accession, and the ORF gene name
-            result = u_service.search(
-                query_acc, columns="xref_embl")  # type: ignore
-            qstring = result.split("\n")[1].strip()[:-1]
-            result = u_service.search(
-                query_acc, columns="gene_orf")  # type: ignore
             # bioservices 1.12 now returns a string without trailing \n if there is
-            # no match, so we need to account for this
-            if "\n" in result:
-                pstring = result.split("\n")[1].strip()
-            else:
-                pstring = ""
+            # no match, so we need to account for this for each of qstring, pstring,
+            # and gstring
+            qstring, pstring = uniprot_to_embl(query_acc, u_service)
             # print(qstring, pstring)
             if qstring == "":
                 logger.warning(
@@ -162,8 +177,12 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # then must be queried to get the nucleotide cross-reference.
                 logger.debug("Trying xref_geneid as last resort")
                 gresult = u_service.search(
-                    query_acc, columns="xref_geneid")  # type: ignore
-                gstring = gresult.split("\n")[1].strip()[:-1]
+                    query_acc, columns="xref_geneid"
+                )  # type: ignore
+                if "\n" in gresult:
+                    gstring = gresult.split("\n")[1].strip()[:-1]
+                else:
+                    gstring = ""
                 if gstring == "":
                     logger.warning(
                         "Uniprot record %s has no GeneID cross-reference (skipping)",
@@ -171,8 +190,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                     )
                     continue
                 # Fetch the GeneID entry and extract nucleotide information from it.
-                logger.debug(
-                    "Finding nucleotide entry from GeneID %s", gstring)
+                logger.debug("Finding nucleotide entry from GeneID %s", gstring)
                 handle = ncbi_cds_from_protein.entrez.efetch_with_retries(
                     gstring, "gene", "acc", "text", 10
                 )  # NOTE: hard-coded retry count
@@ -192,7 +210,8 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # the query.
                 logger.debug("Finding protein entry from GeneID %s", gstring)
                 presult = u_service.search(
-                    gstring, columns="xref_refseq")  # type: ignore
+                    gstring, columns="xref_refseq"
+                )  # type: ignore
                 pstring = presult.split("\n")[1].strip()[:-1]
                 if pstring == "":
                     logger.warning(
@@ -208,12 +227,10 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             # key in the same table as the query IDs.
             # TODO: Update schema to allow multiple queries per record
             for qid in qstring.split(";"):
-                logger.debug(
-                    "Adding record %s to cache with query %s", record.id, qid)
+                logger.debug("Adding record %s to cache with query %s", record.id, qid)
                 # Uniprot sequences are added to cache as (accession, NULL, nt_query)
                 try:
-                    logger.debug(
-                        "Adding %s as nt ID (protein ID: %s)", qid, pstring)
+                    logger.debug("Adding %s as nt ID (protein ID: %s)", qid, pstring)
                     add_input_sequence(cachepath, record.id, pstring, qid)
                 except sqlite3.IntegrityError:  # Sequence exists
                     logger.warning(
@@ -322,9 +339,8 @@ def extract_feature_cds(feature, record, stockholm, args):
     # If Stockholm (start, end) headers were provided, unpack tuple and trim sequences
     if len(stockholm) != 0:
         start, end = stockholm
-        logger.debug(
-            "Trimming CDS to Stockholm coordinates: %d..%d", start, end)
-        ntseq = ntseq[(start - 1) * 3: (end * 3)]
+        logger.debug("Trimming CDS to Stockholm coordinates: %d..%d", start, end)
+        ntseq = ntseq[(start - 1) * 3 : (end * 3)]
 
     # Has a region been requested that is outside the CDS?
     # NOTE: This can happen if a Stockholm region is provided, but
@@ -332,8 +348,7 @@ def extract_feature_cds(feature, record, stockholm, args):
     # iterate over all matching CDS and choose one (the first?)
     # that provides the correct conceptual translation.
     if not len(ntseq):
-        logger.warning(
-            "Requested region %d..%d is outside CDS, skipping", start, end)
+        logger.warning("Requested region %d..%d is outside CDS, skipping", start, end)
         return None, None
 
     # Generate conceptual translation from extracted nucleotide sequence
@@ -342,8 +357,11 @@ def extract_feature_cds(feature, record, stockholm, args):
         aaseq = aaseq[:-1]
 
     # Create SeqRecords of CDS and conceptual translation
-    field = "protein_id" if (
-        "locus_tag" not in feature.qualifiers or args.use_protein_ids) else "locus_tag"
+    field = (
+        "protein_id"
+        if ("locus_tag" not in feature.qualifiers or args.use_protein_ids)
+        else "locus_tag"
+    )
     logger.debug("Using %s as ID", feature.qualifiers[field][0])
     ntrecord = SeqRecord(
         seq=ntseq,
