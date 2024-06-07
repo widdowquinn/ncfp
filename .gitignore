@@ -44,3 +44,6 @@ dist/
 build/
 *.egg-info
 _build/
+
+# Exclude directories as we work on issues
+issue*/
