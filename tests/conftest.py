@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# (c) The University of Strathclude 2019-2022
+# (c) The University of Strathclyde 2019-2024
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -16,7 +16,7 @@
 #
 # The MIT License
 #
-# (c) The University of Strathclude 2019-2022
+# (c) The University of Strathclyde 2019-2024
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -80,6 +80,7 @@ def path_ambiguous_targets():
     """Path to target output with ambiguous UniProt GN field."""
     yield TARGETPATH / "ambiguous"
 
+
 @pytest.fixture
 def path_human():
     """Path to FASTA file of human sequences."""
@@ -141,6 +142,12 @@ def path_uniprot_stockholm_small():
 
 
 @pytest.fixture
+def path_single_cds():
+    """Path to small FASTA file of UniProt sequences with a single CDS match."""
+    yield SEQUENCEPATH / "input_single_cds.fasta"
+
+
+@pytest.fixture
 def path_uniprot_targets():
     """Path to UniProt target outputs."""
     yield TARGETPATH / "basic_uniprot"
@@ -162,3 +169,9 @@ def path_uniprot_stockholm_small_unified_targets():
 def path_uniprot_stockholm_small_use_proteinid_targets():
     """Path to targets for small UniProt Stockholm sequences - forcing use of protein_id field."""
     yield TARGETPATH / "small_stockholm_use_proteinid"
+
+
+@pytest.fixture
+def path_single_cds_targets():
+    """Path to targets for records with single CDS sequences."""
+    yield TARGETPATH / "single_cds"
