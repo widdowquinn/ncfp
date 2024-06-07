@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2022
+# (c) University of Strathclyde 2019-2024
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +18,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2022 University of Strathclyde
+# Copyright (c) 2019-2024 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -53,7 +53,11 @@ from typing import List
 from Bio import SeqIO
 
 from ncbi_cds_from_protein import NCFPException, __version__
-from ncbi_cds_from_protein.caches import initialise_dbcache, find_record_cds, get_aa_query
+from ncbi_cds_from_protein.caches import (
+    initialise_dbcache,
+    find_record_cds,
+    get_aa_query,
+)
 from ncbi_cds_from_protein.entrez import (
     set_entrez_email,
     search_nt_ids,
@@ -94,19 +98,16 @@ def load_input_sequences(args: Namespace) -> List:
         try:
             instream = args.infname.open("r")
         except OSError:
-            logger.error("Could not open input file %s",
-                         args.infname, exc_info=True)
+            logger.error("Could not open input file %s", args.infname, exc_info=True)
             raise SystemExit(1)
         logger.info("Reading sequences from %s", args.infname)
     try:
         records = list(SeqIO.parse(instream, "fasta"))
     except IOError:
-        logger.error("Could not parse sequence file %s",
-                     args.infname, exc_info=True)
+        logger.error("Could not parse sequence file %s", args.infname, exc_info=True)
         raise SystemExit(1)
     logger.info(
-        "%d sequence records read successfully from %s", len(
-            records), args.infname
+        "%d sequence records read successfully from %s", len(records), args.infname
     )
     return records
 
@@ -127,8 +128,8 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
         logger.debug("Processing sequence %s", record.id)
         result = find_record_cds(cachepath, record.id)
         aaqueryid = get_aa_query(cachepath, record.id)
-        logger.debug(
-            "Found AA query ID %s for this sequence in cache", aaqueryid)
+        # print(f"{record.id=} {aaqueryid=}")
+        logger.debug("Found AA query ID %s for this sequence in cache", aaqueryid)
         if not result:
             logger.warning(
                 "No record found for sequence input %s - please check this sequence manually",
@@ -149,23 +150,24 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
             # raise SystemExit(1)
         else:
             gbrecord = SeqIO.read(StringIO(result[0][-1]), "gb")
-            logger.info("Sequence %s matches GenBank entry %s",
-                        record.id, gbrecord.id)
+            logger.info("Sequence %s matches GenBank entry %s", record.id, gbrecord.id)
             match = re.search(re_uniprot_gn, record.description)
-            # If we have a match, we can use the UniProt gene name to extract the
+            # If we have a match, we can use the UniProt gene name (GN=) to extract the
             # CDS. In some cases (e.g. A0A127QBK9) the UniProt gene name is
             # ambiguous, and the CDS will not be extracted correctly. If we have one,
-            # we prefer to use the AA query ID to extract the CDS.
+            # we prefer to use the AA query ID to extract the CDS.
             feature = None
             logger.debug("AA query ID: %s", aaqueryid)
             if aaqueryid is not None:
                 logger.info(
-                    "Extracting CDS by locus tag with AA query ID: %s", aaqueryid)
-                feature = extract_feature_by_locus_tag(
-                    gbrecord, aaqueryid[0])
+                    "Extracting CDS by locus tag with AA query ID: %s", aaqueryid
+                )
+                feature = extract_feature_by_locus_tag(gbrecord, aaqueryid[0])
                 if feature is None:
                     logger.info(
-                        "Did not find feature with locus tag %s, trying GN field", aaqueryid)
+                        "Did not find feature with locus tag %s, trying GN field",
+                        aaqueryid,
+                    )
             # For Uniprot sequences, we extract the gene name
             if (match is not None) and (feature is None):
                 logger.debug("Matched %s to %s", record.id, match.group())
@@ -173,12 +175,12 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 gene_name = match.group(0)
                 logger.info("Searching for CDS: %s", gene_name)
                 feature = extract_feature_by_locus_tag(gbrecord, gene_name)
+                # print("feature: ", feature)
                 if feature is None:
                     logger.debug(
                         "Could not find feature with locus tag, trying protein ID"
                     )
-                    feature = extract_feature_by_protein_id(
-                        gbrecord, gene_name)
+                    feature = extract_feature_by_protein_id(gbrecord, gene_name)
             elif feature is None:  # NCBI sequences
                 # Get the matching CDS - note we have to remove the Stockholm
                 # domain info, if that is present
@@ -189,11 +191,29 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 feature = extract_feature_by_protein_id(
                     gbrecord, strip_stockholm_from_seqid(record.id)
                 )
-            # Last ditch effort - try gene ID
+                gene_name = None  # explicitly note that there is no gene_name
+            # Nearly a last-ditch effort - try gene ID
+            if (feature is None) and (gene_name is not None):
+                logger.debug(
+                    "Could not find feature by locus tag or protein ID, trying gene ID (%s)",
+                    gene_name,
+                )
+                feature = extract_feature_by_gene_id(gbrecord, gene_name)
+            # A very, very final attempt - if there is a single CDS feature,
+            # we'll try to use that. We might want to allow looping over all
+            # CDS features of a small GenBank file in a future version
             if feature is None:
                 logger.debug(
-                    "Could not find feature by locus tag or protein ID, trying gene ID (%s) as last resort", gene_name)
-                feature = extract_feature_by_gene_id(gbrecord, gene_name)
+                    "Could not find feature by gene ID, checking if there is a single CDS feature as last resort"
+                )
+                cds_features = [_ for _ in gbrecord.features if _.type == "CDS"]
+                if len(cds_features) == 1:
+                    protein_id = cds_features[0].qualifiers["protein_id"][0]
+                    logger.debug(
+                        "Found a single CDS feature, trying that: %s",
+                        protein_id,
+                    )
+                    feature = extract_feature_by_protein_id(gbrecord, protein_id)
             if feature is None:  #  If even the last ditch fails, we give up
                 logger.info("Could not identify CDS feature for %s", record.id)
             else:
@@ -207,7 +227,8 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 if args.stockholm:
                     locdata = record.id.split("/")[-1]
                     logger.debug(
-                        "Adding Stockholm domain info %s to sequence ID", locdata)
+                        "Adding Stockholm domain info %s to sequence ID", locdata
+                    )
                     stockholm = [int(e) for e in locdata.split("-")]
                 else:
                     stockholm = []
@@ -216,8 +237,7 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 )
                 # Could not extract feature for some reason, skip
                 if ntseq is None and aaseq is None:
-                    logger.warning(
-                        "Could not extract CDS for %s (skipping)", record.id)
+                    logger.warning("Could not extract CDS for %s (skipping)", record.id)
                     continue
 
                 if args.unify_seqid:
@@ -231,8 +251,7 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 elif args.stockholm:
                     ntseq.id = f"{ntseq.id}/{stockholm[0] * 3 - 2}-{stockholm[1] * 3}"
                 if aaseq.seq == record.seq.ungap("-").upper():
-                    logger.info(
-                        "\t\tTranslated sequence matches input sequence")
+                    logger.info("\t\tTranslated sequence matches input sequence")
                     nt_sequences.append((record, ntseq))
                 elif (
                     args.alternative_start_codon
@@ -330,11 +349,9 @@ def run_main(argv=None):
     # parse that appropriately, we can't search - so we skip those
     # sequences
     logger.debug("seqrecords: %s", seqrecords)
-    qrecords, qskipped = process_sequences(
-        seqrecords, cachepath, args.disabletqdm)
+    qrecords, qskipped = process_sequences(seqrecords, cachepath, args.disabletqdm)
     if qskipped:
-        logger.warning(
-            "Skipped %d sequences (no query term found)", len(qskipped))
+        logger.warning("Skipped %d sequences (no query term found)", len(qskipped))
         skippedpath = args.outdirname / args.skippedfname
         SeqIO.write(qskipped, skippedpath, "fasta")
         logger.warning("Skipped sequences were written to %s", skippedpath)
@@ -354,8 +371,7 @@ def run_main(argv=None):
             "NCBI nucleotide accession search failed for " + "%d records", countfail
         )
     if not addedrows and countfail == 0:
-        logger.warning(
-            "No nucleotide accession downloads were required! (in cache?)")
+        logger.warning("No nucleotide accession downloads were required! (in cache?)")
 
     # At this point, we want to retrieve all records that are
     # queryable against the NCBI nt database.
@@ -367,11 +383,9 @@ def run_main(argv=None):
     )
     logger.info("Updated GenBank accessions for %d UIDs", len(updatedrows))
     if countfail:
-        logger.warning(
-            "Unable to update GenBank accessions for %d UIDs", countfail)
+        logger.warning("Unable to update GenBank accessions for %d UIDs", countfail)
     if not updatedrows and countfail == 0:
-        logger.warning(
-            "No GenBank accession downloads were required! (in cache?)")
+        logger.warning("No GenBank accession downloads were required! (in cache?)")
 
     # Next we recover GenBank headers and extract useful information -
     # sequence length, taxonomy, and so on.
@@ -381,11 +395,9 @@ def run_main(argv=None):
     )
     logger.info("Fetched GenBank headers for %d UIDs", len(addedrows))
     if countfail:
-        logger.warning(
-            "Unable to update GenBank headers for %d UIDs", countfail)
+        logger.warning("Unable to update GenBank headers for %d UIDs", countfail)
     if not addedrows and countfail == 0:
-        logger.warning(
-            "No GenBank header downloads were required! (in cache?)")
+        logger.warning("No GenBank header downloads were required! (in cache?)")
 
     # Next we recover the shortest complete GenBank record for each input
     # sequence
@@ -395,21 +407,18 @@ def run_main(argv=None):
     )
     logger.info("Fetched GenBank records for %d UIDs", len(addedrows))
     if countfail:
-        logger.warning(
-            "Unable to get complete GenBank files for %d UIDs", countfail)
+        logger.warning("Unable to get complete GenBank files for %d UIDs", countfail)
     if not addedrows and countfail == 0:
-        logger.warning(
-            "No complete GenBank downloads were required! (in cache?)")
+        logger.warning("No complete GenBank downloads were required! (in cache?)")
 
     # Now that all the required GenBank nucleotide information is in the
     # local cache, we extract the CDS for each of the input sequences
     logger.info("Extracting CDS for each input sequence...")
     if args.stockholm:
-        logger.info(
-            "Expecting Stockholm format location data for each sequence")
+        logger.info("Expecting Stockholm format location data for each sequence")
     nt_sequences = extract_cds_features(seqrecords, cachepath, args)
     logger.info("Matched %d/%d records", len(nt_sequences), len(seqrecords))
-    for (record, cds) in nt_sequences:
+    for record, cds in nt_sequences:
         logger.info("\t%-40s to CDS: %s", record.id, cds.id)
 
     # Write matched pairs to output directory, in files ending
@@ -435,15 +444,13 @@ def write_sequences(aa_nt_seqs, args: Namespace):
     # Write input sequences that were matched
     aafilename = args.outdirname / Path(args.filestem + "_aa.fasta")
     logger.info(
-        "\tWriting %d matched input sequences to %s", len(
-            aa_nt_seqs), aafilename
+        "\tWriting %d matched input sequences to %s", len(aa_nt_seqs), aafilename
     )
     SeqIO.write([aaseq for (aaseq, ntseq) in aa_nt_seqs], aafilename, "fasta")
 
     # Write coding sequences
     ntfilename = args.outdirname / Path(args.filestem + "_nt.fasta")
     logger.info(
-        "\tWriting %d matched output sequences to %s", len(
-            aa_nt_seqs), ntfilename
+        "\tWriting %d matched output sequences to %s", len(aa_nt_seqs), ntfilename
     )
     SeqIO.write([ntseq for (aaseq, ntseq) in aa_nt_seqs], ntfilename, "fasta")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2022
+# (c) University of Strathclyde 2019-2024
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +18,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2022 University of Strathclyde
+# Copyright (c) 2019-2024 University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -348,8 +348,7 @@ def add_ncbi_uids(cachepath, accession, uids):
                 if str(err).startswith("UNIQUE constraint failed"):
                     pass
                 else:
-                    logger.error(
-                        "Adding NCBI UID filed (exiting)", exc_info=True)
+                    logger.error("Adding NCBI UID filed (exiting)", exc_info=True)
                     raise SystemExit(1)
             cur.execute(SQL_ADD_SEQDATA_NT_LINK, (accession, uid))
     return results
@@ -416,7 +415,7 @@ def get_gbheader_lengths(cachepath):
         cur.execute(SQL_GET_GBHEADER_LENGTHS)
 
     result = defaultdict(list)
-    for (seqid, gbid, gblen) in cur.fetchall():
+    for seqid, gbid, gblen in cur.fetchall():
         result[seqid].append((gblen, gbid))
 
     return result
