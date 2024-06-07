@@ -377,3 +377,39 @@ def test_ncbi_stockholm(
         path_ncbi_stockholm_targets,
         ("ncfp_aa.fasta", "ncfp_nt.fasta"),
     )
+
+
+def test_single_cds(
+    namespace_base,
+    path_single_cds,
+    path_single_cds_targets,
+    tmp_path,
+):
+    """ncfp collects correct sequence when it has to assume single CDS match.
+
+    Makefile target:
+        ncfp --unify_seqid -s -v \
+            tests/fixtures/sequences/input_single_cds.fasta \
+            tests/fixtures/targets/single_cds \
+            dev@null.com
+    """
+    # Modify default arguments
+    infile = path_single_cds
+    outdir = tmp_path / "single_cds"
+    args = modify_namespace(
+        namespace_base,
+        infname=infile,
+        outdirname=outdir,
+        stockholm=True,
+        unify_seqid=True,
+    )
+
+    # Run ersatz command-line
+    ncfp.run_main(args)
+
+    # Compare output (should be no skipped files)
+    check_files(
+        outdir,
+        path_single_cds_targets,
+        ("ncfp_aa.fasta", "ncfp_nt.fasta"),
+    )

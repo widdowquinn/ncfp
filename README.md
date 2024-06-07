@@ -53,7 +53,7 @@ For more detailed information about `ncfp` as a program, or using the underlying
 Unless otherwise indicated, all code is licensed under the MIT license and subject to the following agreement:
 
     (c) The James Hutton Institute 2017-2019
-    (c) The University of Strathclyde 2019-2023
+    (c) The University of Strathclyde 2019-2024
     Author: Leighton Pritchard
 
     Contact: leighton.pritchard@strath.ac.uk
@@ -70,7 +70,7 @@ Unless otherwise indicated, all code is licensed under the MIT license and subje
 The MIT License
 
 Copyright (c) 2017-2019 The James Hutton Institute
-Copyright (c) 2019-2023 The University of Strathclyde
+Copyright (c) 2019-2024 The University of Strathclyde
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
