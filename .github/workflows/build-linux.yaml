@@ -2,9 +2,11 @@ name: build-linux
 
 on:
   push:
-    branches: master
+    branches: 
+      - master
+      - issue_50
   # To be able to trigger a manual build
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   build:
