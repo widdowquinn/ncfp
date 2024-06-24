@@ -176,9 +176,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # a fallback. This refers to a gene database record at NCBI, which
                 # then must be queried to get the nucleotide cross-reference.
                 logger.debug("Trying xref_geneid as last resort")
-                gresult = u_service.search(
-                    query_acc, columns="xref_geneid"
-                )  # type: ignore
+                gresult = u_service.search(query_acc, columns="xref_geneid")  # type: ignore
                 if "\n" in gresult:
                     gstring = gresult.split("\n")[1].strip()[:-1]
                 else:
@@ -209,9 +207,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # We also need the xref_refseq entry to get a protein ID for
                 # the query.
                 logger.debug("Finding protein entry from GeneID %s", gstring)
-                presult = u_service.search(
-                    gstring, columns="xref_refseq"
-                )  # type: ignore
+                presult = u_service.search(gstring, columns="xref_refseq")  # type: ignore
                 pstring = presult.split("\n")[1].strip()[:-1]
                 if pstring == "":
                     logger.warning(
