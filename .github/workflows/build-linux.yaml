@@ -4,7 +4,6 @@ on:
   push:
     branches: 
       - master
-      - issue_50
   # To be able to trigger a manual build
   workflow_dispatch:
 
