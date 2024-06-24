@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2023
+# (c) University of Strathclyde 2019-
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +18,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2023 University of Strathclyde
+# Copyright (c) 2019- University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,12 +37,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Functions for handling sequence data"""
+"""Functions for handling sequence data."""
 
 import logging
 import re
 import sqlite3
-
 from pathlib import Path
 
 from Bio.SeqRecord import SeqRecord
@@ -52,7 +51,6 @@ from tqdm.auto import tqdm
 import ncbi_cds_from_protein
 
 from .caches import add_input_sequence, has_query
-
 
 # regexes for parsing out Uniprot
 re_uniprot_head = re.compile(r".*\|.*\|.*")
@@ -176,9 +174,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # a fallback. This refers to a gene database record at NCBI, which
                 # then must be queried to get the nucleotide cross-reference.
                 logger.debug("Trying xref_geneid as last resort")
-                gresult = u_service.search(
-                    query_acc, columns="xref_geneid"
-                )  # type: ignore
+                gresult = u_service.search(query_acc, columns="xref_geneid")  # type: ignore
                 if "\n" in gresult:
                     gstring = gresult.split("\n")[1].strip()[:-1]
                 else:
@@ -209,9 +205,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # We also need the xref_refseq entry to get a protein ID for
                 # the query.
                 logger.debug("Finding protein entry from GeneID %s", gstring)
-                presult = u_service.search(
-                    gstring, columns="xref_refseq"
-                )  # type: ignore
+                presult = u_service.search(gstring, columns="xref_refseq")  # type: ignore
                 pstring = presult.split("\n")[1].strip()[:-1]
                 if pstring == "":
                     logger.warning(
