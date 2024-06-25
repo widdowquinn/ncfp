@@ -46,7 +46,7 @@ import sys
 import time
 from io import StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, list
+from typing import TYPE_CHECKING, Iterable
 
 from Bio import SeqIO
 
