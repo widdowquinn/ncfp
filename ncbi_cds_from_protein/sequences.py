@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
 # (c) University of Strathclyde 2019-
 # Author: Leighton Pritchard
@@ -39,11 +37,16 @@
 # THE SOFTWARE.
 """Functions for handling sequence data."""
 
+from __future__ import annotations
+
 import logging
 import re
 import sqlite3
+from argparse import Namespace
 from pathlib import Path
+from typing import Iterable, List, Tuple
 
+from Bio.SeqFeature import SeqFeature
 from Bio.SeqRecord import SeqRecord
 from bioservices import UniProt
 from tqdm.auto import tqdm
@@ -57,7 +60,7 @@ re_uniprot_head = re.compile(r".*\|.*\|.*")
 re_uniprot_gn = re.compile(r"(?<=GN=)[^\s]+")
 
 
-def guess_seqtype(record):
+def guess_seqtype(record: SeqRecord) -> str:
     """Return best guess at SeqRecord origin on basis of header.
 
     :param record:  SeqRecord describing sequence.
@@ -72,23 +75,23 @@ def guess_seqtype(record):
     logger = logging.getLogger(__name__)
     logger.debug("Guessing sequence type for %s...", record.id)
 
-    if record.id.startswith("UPI"):
+    if record.id is not None and record.id.startswith("UPI"):
         logger.debug("...guessed UniParc")
         return "UniParc"
-    else:  # Test for UniProt, see https://www.uniprot.org/help/fasta-headers
-        match = re.search(
-            re_uniprot_head, record.description
-        )  # test for UniProt header
+    # Test for UniProt, see https://www.uniprot.org/help/fasta-headers
+    match = re.search(
+        re_uniprot_head,
+        record.description,
+    )  # test for UniProt header
 
     if match is None:
         logger.debug("...guessed NCBI")
         return "NCBI"
-    else:
-        logger.debug("...guessed UniProt")
-        return "UniProt"
+    logger.debug("...guessed UniProt")
+    return "UniProt"
 
 
-def uniprot_to_embl(query_acc, u_service):
+def uniprot_to_embl(query_acc: str, u_service: UniProt) -> tuple[str, str]:
     """Return EMBL accession and ORF gene name for passed UniProt accession.
 
     query_acc   - UniProt accession to query
@@ -96,23 +99,22 @@ def uniprot_to_embl(query_acc, u_service):
 
     Returns empty string in each case if no match found
     """
-    result = u_service.search(query_acc, columns="xref_embl")  # type: ignore
-    if "\n" in result:
-        qstring = result.split("\n")[1].strip()[:-1]
-    else:
-        qstring = ""
-    result = u_service.search(query_acc, columns="gene_orf")  # type: ignore
-    if "\n" in result:
-        pstring = result.split("\n")[1].strip()
-    else:
-        pstring = ""
+    result = u_service.search(query_acc, columns="xref_embl")
+    qstring = result.split("\n")[1].strip()[:-1] if "\n" in result else ""
+
+    result = u_service.search(query_acc, columns="gene_orf")
+    pstring = result.split("\n")[1].strip() if "\n" in result else ""
 
     return qstring, pstring
 
 
 # Process collection of SeqRecords into cache and skipped/kept
-def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
-    """Triage SeqRecords into those that can/cannot be used
+def process_sequences(
+    records: Iterable[SeqRecord],
+    cachepath: Path,
+    disabletqdm: bool = True,
+) -> tuple[list[SeqRecord], list[SeqRecord]]:
+    """Triage SeqRecords into those that can/cannot be used.
 
     This function also caches all inputs into the SQLite cache
     at cachepath
@@ -129,12 +131,15 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
     u_service = UniProt()
 
     for record in tqdm(
-        records, desc="1/5 Process input sequences", disable=disabletqdm
+        records,
+        desc="1/5 Process input sequences",
+        disable=disabletqdm,
     ):
         seqtype = guess_seqtype(record)
         if seqtype == "UniParc":
             logger.warning(
-                "Record %s looks like a UniParc cluster (skipping)", record.id
+                "Record %s looks like a UniParc cluster (skipping)",
+                record.id,
             )
             skipped.append(record)
             continue
@@ -143,12 +148,15 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             pstring = None  # None if we don't need to look up GeneID
             if match is None:  # No GN field
                 logger.warning(
-                    "Uniprot record %s has no GN field (skipping)", record.id
+                    "Uniprot record %s has no GN field (skipping)",
+                    record.id,
                 )
                 skipped.append(record)
                 continue
             logger.debug(
-                "Uniprot record %s has GN field: %s", record.id, match.group(0)
+                "Uniprot record %s has GN field: %s",
+                record.id,
+                match.group(0),
             )
             # The UniProt API was updated in June 2022, requiring a change
             # to the returned field for the cross-reference to EMBL
@@ -164,7 +172,6 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             # no match, so we need to account for this for each of qstring, pstring,
             # and gstring
             qstring, pstring = uniprot_to_embl(query_acc, u_service)
-            # print(qstring, pstring)
             if qstring == "":
                 logger.warning(
                     "Uniprot record %s has no EMBL cross-reference",
@@ -174,21 +181,24 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # a fallback. This refers to a gene database record at NCBI, which
                 # then must be queried to get the nucleotide cross-reference.
                 logger.debug("Trying xref_geneid as last resort")
-                gresult = u_service.search(query_acc, columns="xref_geneid")  # type: ignore
-                if "\n" in gresult:
-                    gstring = gresult.split("\n")[1].strip()[:-1]
-                else:
-                    gstring = ""
+                gresult = u_service.search(query_acc, columns="xref_geneid")
+                gstring = gresult.split("\n")[1].strip()[:-1] if "\n" in gresult else ""
+
                 if gstring == "":
                     logger.warning(
                         "Uniprot record %s has no GeneID cross-reference (skipping)",
                         record.id,
                     )
                     continue
+
                 # Fetch the GeneID entry and extract nucleotide information from it.
                 logger.debug("Finding nucleotide entry from GeneID %s", gstring)
                 handle = ncbi_cds_from_protein.entrez.efetch_with_retries(
-                    gstring, "gene", "acc", "text", 10
+                    gstring,
+                    "gene",
+                    "acc",
+                    "text",
+                    10,
                 )  # NOTE: hard-coded retry count
                 acc = [
                     _.strip().split()[1]
@@ -197,7 +207,8 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 ]
                 if len(acc) == 0:
                     logger.warning(
-                        "No nucleotide entry found for %s (skipping)", gstring
+                        "No nucleotide entry found for %s (skipping)",
+                        gstring,
                     )
                     continue
                 qstring = acc[0]  # This is our new query string
@@ -205,7 +216,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
                 # We also need the xref_refseq entry to get a protein ID for
                 # the query.
                 logger.debug("Finding protein entry from GeneID %s", gstring)
-                presult = u_service.search(gstring, columns="xref_refseq")  # type: ignore
+                presult = u_service.search(gstring, columns="xref_refseq")
                 pstring = presult.split("\n")[1].strip()[:-1]
                 if pstring == "":
                     logger.warning(
@@ -219,7 +230,7 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
             # UniProt can return multiple UIDs separated by semicolons. Sometimes the same
             # UID is repeated. However, the current cache schema uses the accession as primary
             # key in the same table as the query IDs.
-            # TODO: Update schema to allow multiple queries per record
+            # TODO(widdowquinn): Update schema to allow multiple queries per record
             for qid in qstring.split(";"):
                 logger.debug("Adding record %s to cache with query %s", record.id, qid)
                 # Uniprot sequences are added to cache as (accession, NULL, nt_query)
@@ -249,8 +260,12 @@ def process_sequences(records, cachepath: Path, disabletqdm: bool = True):
 
 
 # Extract a gene feature by locus tag
-def extract_feature_by_locus_tag(record, tag, ftype="CDS"):
-    """Returns the gene feature with passed tag from passed seqrecord.
+def extract_feature_by_locus_tag(
+    record: SeqRecord,
+    tag: str,
+    ftype: str = "CDS",
+) -> None | SeqFeature:
+    """Return the gene feature with passed tag from passed seqrecord.
 
     record      - Biopython SeqRecord
     tag         - locus tag to search for
@@ -269,8 +284,12 @@ def extract_feature_by_locus_tag(record, tag, ftype="CDS"):
 
 
 # Extract a gene feature by protein_id
-def extract_feature_by_protein_id(record, tag, ftype="CDS"):
-    """Returns the gene feature with passed tag from passed seqrecord.
+def extract_feature_by_protein_id(
+    record: SeqRecord,
+    tag: str,
+    ftype: str = "CDS",
+) -> None | SeqFeature:
+    """Return the gene feature with passed tag from passed seqrecord.
 
     record      - Biopython SeqRecord
     tag         - locus tag to search for
@@ -289,8 +308,12 @@ def extract_feature_by_protein_id(record, tag, ftype="CDS"):
 
 
 # Extract a gene feature by gene_id
-def extract_feature_by_gene_id(record, tag, ftype="CDS"):
-    """Returns the gene feature with passed tag from passed seqrecord.
+def extract_feature_by_gene_id(
+    record: SeqRecord,
+    tag: str,
+    ftype: str = "CDS",
+) -> None | SeqFeature:
+    """Return the gene feature with passed tag from passed seqrecord.
 
     record      - Biopython SeqRecord
     tag         - gene ID to search for
@@ -309,8 +332,13 @@ def extract_feature_by_gene_id(record, tag, ftype="CDS"):
 
 
 # Extract the coding sequence from a feature
-def extract_feature_cds(feature, record, stockholm, args):
-    """Returns SeqRecord with CDS and translation of GenBank record feature.
+def extract_feature_cds(
+    feature: SeqFeature,
+    record: SeqRecord,
+    stockholm: tuple[int, int],
+    args: Namespace,
+) -> tuple[None | SeqRecord, None | SeqRecord]:
+    """Return SeqRecord with CDS and translation of GenBank record feature.
 
     :param feature:  SeqFeature object
     :param record:  SeqRecord object
@@ -324,10 +352,11 @@ def extract_feature_cds(feature, record, stockholm, args):
     ntseq = feature.extract(record.seq)
 
     # Account for offset start codon, if necessary (not usually an issue)
-    if "codon_start" in feature.qualifiers:
-        startpos = int(feature.qualifiers["codon_start"][0]) - 1
-    else:
-        startpos = 0
+    startpos = (
+        int(feature.qualifiers["codon_start"][0]) - 1
+        if "codon_start" in feature.qualifiers
+        else 0
+    )
     ntseq = ntseq[startpos:]
 
     # If Stockholm (start, end) headers were provided, unpack tuple and trim sequences
@@ -367,33 +396,11 @@ def extract_feature_cds(feature, record, stockholm, args):
         description="conceptual translation",
         id=feature.qualifiers[field][0],
     )
-    # if (args.use_protein_ids) or ("locus_tag" not in feature.qualifiers):
-    #     ntrecord = SeqRecord(
-    #         seq=ntseq,
-    #         description="coding sequence",
-    #         id=feature.qualifiers["protein_id"][0],
-    #     )
-    #     aarecord = SeqRecord(
-    #         seq=aaseq,
-    #         description="conceptual translation",
-    #         id=feature.qualifiers["protein_id"][0],
-    #     )
-    # else:
-    #     ntrecord = SeqRecord(
-    #         seq=ntseq,
-    #         description="coding sequence",
-    #         id=feature.qualifiers["locus_tag"][0],
-    #     )
-    #     aarecord = SeqRecord(
-    #         seq=aaseq,
-    #         description="conceptual translation",
-    #         id=feature.qualifiers["locus_tag"][0],
-    #     )
 
     return ntrecord, aarecord
 
 
-def strip_stockholm_from_seqid(seqid):
+def strip_stockholm_from_seqid(seqid: str) -> str:
     """Strip Stockholm header from seqid.
 
     seqid        - seqid to strip
