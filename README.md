@@ -4,7 +4,7 @@ This repository contains code for a script that identifies and writes the corres
 
 ![macOS Python 3.11 build](https://github.com/widdowquinn/ncfp/actions/workflows/build-macos.yaml/badge.svg)
 ![Linux Python 3.11 build](https://github.com/widdowquinn/ncfp/actions/workflows/build-linux.yaml/badge.svg)
-[![ncfp codecov.io coverage](https://img.shields.io/codecov/c/github/widdowquinn/ncfp/master.svg)](https://codecov.io/github/widdowquinn/ncfp)
+[![Codacy Coverage Badge](https://app.codacy.com/project/badge/Coverage/99a037e5eb2c4ae48e27e44c8974a3f8)](https://app.codacy.com/gh/widdowquinn/ncfp/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/99a037e5eb2c4ae48e27e44c8974a3f8)](https://www.codacy.com/manual/widdowquinn/ncfp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=widdowquinn/ncfp&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/widdowquinn/ncfp/badge)](https://www.codefactor.io/repository/github/widdowquinn/ncfp)
 [![ncfp documentation](https://readthedocs.org/projects/ncfp/badge/?version=latest)](https://ncfp.readthedocs.io/en/latest/?badge=latest)
