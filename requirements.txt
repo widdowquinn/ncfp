@@ -1,4 +1,4 @@
-biopython
+biopython >= 1.83
 bioservices >= 1.10
 requests-cache >= 0.6
 tqdm
