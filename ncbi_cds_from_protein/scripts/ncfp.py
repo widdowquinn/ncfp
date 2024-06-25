@@ -214,7 +214,7 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                         protein_id,
                     )
                     feature = extract_feature_by_protein_id(gbrecord, protein_id)
-            if feature is None:  #  If even the last ditch fails, we give up
+            if feature is None:  # If even the last ditch fails, we give up
                 logger.info("Could not identify CDS feature for %s", record.id)
             else:
                 logger.info(
