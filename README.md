@@ -21,6 +21,8 @@ This repository contains code for a script that identifies and writes the corres
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/downloads.svg)](https://anaconda.org/bioconda/ncfp)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/platforms.svg)](https://anaconda.org/bioconda/ncfp)
 
+[![codecov](https://codecov.io/github/widdowquinn/ncfp/graph/badge.svg?token=BIQKi7zUig)](https://codecov.io/github/widdowquinn/ncfp)
+![CodeCov coverage plot](https://codecov.io/github/widdowquinn/ncfp/graphs/icicle.svg?token=BIQKi7zUig)
 
 ## Quickstart: `ncfp` at the command-line
 
