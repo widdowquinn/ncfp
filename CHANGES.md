@@ -2,6 +2,8 @@
 
 ## v0.2.1a1
 
+- add ruff.toml configuration
+- move from CircleCI to GitHub Actions for CI
 - if all other attempts to match the linked CDS fail, and there is only one CDS in the retrieved record, use that CDS as the candidate sequence (#46)
 - fix badges (Zenodo/PyPI) in `README.md`
 - make Stockholm domains work with NCBI sequence inputs (#27)

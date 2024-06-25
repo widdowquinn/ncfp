@@ -68,14 +68,14 @@ jobs:
         if: ${{ always() }}
 
       - name: Codacy Coverage Reporter
-        uses: codacy/codacy-coverage-reporter-action@v1
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: .coverage-linux-${{ matrix.python-version }}.xml
         if: ${{ always() }}
 
       - name: Codecov Coverage Report
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true # optional (default = false)
           files: .coverage-linux-${{ matrix.python-version }}.xml # optional
