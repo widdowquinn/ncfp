@@ -250,17 +250,17 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                 # Otherwise, if we have stockholm format append locations to the ntseq IDs
                 elif args.stockholm:
                     ntseq.id = f"{ntseq.id}/{stockholm[0] * 3 - 2}-{stockholm[1] * 3}"
-                if aaseq.seq == record.seq.ungap("-").upper():
+                if aaseq.seq == record.seq.replace("-", "").upper():
                     logger.info("\t\tTranslated sequence matches input sequence")
                     nt_sequences.append((record, ntseq))
                 elif (
                     args.alternative_start_codon
-                    and aaseq.seq[1:] == record.seq.ungap("-").upper()[1:]
+                    and aaseq.seq[1:] == record.seq.replace("-", "").upper()[1:]
                 ):
                     logger.info(
                         "\t\tTranslated sequence matches input sequence with alternative start codon %s -> %s",
                         aaseq.seq[0],
-                        record.seq.ungap("-").upper()[0],
+                        record.seq.replace("-", "").upper()[0],
                     )
                     nt_sequences.append((record, ntseq))
                 else:
@@ -268,7 +268,7 @@ def extract_cds_features(seqrecords, cachepath: Path, args: Namespace):
                         "\t\tTranslated sequence does not match " + "input sequence!"
                     )
                     logger.warning("\t\t%s", aaseq.seq)
-                    logger.warning("\t\t%s", record.seq.ungap("-").upper())
+                    logger.warning("\t\t%s", record.seq.replace("-", "").upper())
 
     return nt_sequences
 
