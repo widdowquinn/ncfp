@@ -18,7 +18,6 @@ This repository contains code for a script that identifies and writes the corres
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/version.svg)](https://anaconda.org/bioconda/ncfp)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/latest_release_date.svg)](https://anaconda.org/bioconda/ncfp)
 
-[![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/installer/conda.svg)](https://conda.anaconda.org/bioconda)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/downloads.svg)](https://anaconda.org/bioconda/ncfp)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/platforms.svg)](https://anaconda.org/bioconda/ncfp)
 
