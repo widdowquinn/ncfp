@@ -42,11 +42,8 @@ from __future__ import annotations
 import logging
 import re
 import sqlite3
-from argparse import Namespace
-from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import TYPE_CHECKING, Iterable
 
-from Bio.SeqFeature import SeqFeature
 from Bio.SeqRecord import SeqRecord
 from bioservices import UniProt
 from tqdm.auto import tqdm
@@ -54,6 +51,12 @@ from tqdm.auto import tqdm
 import ncbi_cds_from_protein
 
 from .caches import add_input_sequence, has_query
+
+if TYPE_CHECKING:
+    from argparse import Namespace
+    from pathlib import Path
+
+    from Bio.SeqFeature import SeqFeature
 
 # regexes for parsing out Uniprot
 re_uniprot_head = re.compile(r".*\|.*\|.*")

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
 # (c) University of Strathclyde 2019-2022
 # Author: Leighton Pritchard
@@ -37,28 +35,27 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Functions to interact with Entrez"""
+"""Functions to interact with Entre."""
 
 import logging
-
 from io import StringIO
 
 from Bio import Entrez, SeqIO
 from tqdm import tqdm
 
 from ncbi_cds_from_protein.caches import (
-    has_nt_query,
+    add_gbfull,
+    add_gbheaders,
+    add_ncbi_uids,
+    find_shortest_genbank,
+    get_nogbfull_nt_acc,
+    get_nogbhead_nt_uids,
+    get_nt_noacc_uids,
     get_nt_query,
     has_aa_query,
     has_ncbi_uid,
-    add_ncbi_uids,
-    get_nt_noacc_uids,
+    has_nt_query,
     update_nt_uid_acc,
-    add_gbheaders,
-    add_gbfull,
-    get_nogbhead_nt_uids,
-    get_nogbfull_nt_acc,
-    find_shortest_genbank,
 )
 
 from .sequences import strip_stockholm_from_seqid
@@ -69,7 +66,7 @@ from .sequences import strip_stockholm_from_seqid
 class NCFPELinkException(Exception):
     """Exception for ELink qeries."""
 
-    def __init__(self, msg="Error in ncfp ELink query"):
+    def __init__(self, msg: str = "Error in ncfp ELink query") -> None:
         """Instantiate class."""
         Exception.__init__(self, msg)
 
@@ -77,7 +74,7 @@ class NCFPELinkException(Exception):
 class NCFPEPostException(Exception):
     """Exception for EPost qeries."""
 
-    def __init__(self, msg="Error in ncfp EPost query"):
+    def __init__(self, msg: str = "Error in ncfp EPost query") -> None:
         """Instantiate class."""
         Exception.__init__(self, msg)
 
@@ -85,7 +82,7 @@ class NCFPEPostException(Exception):
 class NCFPEFetchException(Exception):
     """Exception for EFetch queries."""
 
-    def __init__(self, msg="Error in ncfp EFetch query"):
+    def __init__(self, msg: str = "Error in ncfp EFetch query") -> None:
         """Instantiate class."""
         Exception.__init__(self, msg)
 
@@ -93,21 +90,21 @@ class NCFPEFetchException(Exception):
 class NCFPESearchException(Exception):
     """Exception for ESearch queries."""
 
-    def __init__(self, msg="Error in ncfp ESearch query"):
+    def __init__(self, msg: str = "Error in ncfp ESearch query") -> None:
         """Instantiate class."""
         Exception.__init__(self, msg)
 
 
 class NCFPMaxretryException(Exception):
-    """Exception raised when maximum retries are reached"""
+    """Exception raised when maximum retries are reached."""
 
-    def __init__(self, msg="Maximum retries exceeded"):
+    def __init__(self, msg: str = "Maximum retries exceeded") -> None:
         """Instantiate class."""
         Exception.__init__(self, msg)
 
 
 def fetch_gb_headers(cachepath, retries, batchsize, disabletqdm=True):
-    """Update cache with NCBI GenBank headers for passed records
+    """Update cache with NCBI GenBank headers for passed records.
 
     cachepath - path to cache
     retries   - number of Entrez retries
@@ -127,12 +124,18 @@ def fetch_gb_headers(cachepath, retries, batchsize, disabletqdm=True):
     ]:
         epost_histories.append(epost_history_with_retries(batch, "nucleotide", retries))
     for history in tqdm(
-        epost_histories, desc="4/5 Fetching GenBank headers", disable=disabletqdm
+        epost_histories,
+        desc="4/5 Fetching GenBank headers",
+        disable=disabletqdm,
     ):
         try:
             records = SeqIO.parse(
                 efetch_history_with_retries(
-                    history, "nucleotide", "gb", "text", retries
+                    history,
+                    "nucleotide",
+                    "gb",
+                    "text",
+                    retries,
                 ),
                 "gb",
             )
@@ -146,7 +149,7 @@ def fetch_gb_headers(cachepath, retries, batchsize, disabletqdm=True):
                         record.annotations["organism"],
                         taxonomy,
                         record.annotations["date"],
-                    )
+                    ),
                 )
         except NCFPMaxretryException:
             failcount += 1
@@ -182,12 +185,18 @@ def fetch_shortest_genbank(cachepath, retries, batchsize, disabletqdm=True):
     ]:
         epost_histories.append(epost_history_with_retries(batch, "nucleotide", retries))
     for history in tqdm(
-        epost_histories, desc="5/5 Fetching full GenBank records", disable=disabletqdm
+        epost_histories,
+        desc="5/5 Fetching full GenBank records",
+        disable=disabletqdm,
     ):
         try:
             records = SeqIO.parse(
                 efetch_history_with_retries(
-                    history, "nucleotide", "gbwithparts", "text", retries
+                    history,
+                    "nucleotide",
+                    "gbwithparts",
+                    "text",
+                    retries,
                 ),
                 "gb",
             )
@@ -200,8 +209,8 @@ def fetch_shortest_genbank(cachepath, retries, batchsize, disabletqdm=True):
 
 
 # Query NCBI singly with each record, to recover nucleotide accessions
-def search_nt_ids(records, cachepath, retries, disabletqdm=True):
-    """Queries NCBI nucleotide database and populates cache
+def search_nt_ids(records, cachepath, retries, disabletqdm: bool = True):
+    """Query NCBI nucleotide database and populate cache.
 
     records - collection of SeqRecords
     cache   - path to cache
@@ -226,18 +235,22 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
     noresult = 0  # Count of records with no result
     for record in tqdm(records, desc="2/5 Search NT IDs", disable=disabletqdm):
         if not has_ncbi_uid(cachepath, record.id) and has_nt_query(
-            cachepath, record.id
+            cachepath,
+            record.id,
         ):  # direct ESearch
             logger.debug("Entry has nt query, using direct ESearch: %s", record.id)
             result = esearch_with_retries(
-                get_nt_query(cachepath, record.id), "nucleotide", retries
+                get_nt_query(cachepath, record.id),
+                "nucleotide",
+                retries,
             )
             if result["IdList"]:
                 addedrows.extend(add_ncbi_uids(cachepath, record.id, result["IdList"]))
             else:
                 noresult += 1
         elif not has_ncbi_uid(cachepath, record.id) and has_aa_query(
-            cachepath, record.id
+            cachepath,
+            record.id,
         ):  # ELink search
             logger.debug(
                 "Entry has aa query, using ELink: %s",
@@ -257,7 +270,6 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
                     "No result returned for %s: possible deleted record - please check",
                     record.id,
                 )
-                # raise NCFPEFetchException("No link/record returned for %s" % record.id)
                 idlist = None
             if idlist:
                 addedrows.extend(add_ncbi_uids(cachepath, record.id, idlist))
@@ -269,7 +281,7 @@ def search_nt_ids(records, cachepath, retries, disabletqdm=True):
 
 # Update existing cache nt_uid_acc table with accessions from NCBI
 def update_gb_accessions(cachepath, retries, disabletqdm=True):
-    """Updates the cache table with GenBank accession for each UID.
+    """Update cache table with GenBank accession for each UID.
 
     cachepath     - path to cache database
     retries       - number of Entres retries
@@ -322,7 +334,10 @@ def esearch_with_retries(query_id, dbname, maxretries):
         except Exception:
             tries += 1
             logger.warning(
-                "ESearch query (%s) failed (retry %d)", query_id, tries, exc_info=True
+                "ESearch query (%s) failed (retry %d)",
+                query_id,
+                tries,
+                exc_info=True,
             )
     raise NCFPMaxretryException("Query ID %s ESearch failed\n%s" % query_id)
 
@@ -342,17 +357,23 @@ def elink_fetch_with_retries(query_id, dbname, linkdbname, maxretries):
     while tries < maxretries:
         try:
             logger.debug(
-                "dbname: %s linkdbname: %s query_id: %s", dbname, linkdbname, query_id
+                "dbname: %s linkdbname: %s query_id: %s",
+                dbname,
+                linkdbname,
+                query_id,
             )
             matches = Entrez.read(
-                Entrez.elink(dbfrom=dbname, linkname=linkdbname, id=query_id)
+                Entrez.elink(dbfrom=dbname, linkname=linkdbname, id=query_id),
             )
             logger.debug("matches: %s", matches)
             return matches
         except Exception:
             tries += 1
             logger.warning(
-                "ELink query (%s) failed (retry %d)", query_id, tries, exc_info=True
+                "ELink query (%s) failed (retry %d)",
+                query_id,
+                tries,
+                exc_info=True,
             )
     raise NCFPMaxretryException("Query ID %s ELink failed" % query_id)
 
@@ -376,19 +397,24 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
     while tries < maxretries:
         try:
             data = Entrez.efetch(
-                db=dbname, rettype=rettype, retmode=retmode, id=query_id
+                db=dbname,
+                rettype=rettype,
+                retmode=retmode,
+                id=query_id,
             ).read()
             if rettype in ["gb", "gbwithparts"] and retmode == "text":
                 if not data.startswith("LOCUS"):
-                    raise NCFPEFetchException(
-                        "Data does not begin with expected LOCUS string"
-                    )
+                    msg = "Data does not begin with expected LOCUS string"
+                    raise NCFPEFetchException(msg)
             # Return data string as stream
             return StringIO(data)
         except Exception:
             tries += 1
             logger.warning(
-                "EFetch query (%s) failed (retry %d)", query_id, tries, exc_info=True
+                "EFetch query (%s) failed (retry %d)",
+                query_id,
+                tries,
+                exc_info=True,
             )
     raise NCFPMaxretryException("Query ID %s EFetch failed" % query_id)
 
@@ -406,15 +432,17 @@ def epost_history_with_retries(qids, dbname, maxretries):
     tries = 0
     while tries < maxretries:
         try:
-            history = Entrez.read(Entrez.epost(dbname, id=",".join(qids)))
-            return history
+            # Get and return history
+            return Entrez.read(Entrez.epost(dbname, id=",".join(qids)))
         except Exception:
             tries += 1
-    raise NCFPMaxretryException("Batch EPost failed.")
+
+    errmsg = "Batch EPost failed."
+    raise NCFPMaxretryException(errmsg)
 
 
 def efetch_history_with_retries(history, dbname, rettype, retmode, maxretries):
-    """Run Entrez EFetch on a passed EPost history
+    """Run Entrez EFetch on a passed EPost history.
 
     history          - EPost history
     dbname           - target NCBI database
@@ -436,15 +464,16 @@ def efetch_history_with_retries(history, dbname, rettype, retmode, maxretries):
             ).read()
             if rettype in ["gb", "gbwithparts"] and retmode == "text":
                 if not data.startswith("LOCUS"):
-                    raise NCFPEFetchException(
-                        "Returned data does not begin with string LOCUS"
-                    )
+                    errmsg = "Returned data does not begin with string LOCUS"
+                    raise NCFPEFetchException(errmsg)
             return StringIO(data)
         except Exception:
             tries += 1
-    raise NCFPMaxretryException("Failed to recover batch EFetch")
+
+    errmsg = "Failed to recover batch EFetch"
+    raise NCFPMaxretryException(errmsg)
 
 
-def set_entrez_email(email):
-    """Sets Entrez email address."""
+def set_entrez_email(email: str) -> None:
+    """Set Entrez email address."""
     Entrez.email = email

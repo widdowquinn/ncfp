@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2022
+# (c) University of Strathclyde 2019-present
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -17,7 +16,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2022 University of Strathclyde
+# Copyright (c) 2019-present University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -36,24 +35,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Code providing a script logger"""
+"""Code providing a script logger."""
 
 import logging
 import logging.config
 import re
 import sys
-
 from argparse import Namespace
 from pathlib import Path
 
 
 class NoColorFormatter(logging.Formatter):
-
     """Log formatter that strips terminal colour escape codes from the log message."""
 
     ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
-    def format(self, record):
+    def format(self, record) -> str:
         """Return logger message with terminal escapes removed."""
         return "[%s] [%s]: %s" % (
             record.levelname,
@@ -62,8 +59,8 @@ class NoColorFormatter(logging.Formatter):
         )
 
 
-def config_logger(args: Namespace):
-    """Configure package/script-level logging
+def config_logger(args: Namespace) -> None:
+    """Configure package/script-level logging.
 
     :param args:  CLI arguments
 
@@ -89,11 +86,13 @@ def config_logger(args: Namespace):
     if args is not None and args.logfile is not None:
         logdir = args.logfile.parents[0]
         try:
-            if not logdir == Path.cwd():
+            if logdir != Path.cwd():
                 logdir.mkdir(exist_ok=True, parents=True)
         except OSError:
             logger.error(
-                "Could not create log directory %s (exiting)", logdir, exc_info=True
+                "Could not create log directory %s (exiting)",
+                logdir,
+                exc_info=True,
             )
             raise SystemExit(1)
 

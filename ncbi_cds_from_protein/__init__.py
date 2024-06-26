@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
 # (c) University of Strathclyde 2019-2020
 # Author: Leighton Pritchard
@@ -36,7 +35,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""ncbi_cds_from_protein module"""
+"""ncbi_cds_from_protein module."""
 
 # python package version
 # should match r"^__version__ = '(?P<version>[^']+)'$" for setup.py
@@ -46,6 +45,9 @@ __version__ = "0.2.1a1"
 class NCFPException(Exception):
     """General exception for ncfp."""
 
-    def __init__(self, msg="Error in ncbi_cds_from_protein module"):
+    def __init__(
+        self: Exception,
+        msg: str = "Error in ncbi_cds_from_protein module",
+    ) -> None:
         """Instantiate class."""
         Exception.__init__(self, msg)

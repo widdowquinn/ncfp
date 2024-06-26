@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # (c) The James Hutton Institute 2017-2019
-# (c) University of Strathclyde 2019-2024
+# (c) University of Strathclyde 2019-present
 # Author: Leighton Pritchard
 #
 # Contact:
@@ -18,7 +16,7 @@
 # The MIT License
 #
 # Copyright (c) 2017-2019 The James Hutton Institute
-# Copyright (c) 2019-2024 University of Strathclyde
+# Copyright (c) 2019-present University of Strathclyde
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,11 +35,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Functions for handling data caches"""
+"""Functions for handling data caches."""
+
+from __future__ import annotations
 
 import logging
 import sqlite3
-
 from collections import defaultdict
 
 # SQL QUERIES
@@ -230,7 +229,7 @@ SQL_UPDATE_UID_ACC = """
 
 
 # Initialise SQLite cache
-def initialise_dbcache(path):
+def initialise_dbcache(path) -> None:
     """Initialise SQLite cache.
 
     path     - path to SQLite3 database cache
@@ -242,7 +241,7 @@ def initialise_dbcache(path):
         cur.executescript(SQL_CREATEDB)
 
 
-def add_input_sequence(cachepath, accession, aa_query, nt_query):
+def add_input_sequence(cachepath, accession, aa_query, nt_query) -> int | None:
     """Populate a row of the seqdata table in cache.
 
     accession    - unique ID for input sequence
@@ -261,8 +260,8 @@ def add_input_sequence(cachepath, accession, aa_query, nt_query):
     return cur.lastrowid
 
 
-def has_query(cachepath, accession):
-    """Returns True if a seqdata row has any query."""
+def has_query(cachepath, accession) -> bool:
+    """Return True if a seqdata row has any query."""
     # Path must be string, not PosixPath, in Py3.6
     conn = sqlite3.connect(str(cachepath))
     with conn:
@@ -273,8 +272,8 @@ def has_query(cachepath, accession):
     return True
 
 
-def has_nt_query(cachepath, accession):
-    """Returns True if a seqdata row has an nt query."""
+def has_nt_query(cachepath, accession) -> bool:
+    """Return True if a seqdata row has an nt query."""
     # Path must be string, not PosixPath, in Py3.6
     conn = sqlite3.connect(str(cachepath))
     with conn:
@@ -285,8 +284,8 @@ def has_nt_query(cachepath, accession):
     return True
 
 
-def has_aa_query(cachepath, accession):
-    """Returns True if a seqdata row has an aa query."""
+def has_aa_query(cachepath, accession) -> bool:
+    """Return True if a seqdata row has an aa query."""
     # Path must be string, not PosixPath, in Py3.6
     conn = sqlite3.connect(str(cachepath))
     with conn:
@@ -298,7 +297,7 @@ def has_aa_query(cachepath, accession):
 
 
 def get_nt_query(cachepath, accession):
-    """Returns nt query for a seqdata row."""
+    """Return nt query for a seqdata row."""
     # Path must be string, not PosixPath, in Py3.6
     conn = sqlite3.connect(str(cachepath))
     with conn:
@@ -308,7 +307,7 @@ def get_nt_query(cachepath, accession):
 
 
 def get_aa_query(cachepath, accession):
-    """Returns aa query for a seqdata row."""
+    """Return aa query for a seqdata row."""
     # Path must be string, not PosixPath, in Py3.6
     conn = sqlite3.connect(str(cachepath))
     with conn:
@@ -317,8 +316,8 @@ def get_aa_query(cachepath, accession):
     return cur.fetchone()
 
 
-def has_ncbi_uid(cachepath, accession):
-    """Returns True if seq accession has at least one nt UID."""
+def has_ncbi_uid(cachepath, accession) -> bool:
+    """Return True if seq accession has at least one nt UID."""
     # Path must be string, not PosixPath, in Py3.6
     conn = sqlite3.connect(str(cachepath))
     with conn:
@@ -407,7 +406,7 @@ def add_gbheaders(cachepath, accession, length, org, taxon, date):
 
 
 def get_gbheader_lengths(cachepath):
-    """Returns GenBank accessions and lengths for each sequence."""
+    """Return GenBank accessions and lengths for each sequence."""
     # Path must be string, not PosixPath, in Py3.6
     conn = sqlite3.connect(str(cachepath))
     with conn:
@@ -425,7 +424,7 @@ def find_shortest_genbank(cachepath):
     """Return shortest GenBank entries covering all sequences."""
     shortids = set()
     gblens = get_gbheader_lengths(cachepath)
-    for seqid in gblens.keys():
+    for seqid in gblens:
         shortid = sorted(gblens[seqid])[0][1]
         shortids.add(shortid)
     return shortids
