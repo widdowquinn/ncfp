@@ -21,9 +21,12 @@ This repository contains code for a script that identifies and writes the corres
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/downloads.svg)](https://anaconda.org/bioconda/ncfp)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/ncfp/badges/platforms.svg)](https://anaconda.org/bioconda/ncfp)
 
+<<<<<<< Updated upstream
 [![codecov](https://codecov.io/github/widdowquinn/ncfp/graph/badge.svg?token=BIQKi7zUig)](https://codecov.io/github/widdowquinn/ncfp)
 ![CodeCov coverage plot](https://codecov.io/github/widdowquinn/ncfp/graphs/icicle.svg?token=BIQKi7zUig)
 
+=======
+>>>>>>> Stashed changes
 ## Quickstart: `ncfp` at the command-line
 
 Providing an input file of protein sequences as `<INPUT>.fasta`, and writing output to the directory `<OUTPUT>`, while specifying a user email to NCBI of `<EMAIL>` will generate two files: `<OUTPUT>/ncfp_aa.fasta` and `<OUTPUT>/ncfp_nt.fasta`.
