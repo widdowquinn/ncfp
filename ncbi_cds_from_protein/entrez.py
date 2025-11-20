@@ -256,21 +256,41 @@ def search_nt_ids(records, cachepath, retries, disabletqdm: bool = True):
                 "Entry has aa query, using ELink: %s",
                 strip_stockholm_from_seqid(record.id),
             )
-            result = elink_fetch_with_retries(
-                strip_stockholm_from_seqid(record.id),
-                "protein",
-                "protein_nuccore",
-                retries,
-            )
             try:
-                idlist = [lid["Id"] for lid in result[0]["LinkSetDb"][0]["Link"]]
-                logger.debug("result: %s, idlist: %s", result, idlist)
-            except IndexError:  # No result returned - possible deleted record
-                logger.warning(
-                    "No result returned for %s: possible deleted record - please check",
-                    record.id,
+                result = elink_fetch_with_retries(
+                    strip_stockholm_from_seqid(record.id),
+                    "protein",
+                    "protein_nuccore",
+                    retries,
                 )
-                idlist = None
+                try:
+                    idlist = [lid["Id"] for lid in result[0]["LinkSetDb"][0]["Link"]]
+                    logger.debug("result: %s, idlist: %s", result, idlist)
+                except IndexError:  # No result returned - possible deleted record
+                    logger.warning(
+                        "No result returned for %s: possible deleted record - please check",
+                        record.id,
+                    )
+                    idlist = None
+            except NCFPMaxretryException:  # Thrown if we can't get an ELink from Entrez
+                logger.warning(
+                    "Could not identify nucleotide sequence link for %s", record.id
+                )
+                logger.debug("Trying IPG query with protein ID")
+                try:
+                    result = efetch_ipg_with_retries(
+                        strip_stockholm_from_seqid(record.id),
+                        retries,
+                    )
+                    # Get genome entry accession
+                    genbank_acc = result["IPGReport"]["ProteinList"][0]["CDSList"][
+                        0
+                    ].attributes["accver"]
+                    idlist = [genbank_acc]
+                except Exception as err:
+                    err = err
+                    logger.debug("IPG Efetch failed for %s", record.id, exc_info=True)
+                    idlist = None
             if idlist:
                 addedrows.extend(add_ncbi_uids(cachepath, record.id, idlist))
                 logger.debug("record.id: %s, idlist: %s", record.id, idlist)
@@ -406,7 +426,6 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
                 if not data.startswith("LOCUS"):
                     msg = "Data does not begin with expected LOCUS string"
                     raise NCFPEFetchException(msg)
-            # Return data string as stream
             return StringIO(data)
         except Exception:
             tries += 1
@@ -417,6 +436,41 @@ def efetch_with_retries(query_id, dbname, rettype, retmode, maxretries):
                 exc_info=True,
             )
     raise NCFPMaxretryException("Query ID %s EFetch failed" % query_id)
+
+
+# Run an EFetch on a single ID
+def efetch_ipg_with_retries(query_id, maxretries):
+    """Entrez EFetch IPG match for a single query ID.
+
+    query_id      - query term for search
+    maxretries    - maximum number of attempts to make
+
+    Returns the Entrez record.
+    """
+    logger = logging.getLogger(__name__)
+
+    tries = 0
+    while tries < maxretries:
+        try:
+            data = Entrez.read(
+                Entrez.efetch(
+                    db="protein",
+                    rettype="ipg",
+                    retmode="xml",
+                    id=query_id,
+                )
+            )
+            print(data)
+            return data
+        except Exception:
+            tries += 1
+            logger.warning(
+                "EFetch IPG query (%s) failed (retry %d)",
+                query_id,
+                tries,
+                exc_info=True,
+            )
+    raise NCFPMaxretryException("Query ID %s EFetch IPG failed" % query_id)
 
 
 # Batch EPost to get history for a set of query IDs
@@ -430,6 +484,7 @@ def epost_history_with_retries(qids, dbname, maxretries):
     Returns the generated history, as parsed by Entrez.read()
     """
     tries = 0
+    print(f"{qids=}")
     while tries < maxretries:
         try:
             # Get and return history
